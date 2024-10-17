@@ -47,6 +47,7 @@ public class MainApp {
         System.out.println("1: Create new room type");
         System.out.println("2: View room type details");
         System.out.println("3: Update Room Type Details");
+        System.out.println("4: Delete Room");
         System.out.print(">"); 
         
         
@@ -58,6 +59,8 @@ public class MainApp {
             viewRoomTypeDetails(); 
         } else if (response == 3) {
             updateRoomType(); 
+        } else if (response == 4) {
+            deleteRoomType();
         } else if (response == 5) {
             viewAllRoomTypes();
         }
@@ -102,16 +105,6 @@ public class MainApp {
             viewAllRoomRates();
         }
         } 
-        
-        
-        
-        
-       
-        
-        
-        
-        
-    
     }
     
     private void createNewRoomType() {
@@ -229,6 +222,21 @@ public class MainApp {
         }
         roomTypeSessionBeanRemote.updateRoomTypeDetails(roomTypeId, newRoomTypeName, newDescription, newSize, newBedCapacity, newAmenities); 
         
+    }
+    
+    private void deleteRoomType() {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("Please select the room type that you want to delete.");
+        List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
+        for (int i = 0; i < roomTypesList.size(); i++) {
+            System.out.println(i + ": " + roomTypesList.get(i).getName()); 
+        }
+        Integer response = scanner.nextInt();
+        RoomType roomType = roomTypesList.get(response); 
+        
+        String output = roomTypeSessionBeanRemote.deleteRoomType(roomType);
+        System.out.println(output);
     }
     
     private void viewAllRoomTypes() {

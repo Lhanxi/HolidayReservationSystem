@@ -47,5 +47,30 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         roomType.setAmenities(newAmenities);
     }
     
+    
+    public String deleteRoomType(RoomType roomType) {
+        //check whether there are any rooms that depend on this roomType
+        if (checkRoomTypeForRooms(roomType) && checkRoomTypeForRoomRates(roomType)) {
+            em.remove(roomType);
+            return "Room Type successfully deleted";
+        } else {
+            roomType.disableRoom();
+        }
+        return "Room Type deletion failed, Room Type is being used. Room Type has been disabled.";
+    }
+    
+    private boolean checkRoomTypeForRooms(RoomType roomType) {
+        Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomType = :roomType"); 
+        query.setParameter("roomType", roomType);
+        return query.getResultList().isEmpty();
+    } 
+    
+    //for the case where there might not be any rooms that are currently using a room type
+    private boolean checkRoomTypeForRoomRates(RoomType roomType) {
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType = :roomType"); 
+        query.setParameter("roomType", roomType);
+        return query.getResultList().isEmpty();
+    }
+    
 
 }

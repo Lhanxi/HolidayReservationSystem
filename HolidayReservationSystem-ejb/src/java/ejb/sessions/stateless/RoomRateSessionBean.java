@@ -29,8 +29,7 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     @Override
     public Long createNewRoomRate(RoomRate roomRate) {
         em.persist(roomRate); 
-        RoomType roomType = roomRate.getRoomType();
-        roomType.addRoomRate(roomRate);
+        em.flush();
         return roomRate.getRoomRateId();
     }
     
