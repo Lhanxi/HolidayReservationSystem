@@ -38,7 +38,7 @@ public class MainApp {
         System.out.println("1: RoomType functions");
         System.out.println("2: Room functions");
         System.out.println("3: RoomRate functions");
-        System.out.println(">"); 
+        System.out.print(">"); 
         Integer r = scanner.nextInt();
         
         if (r == 1) {
@@ -47,7 +47,7 @@ public class MainApp {
         System.out.println("1: Create new room type");
         System.out.println("2: View room type details");
         System.out.println("3: Update Room Type Details");
-        System.out.println(">"); 
+        System.out.print(">"); 
         
         
         Integer response = scanner.nextInt();
@@ -69,7 +69,7 @@ public class MainApp {
         System.out.println("2: Update Room");
         System.out.println("3: Delete Room");
         System.out.println("4: View All Rooms");
-        System.out.println(">"); 
+        System.out.print(">"); 
         Integer newResponse = scanner.nextInt(); 
         
         if (newResponse == 1) {
@@ -89,7 +89,7 @@ public class MainApp {
         System.out.println("2: Update RoomRate ");
         System.out.println("3: Delete Room Rate");
         System.out.println("4: View All Room Rates");
-        System.out.println(">"); 
+        System.out.print(">"); 
         Integer re = scanner.nextInt();
         
         if (re == 1) {
@@ -118,23 +118,23 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("Please enter the room type name.");
-        System.out.println(">"); 
+        System.out.print(">"); 
         String roomNameType = scanner.next();
         
         System.out.println("Please include the description for the room type"); 
-        System.out.println(">"); 
+        System.out.print(">"); 
         String description = scanner.nextLine();
         
         System.out.println("Please indicate the size of the room"); 
-        System.out.println(">"); 
+        System.out.print(">"); 
         String size = scanner.next(); 
         
         System.out.println("Please indicate the bed capacity of the room"); 
-        System.out.println(">"); 
+        System.out.print(">"); 
         String bedCapacity = scanner.next(); 
         
         System.out.println("Please indicate the room amentities, separating them with a comma"); 
-        System.out.println(">"); 
+        System.out.print(">"); 
         String amenities = scanner.next();
         
         RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities);
@@ -153,8 +153,9 @@ public class MainApp {
         for (int i = 0; i < roomTypesList.size(); i++) {
             System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
         }
+        System.out.print(">"); 
         Integer response = scanner.nextInt(); 
-        
+
         System.out.println("RoomId: " + roomTypesList.get(response).getRoomTypeId());
         System.out.println("Room Name: " + roomTypesList.get(response).getName());
         System.out.println("Description: " + roomTypesList.get(response).getDescription());
@@ -171,6 +172,7 @@ public class MainApp {
         for (int i = 0; i < roomTypesList.size(); i++) {
             System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
         }
+        
         Integer response = scanner.nextInt(); 
         RoomType roomType = roomTypesList.get(response);
         
@@ -202,24 +204,24 @@ public class MainApp {
 
             if (response == 1) {
                 System.out.println("Please enter the new room type.");
-                System.out.println(">");
+                System.out.print(">");
                 newRoomTypeName = scanner.next();
 
             } else if (response == 2) {
                 System.out.println("Please enter new description"); 
-                System.out.println(">");
+                System.out.print(">");
                 newDescription = scanner.nextLine();
             } else if (response == 3) {
                 System.out.println("Please enter the new size"); 
-                System.out.println(">"); 
+                System.out.print(">"); 
                 newSize = scanner.next(); 
             } else if (response == 4) {
                 System.out.println("Please enter the new bed capacity"); 
-                System.out.println(">"); 
+                System.out.print(">"); 
                 newBedCapacity = scanner.next(); 
             } else if (response == 5) {
                 System.out.println("Please enter the new amenities"); 
-                System.out.println(">"); 
+                System.out.print(">"); 
                 newAmenities = scanner.next(); 
             } else if (response == 6) {
                 break;
@@ -252,6 +254,7 @@ public class MainApp {
         for (int i = 0; i < roomTypes.size(); i++) {
             System.out.print(i + ": " + roomTypes.get(i).getName());
         }
+        System.out.print(">"); 
         Integer response = scanner.nextInt();
         RoomType roomType = roomTypes.get(response);
         
@@ -259,7 +262,7 @@ public class MainApp {
         
         while (true) {
             System.out.println("Enter the room number");
-            System.out.println(">");
+            System.out.print(">");
             roomNumber = scanner.next();
             
             //checks if there is a duplicate room number in the database
@@ -303,7 +306,7 @@ public class MainApp {
                 System.out.println("2: Room Number"); //need to pay more attention to the changing of the roomType 
                 System.out.println("3: Toggle Room Status"); 
                 System.out.println("4: Done"); 
-                System.out.println(">");
+                System.out.print(">");
 
                 response = scanner.nextInt();
             }
@@ -320,7 +323,7 @@ public class MainApp {
                      
             } else if (response == 2) {
                 System.out.println("Please enter new room number"); 
-                System.out.println(">");
+                System.out.print(">");
                 roomNumber = scanner.next();
             } else if (response == 3) {
                 if (status) {
@@ -354,7 +357,7 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("Please enter the room rate name"); 
-        System.out.println(">");
+        System.out.print(">");
         String name = scanner.next();
         
         System.out.println("Please select room type"); 
@@ -373,7 +376,7 @@ public class MainApp {
             System.out.println("2: Normal Rate");
             System.out.println("3: Peak Rate");
             System.out.println("4: Promotion Rate");
-            System.out.println(">"); 
+            System.out.print(">"); 
             response = scanner.nextInt();
            
             if (response == 2) {
@@ -386,17 +389,17 @@ public class MainApp {
         }
         
         System.out.println("Please enter the rate per night");
-        System.out.println(">"); 
+        System.out.print(">"); 
         String r = scanner.next(); 
         BigDecimal ratePerNight = new BigDecimal(r);
         
         System.out.println("Please enter the start date in the format DD/MM/YYYY");
-        System.out.println(">");
+        System.out.print(">");
         String s = scanner.next();
         Date startDate = new Date(s);
         
         System.out.println("Please enter the end date in the format DD/MM/YYYY");
-        System.out.println(">");
+        System.out.print(">");
         String d = scanner.next(); 
         Date endDate = new Date(d);
         
