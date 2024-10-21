@@ -13,39 +13,41 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import entity.Visitor;
 
 /**
  *
  * @author leunghanxi
  */
 @Entity
-public class Guest implements Serializable {
+public class Guest extends Visitor implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long guestId;
     
     @Column(nullable = false)
     private String username;
     
     @Column(nullable = false)
     private String password;
-
-    public Long getGuestId() {
-        return guestId;
-    }
-
-    public void setGuestId(Long guestId) {
-        this.guestId = guestId;
-    }
+    
+    @Column(nullable = false)
+    private String passportNumber;
     
     @OneToMany(mappedBy = "guest")
     private List<Reservation> reservations;
     
     public Guest() {
-       reservations = new ArrayList<Reservation>();
+        super();
+        reservations = new ArrayList<Reservation>();
     }
+    
+    public Guest(String username, String password, String passportNumber) {
+        super();
+        this.username = username;
+        this.password = password;
+        this.passportNumber = passportNumber;
+    }
+    
     
     @Override
     public int hashCode() {
@@ -113,5 +115,17 @@ public class Guest implements Serializable {
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
-    
+    /**
+     * @return the passportNumber
+     */
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+
+    /**
+     * @param passportNumber the passportNumber to set
+     */
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
 }
