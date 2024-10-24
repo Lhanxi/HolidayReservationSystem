@@ -11,6 +11,6 @@ import javax.ejb.Remote;
  * @author jeremy
  */
 @Remote
-public interface HotelInventoryRemote {
+public interface HotelInventorySessionBeanRemote {
     
 }

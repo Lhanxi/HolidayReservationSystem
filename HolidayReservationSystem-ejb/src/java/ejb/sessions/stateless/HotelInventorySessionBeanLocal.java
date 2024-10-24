@@ -11,6 +11,6 @@ import javax.ejb.Local;
  * @author jeremy
  */
 @Local
-public interface HotelInventoryLocal {
+public interface HotelInventorySessionBeanLocal {
     
 }

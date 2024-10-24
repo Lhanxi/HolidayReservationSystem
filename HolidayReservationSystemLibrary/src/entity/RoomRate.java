@@ -36,6 +36,8 @@ public class RoomRate implements Serializable {
     private Date startDate; //check if we want to use this 
     private Date endDate;
 
+    public RoomRate() {}
+    
     public RoomRate(String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRate, Date startDate, Date endDate) {
         this.name = name;
         this.roomType = roomType;

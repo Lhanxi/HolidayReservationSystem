@@ -61,4 +61,18 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         room.setRoomStatus(status);
     }
     
+    @Override
+    public void deleteRoom(String roomNumber) {
+        Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber = :roomNumber"); 
+        query.setParameter("roomNumber", roomNumber); 
+        Room room = (Room) query.getSingleResult();
+        
+        if (room.getRoomStatus()) {
+            //if no one is using the room, then we can safely delete the room
+            room.setRoomType(null);
+            em.remove(room);
+        } else {
+            room.setIsDisabled(Boolean.TRUE);
+        }
+    }
 }

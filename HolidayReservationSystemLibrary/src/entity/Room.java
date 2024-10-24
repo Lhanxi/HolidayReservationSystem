@@ -25,9 +25,8 @@ public class Room implements Serializable {
     @ManyToOne
     private RoomType roomType;
     private String roomNumber; 
-
-
-    private Boolean roomStatus; //true is available, false is not available
+    private Boolean roomStatus; //true is available, i.e. no one is occupying the room/has not been allocated for the current day use
+    private Boolean isDisabled; //use to indicate that no new reservations should be done on it, toggled when deletion but room currently occupied
 
     public Room() {
     }
@@ -69,6 +68,15 @@ public class Room implements Serializable {
     public void setRoomNumber(String roomNumber) {
         this.roomNumber = roomNumber;
     }
+
+    public Boolean getIsDisabled() {
+        return isDisabled;
+    }
+
+    public void setIsDisabled(Boolean isDisabled) {
+        this.isDisabled = isDisabled;
+    }
+    
 
     @Override
     public int hashCode() {

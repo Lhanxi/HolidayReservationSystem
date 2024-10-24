@@ -25,5 +25,7 @@ public interface RoomSessionBeanLocal {
     public Room getRoom(String roomNumber);
 
     public void updateRoom(Room room, RoomType roomType, String roomNumber, Boolean status);
+
+    public void deleteRoom(String roomNumber);
     
 }

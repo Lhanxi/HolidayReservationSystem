@@ -47,7 +47,7 @@ public class MainApp {
         System.out.println("1: Create new room type");
         System.out.println("2: View room type details");
         System.out.println("3: Update Room Type Details");
-        System.out.println("4: Delete Room");
+        System.out.println("4: Delete Room Type");
         System.out.print(">"); 
         
         
@@ -80,7 +80,7 @@ public class MainApp {
         } else if (newResponse == 2) {
             updateRoom(); 
         } else if (newResponse == 3) {
-            System.out.println("not avail yet LOL");
+            deleteRoom();
         } else if (newResponse == 4 ){
             viewAllRooms();
         }
@@ -89,7 +89,7 @@ public class MainApp {
             //for RoomRate
         System.out.println("Select what to do");
         System.out.println("1: Create New Room Rate"); 
-        System.out.println("2: Update RoomRate ");
+        System.out.println("2: Update RoomRate");
         System.out.println("3: Delete Room Rate");
         System.out.println("4: View All Room Rates");
         System.out.print(">"); 
@@ -98,7 +98,7 @@ public class MainApp {
         if (re == 1) {
             createNewRoomRate();
         } else if (re == 2) {
-            System.out.println("not available yet LOL"); 
+            updateRoomRate();
         } else if (re == 3) {
             System.out.println("not available yet LOL"); 
         } else if (re == 4 ) {
@@ -116,7 +116,7 @@ public class MainApp {
         
         System.out.println("Please include the description for the room type"); 
         System.out.print(">"); 
-        String description = scanner.nextLine();
+        String description = scanner.next();
         
         System.out.println("Please indicate the size of the room"); 
         System.out.print(">"); 
@@ -286,6 +286,26 @@ public class MainApp {
         roomSessionBeanRemote.createNewRoom(room); 
     }
     
+    private void deleteRoom() {
+        Scanner scanner = new Scanner(System.in);
+        String roomNumber;
+        while (true) {
+            System.out.println("Please enter the room number that you would like to delete."); 
+            System.out.print(">");
+            roomNumber = scanner.next();
+            
+            //isValidRoomNumber was used to check when creating the roomNumber, hence the inverse boolean is used here
+            if (!roomSessionBeanRemote.isValidRoomNumber(roomNumber)) {
+                break;
+            } else {
+                System.out.println("Room with that room number does not exist, please try again"); 
+            }
+        }
+        
+        roomSessionBeanRemote.deleteRoom(roomNumber);
+        System.out.println("Room " + roomNumber + " was successfully deleted");
+    }
+    
     private void updateRoom() {
         
         Scanner scanner = new Scanner(System.in);
@@ -419,6 +439,72 @@ public class MainApp {
                
     }
     
+    private void updateRoomRate() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please select the room rate record that you would like to update");
+        
+        List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
+        for (int i = 0; i < roomRates.size(); i++) {
+            RoomRate r = roomRates.get(i);
+            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
+                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
+            System.out.println(i+ ": " + output);
+        }
+        System.out.print(">");
+        Integer response = scanner.nextInt(); 
+        
+        RoomRate selectedRoomRate = roomRates.get(response);
+        
+        String name = selectedRoomRate.getName();
+        RoomType roomType = selectedRoomRate.getRoomType();
+        RateTypeEnum rateType = selectedRoomRate.getRateTypeEnum(); 
+        BigDecimal roomRate = selectedRoomRate.getRoomRate();
+        Date startDate = selectedRoomRate.getStartDate(); 
+        Date endDate = selectedRoomRate.getEndDate(); 
+        
+        while (true) {
+            System.out.println("Please select which part of the room rate you would like to update"); 
+            System.out.println("1: Name");
+            System.out.println("2: RoomType");
+            System.out.println("3: RateType");
+            System.out.println("4: RoomRate");
+            System.out.println("5: StartDate");
+            System.out.println("6: EndDate");
+            System.out.println("7: Done");
+            System.out.print(">"); 
+            response = scanner.nextInt();
+            
+            if (response == 1) {
+                name = scanner.next();
+            } else if (response == 2) {
+                rateType = selectRateTypeEnum();
+            } else if (response == 3) {
+                
+            } else if (response == 4) {
+                
+            } else if (response == 5) {
+                
+            } else if (response == 6) {
+                
+            } else if (response == 7) {
+                break;
+            }
+            
+        }
+        
+    }
+    
+    private void deleteRoomRate() {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("Please select the room type"); 
+        
+        System.out.println("Please select the room rate"); 
+        
+        
+        roomRateSessionBeanRemote.deleteRoomRate();
+    }
+    
     private void viewAllRoomRates(){
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
         for (RoomRate r : roomRates) {
@@ -426,5 +512,27 @@ public class MainApp {
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
             System.out.println(output);
         }
+    }
+    
+    private RateTypeEnum selectRateTypeEnum() {
+        Scanner scanner = new Scanner(System.in);
+        RateTypeEnum rateType = RateTypeEnum.PUBLISHED;
+            System.out.println("Please select the rate type");
+            System.out.println("1: Published Rate");
+            System.out.println("2: Normal Rate");
+            System.out.println("3: Peak Rate");
+            System.out.println("4: Promotion Rate");
+            System.out.print(">"); 
+            Integer response = scanner.nextInt();
+           
+            if (response == 2) {
+                rateType = RateTypeEnum.NORMAL; 
+            } else if (response == 3) {
+                rateType = RateTypeEnum.PEAK;
+            } else if (response == 4) {
+                rateType = RateTypeEnum.PUBLISHED;
+            }
+        
+        return rateType;
     }
 }
