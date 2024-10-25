@@ -468,7 +468,7 @@ public class MainApp {
             System.out.println("2: RoomType");
             System.out.println("3: RateType");
             System.out.println("4: RoomRate");
-            System.out.println("5: StartDate");
+            System.out.println("5: StartDate ");
             System.out.println("6: EndDate");
             System.out.println("7: Done");
             System.out.print(">"); 
@@ -477,15 +477,15 @@ public class MainApp {
             if (response == 1) {
                 name = scanner.next();
             } else if (response == 2) {
-                rateType = selectRateTypeEnum();
+                roomType = selectRoomType();
             } else if (response == 3) {
-                
+                rateType = selectRateTypeEnum();
             } else if (response == 4) {
-                
+                roomRate = scanner.nextBigDecimal();
             } else if (response == 5) {
-                
+                startDate = new Date(scanner.next());
             } else if (response == 6) {
-                
+                endDate = new Date(scanner.next());
             } else if (response == 7) {
                 break;
             }
@@ -497,12 +497,9 @@ public class MainApp {
     private void deleteRoomRate() {
         Scanner scanner = new Scanner(System.in);
         
-        System.out.println("Please select the room type"); 
-        
         System.out.println("Please select the room rate"); 
-        
-        
-        roomRateSessionBeanRemote.deleteRoomRate();
+        Long roomRateId = selectRoomRate();
+        //roomRateSessionBeanRemote.deleteRoomRate();
     }
     
     private void viewAllRoomRates(){
@@ -534,5 +531,40 @@ public class MainApp {
             }
         
         return rateType;
+    }
+    
+    private RoomType selectRoomType() {
+        Scanner scanner = new Scanner(System.in);
+        List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
+        System.out.println("Please select the room type");
+        
+        for (int i = 0; i < roomTypesList.size(); i++) {
+            RoomType roomType = roomTypesList.get(i);
+            
+            String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size=%s; BedCapacity=%s; Amenities=%s", 
+                    roomType.getRoomTypeId(),
+                    roomType.getName(),
+                    roomType.getDescription(),
+                    roomType.getSize(),
+                    roomType.getBedCapacity(), 
+                    roomType.getAmenities());
+            System.out.println(i + ":" + output);
+        }
+        Integer response = scanner.nextInt();
+        
+        return roomTypesList.get(response);
+    }
+    
+    private Long selectRoomRate() {
+        Scanner scanner = new Scanner(System.in);
+        List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
+        for (int i = 0; i < roomRates.size(); i++) {
+            RoomRate r = roomRates.get(i);
+            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
+                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
+            System.out.println(i + ": " + output);
+        }
+        Integer response = scanner.nextInt();
+        return roomRates.get(response).getRoomRateId();
     }
 }

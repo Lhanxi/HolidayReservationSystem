@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/RoomRate.java</file>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/Visitor.java</file>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/Reservation.java</file>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/Room.java</file>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/Partner.java</file>
+            <file>file:/Users/jeremy/NetBeansProjects/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystem/HolidayReservationSystemLibrary/src/entity/RoomType.java</file>
+        </group>
     </open-files>
 </project-private>
