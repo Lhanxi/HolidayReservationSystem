@@ -26,8 +26,8 @@ public class RoomType implements Serializable {
     private String name;
     private String description;
     private String size;
-    @OneToMany(mappedBy="roomType")
-    private List<RoomRate> roomRates;
+    private Boolean disabled;
+    //removed List of RoomRates because we want to make it unidirectional;
 
     public RoomType() {
     }
@@ -38,6 +38,7 @@ public class RoomType implements Serializable {
         this.size = size;
         this.bedCapacity = bedCapacity;
         this.amenities = amenities;
+        this.disabled = false; //by default when you create a roomType is should be enabled
     }
 
     public String getName() {
@@ -91,12 +92,9 @@ public class RoomType implements Serializable {
         this.roomTypeId = roomTypeId;
     }
     
-    public void addRoomRate(RoomRate roomRate) {
-        this.roomRates.add(roomRate);
-    }
-    
-    public void removeRoomRate(RoomRate roomRate) {
-        this.roomRates.remove(roomRate);
+    public void disableRoom() {
+        this.disabled = true;
+
     }
 
     @Override

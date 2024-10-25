@@ -24,21 +24,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if(roomTypeSessionBeanRemote == null)
-        {
-            System.out.println("NULL NULL 1");
-        }
-        
-        if(roomSessionBeanRemote == null)
-        {
-            System.out.println("NULL NULL 2");
-        }
-        
-        if(roomRateSessionBeanRemote == null)
-        {
-            System.out.println("NULL NULL 3");
-        }
-        
+
         MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote); 
         mainApp.run(); 
         
