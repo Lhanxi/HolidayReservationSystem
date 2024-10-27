@@ -23,29 +23,31 @@ public class RoomType implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomTypeId;
-    private String name;
+    private String roomType; //this is the roomType
     private String description;
     private String size;
-    private Boolean disabled;
+    private Boolean disabled; 
+    private Integer ranking; //used to determine the order of the rooms 
 
     public RoomType() {
     }
 
-    public RoomType(String name, String description, String size, String bedCapacity, String amenities) {
-        this.name = name;
+    public RoomType(String name, String description, String size, String bedCapacity, String amenities, Integer ranking) {
+        this.roomType = name;
         this.description = description;
         this.size = size;
         this.bedCapacity = bedCapacity;
         this.amenities = amenities;
         this.disabled = false; //by default when you create a roomType is should be enabled
+        this.ranking = ranking;
     }
 
-    public String getName() {
-        return name;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoomType(String roomType) {
+        this.roomType = roomType;
     }
 
     public String getDescription() {
@@ -94,6 +96,23 @@ public class RoomType implements Serializable {
     public void disableRoom() {
         this.disabled = true;
     }
+
+    public Boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public Integer getRanking() {
+        return ranking;
+    }
+
+    public void setRanking(Integer ranking) {
+        this.ranking = ranking;
+    }
+    
 
     @Override
     public int hashCode() {

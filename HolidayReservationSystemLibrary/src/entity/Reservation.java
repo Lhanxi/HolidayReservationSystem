@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 /**
  *
@@ -25,14 +26,24 @@ public class Reservation implements Serializable {
     private Long id;
     private Date startDate;
     private Date endDate; 
+    private Integer numRooms;
     
     @ManyToOne
     private Guest guest;
     
     @ManyToOne
     private Partner partner;
+    
+    @OneToOne 
+    private RoomType roomType;
 
     public Reservation() {
+    }
+
+    public Reservation(Date startDate, Date endDate, Integer numRooms) {
+        this.startDate = startDate;
+        this.endDate = endDate; 
+        this.numRooms = numRooms;
     }
 
     public Long getId() {
@@ -57,6 +68,19 @@ public class Reservation implements Serializable {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public Integer getNumRooms() {
+        return numRooms;
+    }
+
+    public void setNumRooms(Integer numRooms) {
+        this.numRooms = numRooms;
+    }
+    
+    
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
     }
     
     

@@ -4,9 +4,12 @@
  */
 package horsmanagementclient;
 
-import ejb.sessions.stateless.RoomRateSessionBeanRemote;
-import ejb.sessions.stateless.RoomSessionBeanRemote;
-import ejb.sessions.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.EmployeeSessionBeanRemote;
+import ejb.session.stateless.HotelInventorySessionBeanRemote;
+import ejb.session.stateless.ReserveRoomSessionBeanRemote;
+import ejb.session.stateless.RoomRateSessionBeanRemote;
+import ejb.session.stateless.RoomSessionBeanRemote;
+import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import javax.ejb.EJB;
 
 /**
@@ -20,11 +23,17 @@ public class Main {
     private static RoomSessionBeanRemote roomSessionBeanRemote; 
     @EJB
     private static RoomRateSessionBeanRemote roomRateSessionBeanRemote;
+    @EJB 
+    private static EmployeeSessionBeanRemote employeeSessionBeanRemote;
+    @EJB
+    private static HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
+    @EJB 
+    private static ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote); 
+    public static void main(String[] args) throws Exception {
+        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, employeeSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote); 
         mainApp.run(); 
         
     }

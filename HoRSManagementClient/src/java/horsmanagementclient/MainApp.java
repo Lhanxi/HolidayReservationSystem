@@ -3,17 +3,27 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package horsmanagementclient;
-import ejb.sessions.stateless.RoomRateSessionBeanRemote;
-import ejb.sessions.stateless.RoomSessionBeanRemote;
-import ejb.sessions.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.EmployeeSessionBeanRemote;
+import ejb.session.stateless.HotelInventorySessionBeanRemote;
+import ejb.session.stateless.ReserveRoomSessionBeanRemote;
+import ejb.session.stateless.RoomRateSessionBeanRemote;
+import ejb.session.stateless.RoomSessionBeanRemote;
+import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import entity.Employee;
+import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import util.enumeration.EmployeeType;
 import util.enumeration.RateTypeEnum;
+import util.exception.InvalidLoginException;
 /**
  *
  * @author jeremy
@@ -22,89 +32,137 @@ public class MainApp {
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
     private RoomSessionBeanRemote roomSessionBeanRemote; 
     private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
+    private EmployeeSessionBeanRemote employeeSessionBeanRemote;
+    private HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
+    private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
     
     public MainApp() {
     }
 
-    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote) {
+    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote) {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
+        this.employeeSessionBeanRemote = employeeSessionBeanRemote;
+        this.hotelInventorySessionBeanRemote = hotelInventorySessionBeanRemote;
+        this.reserveRoomSessionBeanRemote = reserveRoomSessionBeanRemote;
     }
     
-    public void run() {
+    public void run() throws Exception {
         Scanner scanner = new Scanner(System.in);
         
-        System.out.println("1: RoomType functions");
-        System.out.println("2: Room functions");
-        System.out.println("3: RoomRate functions");
-        System.out.print(">"); 
-        Integer r = scanner.nextInt();
+        System.out.println("*** Welcome to Holiday Reservation System Management Portal ***");
+        Employee employee;
         
-        if (r == 1) {
-            //For RoomType
-        System.out.println("Select what to do:"); 
-        System.out.println("1: Create new room type");
-        System.out.println("2: View room type details");
-        System.out.println("3: Update Room Type Details");
-        System.out.println("4: Delete Room Type");
-        System.out.print(">"); 
-        
-        
-        Integer response = scanner.nextInt();
-        
-        if (response == 1) {
-            createNewRoomType(); 
-        } else if (response == 2) {
-            viewRoomTypeDetails(); 
-        } else if (response == 3) {
-            updateRoomType(); 
-        } else if (response == 4) {
-            deleteRoomType();
-        } else if (response == 5) {
-            viewAllRoomTypes();
+        while (true) {
+            System.out.println("Please login to begin."); 
+            System.out.print("Username: "); 
+            String username = scanner.next(); 
+            System.out.print("Password: "); 
+            String password = scanner.next(); 
+            
+            try {
+                employee = employeeSessionBeanRemote.employeeLogin(username, password);  
+                break;
+            } catch (InvalidLoginException e) {
+               System.out.println("Invalid username or password. Please try again.");
+            }
         }
         
-        } else if (r ==2) {
-             //for Room
-        System.out.println("Select what to do:"); 
-        System.out.println("1: Create New Room"); 
-        System.out.println("2: Update Room");
-        System.out.println("3: Delete Room");
-        System.out.println("4: View All Rooms");
-        System.out.print(">"); 
-        Integer newResponse = scanner.nextInt(); 
+        if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
+            
+        } else if (employee.getEmployeeType() == EmployeeType.OPERATION_MANAGER) {
+            System.out.println("Please select what you would like to do.");
+            System.out.println("1: RoomType functions");
+            System.out.println("2: Room functions");
+            Integer r = getIntegerInput();
+            if (r == 1) {
+                while (true) {
+                    //For RoomType
+                    System.out.println("Select what to do:"); 
+                    System.out.println("1: Create new room type");
+                    System.out.println("2: View room type details");
+                    System.out.println("3: Update Room Type Details");
+                    System.out.println("4: Delete Room Type");
+                    System.out.println("5: View all Room Type");
+                    System.out.println("5: Exit");
+                    Integer response = getIntegerInput();
+
+                    if (response == 1) {
+                        createNewRoomType(); 
+                    } else if (response == 2) {
+                        viewRoomTypeDetails(); 
+                    } else if (response == 3) {
+                        updateRoomType(); 
+                    } else if (response == 4) {
+                        deleteRoomType();
+                    } else if (response == 5) {
+                        viewAllRoomTypes();
+                    } else if (response == 6) {
+                        break;
+                    }
+                }
         
-        if (newResponse == 1) {
-            createNewRoom(); 
-        } else if (newResponse == 2) {
-            updateRoom(); 
-        } else if (newResponse == 3) {
-            deleteRoom();
-        } else if (newResponse == 4 ){
-            viewAllRooms();
-        }
+            } else if (r ==2) {
+            //for Room
+            System.out.println("Select what to do:"); 
+            System.out.println("1: Create New Room"); 
+            System.out.println("2: Update Room");
+            System.out.println("3: Delete Room");
+            System.out.println("4: View All Rooms");
+            System.out.print(">"); 
+            Integer newResponse = getIntegerInput();
         
-        } else if (r ==3) {
+            if (newResponse == 1) {
+                createNewRoom(); 
+            } else if (newResponse == 2) {
+                updateRoom(); 
+            } else if (newResponse == 3) {
+                deleteRoom();
+            } else if (newResponse == 4 ){
+                viewAllRooms();
+            }
+            }
+        } else if (employee.getEmployeeType() == EmployeeType.SALES_MANAGER) {
             //for RoomRate
-        System.out.println("Select what to do");
-        System.out.println("1: Create New Room Rate"); 
-        System.out.println("2: Update RoomRate");
-        System.out.println("3: Delete Room Rate");
-        System.out.println("4: View All Room Rates");
-        System.out.print(">"); 
-        Integer re = scanner.nextInt();
+            System.out.println("Select what to do");
+            System.out.println("1: Create New Room Rate"); 
+            System.out.println("2: Update RoomRate");
+            System.out.println("3: Delete Room Rate");
+            System.out.println("4: View All Room Rates");
+            Integer re = getIntegerInput();
+
+            if (re == 1) {
+                createNewRoomRate();
+            } else if (re == 2) {
+                updateRoomRate();
+            } else if (re == 3) {
+                System.out.println("not available yet LOL"); 
+            } else if (re == 4 ) {
+                viewAllRoomRates();
+            }
+        } else if (employee.getEmployeeType() == EmployeeType.GUEST_RELATION_OFFICER) {
+            while (true) {
+                System.out.println("Select what to do");
+                System.out.println("1: Walk-in Search Room"); 
+                System.out.println("2: Check-in Guest");
+                System.out.println("3: Check-out Guest");
+                System.out.println("4: Done");
+                Integer re = getIntegerInput();
+
+                if (re == 1) {
+                    walkInSearchRoom();
+                } else if (re == 2) {
+                    
+                } else if (re == 3) {
+                    
+                } else if (re == 4) {
+                    break;
+                }
+            }
         
-        if (re == 1) {
-            createNewRoomRate();
-        } else if (re == 2) {
-            updateRoomRate();
-        } else if (re == 3) {
-            System.out.println("not available yet LOL"); 
-        } else if (re == 4 ) {
-            viewAllRoomRates();
         }
-        } 
+        return;
     }
     
     private void createNewRoomType() {
@@ -130,7 +188,10 @@ public class MainApp {
         System.out.print(">"); 
         String amenities = scanner.next();
         
-        RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities);
+        System.out.println("Please indicate the room ranking"); 
+        Integer ranking = getIntegerInput();
+        
+        RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, ranking);
         
         Long roomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType); 
         
@@ -144,13 +205,13 @@ public class MainApp {
         System.out.println("Select the room type that you would like to view");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
+            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getRoomType());
         }
         System.out.print(">"); 
         Integer response = scanner.nextInt(); 
 
         System.out.println("RoomId: " + roomTypesList.get(response).getRoomTypeId());
-        System.out.println("Room Name: " + roomTypesList.get(response).getName());
+        System.out.println("Room Name: " + roomTypesList.get(response).getRoomType());
         System.out.println("Description: " + roomTypesList.get(response).getDescription());
         System.out.println("Bed Capacity: " + roomTypesList.get(response).getBedCapacity());
         System.out.println("Amenities: " + roomTypesList.get(response).getAmenities());
@@ -163,7 +224,7 @@ public class MainApp {
         System.out.println("Select the room that you would like to update");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
+            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getRoomType());
         }
         
         Integer response = scanner.nextInt(); 
@@ -171,7 +232,7 @@ public class MainApp {
         
         String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size =%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getName(),
+                    roomType.getRoomType(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
@@ -179,7 +240,7 @@ public class MainApp {
         System.out.println("Selected room" + output);
         
         Long roomTypeId = roomType.getRoomTypeId();
-        String newRoomTypeName = roomType.getName();
+        String newRoomTypeName = roomType.getRoomType();
         String newDescription = roomType.getDescription();
         String newSize = roomType.getSize();
         String newBedCapacity = roomType.getBedCapacity();
@@ -193,7 +254,7 @@ public class MainApp {
             System.out.println("4: Bed Capacity"); 
             System.out.println("5: Amenities"); 
             System.out.println("6: Done"); 
-            response = scanner.nextInt();
+            response = getIntegerInput();
 
             if (response == 1) {
                 System.out.println("Please enter the new room type.");
@@ -230,9 +291,9 @@ public class MainApp {
         System.out.println("Please select the room type that you want to delete.");
         List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getName()); 
+            System.out.println(i + ": " + roomTypesList.get(i).getRoomType()); 
         }
-        Integer response = scanner.nextInt();
+        Integer response = getIntegerInput();
         RoomType roomType = roomTypesList.get(response); 
         
         String output = roomTypeSessionBeanRemote.deleteRoomType(roomType);
@@ -245,7 +306,7 @@ public class MainApp {
         for (RoomType roomType: roomTypesList) {
             String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size=%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getName(),
+                    roomType.getRoomType(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
@@ -260,10 +321,10 @@ public class MainApp {
         System.out.println("Select the room type for the room"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getName());
+            System.out.print(i + ": " + roomTypes.get(i).getRoomType());
         }
         System.out.print(">"); 
-        Integer response = scanner.nextInt();
+        Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
         
         String roomNumber = "";
@@ -336,17 +397,17 @@ public class MainApp {
                 System.out.println("4: Done"); 
                 System.out.print(">");
 
-                response = scanner.nextInt();
+                response = getIntegerInput();
             }
             
             if (response == 1) {
                 System.out.println("Select the room type for the room"); 
                 List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
                 for (int i = 0; i < roomTypes.size(); i++) {
-                    System.out.print(i + ": " + roomTypes.get(i).getName());
+                    System.out.print(i + ": " + roomTypes.get(i).getRoomType());
                 }
                 System.out.println(">");
-                Integer r = scanner.nextInt();
+                Integer r = getIntegerInput();
                 roomType = roomTypes.get(r);
                      
             } else if (response == 2) {
@@ -391,9 +452,9 @@ public class MainApp {
         System.out.println("Please select room type"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getName());
+            System.out.print(i + ": " + roomTypes.get(i).getRoomType());
         }
-        Integer response = scanner.nextInt();
+        Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
         
         response = 0;
@@ -404,8 +465,7 @@ public class MainApp {
             System.out.println("2: Normal Rate");
             System.out.println("3: Peak Rate");
             System.out.println("4: Promotion Rate");
-            System.out.print(">"); 
-            response = scanner.nextInt();
+            response = getIntegerInput();
            
             if (response == 2) {
                 rateType = RateTypeEnum.NORMAL; 
@@ -450,8 +510,7 @@ public class MainApp {
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
             System.out.println(i+ ": " + output);
         }
-        System.out.print(">");
-        Integer response = scanner.nextInt(); 
+        Integer response = getIntegerInput();
         
         RoomRate selectedRoomRate = roomRates.get(response);
         
@@ -471,8 +530,7 @@ public class MainApp {
             System.out.println("5: StartDate ");
             System.out.println("6: EndDate");
             System.out.println("7: Done");
-            System.out.print(">"); 
-            response = scanner.nextInt();
+            response = getIntegerInput();
             
             if (response == 1) {
                 name = scanner.next();
@@ -519,8 +577,7 @@ public class MainApp {
             System.out.println("2: Normal Rate");
             System.out.println("3: Peak Rate");
             System.out.println("4: Promotion Rate");
-            System.out.print(">"); 
-            Integer response = scanner.nextInt();
+            Integer response = getIntegerInput();
            
             if (response == 2) {
                 rateType = RateTypeEnum.NORMAL; 
@@ -543,14 +600,14 @@ public class MainApp {
             
             String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size=%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getName(),
+                    roomType.getRoomType(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
                     roomType.getAmenities());
             System.out.println(i + ":" + output);
         }
-        Integer response = scanner.nextInt();
+        Integer response = getIntegerInput();
         
         return roomTypesList.get(response);
     }
@@ -564,7 +621,115 @@ public class MainApp {
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
             System.out.println(i + ": " + output);
         }
-        Integer response = scanner.nextInt();
+        Integer response = getIntegerInput();
         return roomRates.get(response).getRoomRateId();
     }
+    
+    private void walkInSearchRoom() {
+        Scanner scanner = new Scanner(System.in);
+        RoomType roomType;
+        Date startDate, endDate;
+        while (true) {
+            System.out.println("Please select the Room Type");
+            roomType = selectRoomType();
+            Integer ranking = roomType.getRanking();
+            String name = roomType.getRoomType();
+            System.out.println("Please enter start date (DD/MM/YYYY)"); 
+            startDate = new Date(getValidDate());//walk-in check in should only be done on the current day
+            System.out.println("Please enter end date (DD/MM/YYYY)"); 
+            endDate = new Date(getValidDate());
+            
+            while (!hotelInventorySessionBeanRemote.roomTypeIsAvailableForReservation(startDate, endDate, ranking)) {
+                System.out.println("Sorry there are no availabilities for that Room Type, please select another Room Type.");
+                roomType = selectRoomType(); 
+                //assume that the other details will remain the same
+            }
+            
+            System.out.println("Continue to reserve this Room Type?"); 
+            System.out.println("1: Yes"); 
+            System.out.println("2: No, select a different Room Type"); 
+            Integer response = getIntegerInput();
+            
+            if (response == 1) {
+                break;
+            } else {
+                continue;
+            }
+        }
+        
+        walkInReserveRoom(roomType, startDate, endDate);
+        
+    }
+    
+    private void walkInReserveRoom(RoomType roomType, Date startDate, Date endDate) {
+        Scanner scanner = new Scanner(System.in);
+        int ranking = roomType.getRanking();
+        
+        int numAvailRooms = hotelInventorySessionBeanRemote.numberOfAvailableRoomsForReservation(startDate, endDate, ranking);
+        
+        System.out.println("Please select the number of rooms to reserve. You can select up to " + numAvailRooms + " rooms.");
+        Integer numRooms = getIntegerInput();
+        
+        while (numRooms > numAvailRooms || numRooms < 1) {
+            System.out.println("Invalid number, please select a valid number"); 
+            numRooms = getIntegerInput();
+        }
+        
+        Reservation newReservation = new Reservation(startDate, endDate, numRooms);
+        
+        reserveRoomSessionBeanRemote.reserveRooms(newReservation, roomType);
+        
+    }
+    
+    //utility functions
+    private int getIntegerInput() {
+        Scanner scanner = new Scanner(System.in);
+        int input = 0;
+        boolean isValid = false;
+        
+        while (!isValid) {
+            System.out.print(">"); 
+            if (scanner.hasNextInt()) {
+                input = scanner.nextInt();
+                isValid = true;
+            } else {
+                System.out.println("Invalid input. Please try again.");
+                scanner.next();
+            }
+                    
+        }
+        return input;
+    }
+    
+    public String getValidDate() {
+        Scanner scanner = new Scanner(System.in);
+        String dateInput;
+        
+        while (true) {
+            System.out.print(">");
+            dateInput = scanner.next(); 
+            
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            if (isValidDate(dateInput)) {
+                System.out.println("The date format is valid: " + dateInput);
+                break; // Exit the loop if the date is valid
+            } else {
+                System.out.println("The date format is invalid. Please try again.");
+            }
+        }
+        return dateInput;
+    }
+        
+    public static boolean isValidDate(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        
+        try {
+            LocalDate.parse(date, formatter);
+            return true; 
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
+    
 }
