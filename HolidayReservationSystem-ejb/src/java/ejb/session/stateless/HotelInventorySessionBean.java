@@ -4,8 +4,10 @@
  */
 package ejb.session.stateless;
 
+import entity.AllocationExceptionReport;
 import entity.Reservation;
 import entity.Room;
+import entity.RoomReservation;
 import entity.RoomType;
 import java.util.Date;
 import java.util.List;
@@ -105,6 +107,24 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         
         List<RoomType> roomTypes = roomTypeQuery.getResultList();
         return roomTypes;
+    }
+    
+    public void allocateRoomsToCurrentDayReservations() {
+        //need to update this when we have created a method to call the current date
+        Query reservationQuery = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate = :startDate");
+        reservationQuery.setParameter("startDate", startDate);
+        List<Reservation> reservations = reservationQuery.getResultList();
+        
+        for (Reservation r : reservations) {
+            
+        }
+        
+        
+    }
+    
+    private void createAllocationExceptionReport(RoomReservation r) {
+        AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(); 
+        allocationExceptionReport.setRoomReservation(r);
     }
 
 }
