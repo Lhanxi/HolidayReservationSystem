@@ -6,10 +6,11 @@
     <class>entity.Employee</class>
     <class>entity.Partner</class>
     <class>entity.Reservation</class>
-    <class>entity.Guest</class>
     <class>entity.Visitor</class>
     <class>entity.RoomRate</class>
     <class>entity.RoomType</class>
+    <class>entity.Customer</class>
+    <class>entity.RoomReservation</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.schema-generation.database.action" value="create"/>

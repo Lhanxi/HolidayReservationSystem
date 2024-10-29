@@ -9,18 +9,14 @@ import java.util.List;
 import java.util.ArrayList;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import entity.Visitor;
 
 /**
  *
  * @author leunghanxi
  */
 @Entity
-public class Guest extends Visitor implements Serializable {
+public class Customer extends Visitor implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
@@ -36,12 +32,12 @@ public class Guest extends Visitor implements Serializable {
     @OneToMany(mappedBy = "guest")
     private List<Reservation> reservations;
     
-    public Guest() {
+    public Customer() {
         super();
         reservations = new ArrayList<Reservation>();
     }
     
-    public Guest(String username, String password, String passportNumber) {
+    public Customer(String username, String password, String passportNumber) {
         super();
         this.username = username;
         this.password = password;
@@ -59,10 +55,10 @@ public class Guest extends Visitor implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the guestId fields are not set
-        if (!(object instanceof Guest)) {
+        if (!(object instanceof Customer)) {
             return false;
         }
-        Guest other = (Guest) object;
+        Customer other = (Customer) object;
         if ((this.getGuestId() == null && other.getGuestId() != null) || (this.getGuestId() != null && !this.guestId.equals(other.guestId))) {
             return false;
         }

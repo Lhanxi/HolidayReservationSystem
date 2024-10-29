@@ -6,7 +6,7 @@ package ejb.session.stateless;
 
 import javax.ejb.Stateless;
 import java.util.List;
-import entity.Guest;
+import entity.Customer;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.NoResultException;
@@ -29,29 +29,28 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     }
     
     @Override
-    public Long createNewGuest(Guest newGuest) {
+    public Long createNewGuest(Customer newGuest) {
         entityManager.persist(newGuest);
         entityManager.flush();
         return newGuest.getGuestId();
     }
     
     @Override
-    public Guest retrieveGuestByUsername(String username) throws GuestNotFoundException {
-        Query query = entityManager.createQuery("SELECT g from Guest g WHERE g.username = :inUsername");
+    public Customer retrieveGuestByUsername(String username) throws GuestNotFoundException {
+        Query query = entityManager.createQuery("SELECT c from Customer c WHERE c.username = :inUsername");
         query.setParameter("inUsername", username);
         
         try {
-            return (Guest)query.getSingleResult();
+            return (Customer)query.getSingleResult();
         } catch(NoResultException | NonUniqueResultException ex) {
             throw new GuestNotFoundException("Guest Username " + username + "does not exist");
         }
-            
     }
     
     @Override 
-    public Guest guestLogin(String username, String password) throws InvalidLoginException {
+    public Customer guestLogin(String username, String password) throws InvalidLoginException {
         try {
-            Guest guest = this.retrieveGuestByUsername(username);
+            Customer guest = this.retrieveGuestByUsername(username);
             
             if (guest.getPassword().equals(password)) {
                 return guest;
@@ -62,5 +61,4 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
             throw new InvalidLoginException("Username does not exist or invalid password!");
         }
     }
-    
 }

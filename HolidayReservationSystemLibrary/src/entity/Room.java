@@ -5,6 +5,7 @@
 package entity;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,12 +23,12 @@ public class Room implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
+    @Column(nullable = false)
+    private String roomNumber; 
+    @Column(nullable = false)
+    private Boolean roomStatus; //true is available, false is not available
     @ManyToOne
     private RoomType roomType;
-    private String roomNumber; 
-
-
-    private Boolean roomStatus; //true is available, false is not available
 
     public Room() {
     }
@@ -37,15 +38,20 @@ public class Room implements Serializable {
         this.roomNumber = roomNumber;
         this.roomStatus = roomStatus;
     }
-    
+    /**
+     * @return the roomType
+     */
     public RoomType getRoomType() {
         return roomType;
     }
 
+    /**
+     * @param roomType the roomType to set
+     */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
     }
-
+    
     public Boolean getRoomStatus() {
         return roomStatus;
     }

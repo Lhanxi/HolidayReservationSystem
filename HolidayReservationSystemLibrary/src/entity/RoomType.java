@@ -26,8 +26,8 @@ public class RoomType implements Serializable {
     private String name;
     private String description;
     private String size;
-    @OneToMany(mappedBy="roomType")
-    private List<RoomRate> roomRates;
+    private String bedCapacity;
+    private String amenities;
 
     public RoomType() {
     }
@@ -79,9 +79,6 @@ public class RoomType implements Serializable {
     public void setAmenities(String amenities) {
         this.amenities = amenities;
     }
-    private String bedCapacity;
-    private String amenities; 
-    
 
     public Long getRoomTypeId() {
         return roomTypeId;
@@ -89,14 +86,6 @@ public class RoomType implements Serializable {
 
     public void setRoomTypeId(Long roomTypeId) {
         this.roomTypeId = roomTypeId;
-    }
-    
-    public void addRoomRate(RoomRate roomRate) {
-        this.roomRates.add(roomRate);
-    }
-    
-    public void removeRoomRate(RoomRate roomRate) {
-        this.roomRates.remove(roomRate);
     }
 
     @Override

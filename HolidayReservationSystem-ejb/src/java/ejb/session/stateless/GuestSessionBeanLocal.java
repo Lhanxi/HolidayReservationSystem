@@ -4,7 +4,7 @@
  */
 package ejb.session.stateless;
 
-import entity.Guest;
+import entity.Customer;
 import javax.ejb.Local;
 import util.exception.GuestNotFoundException;
 import util.exception.InvalidLoginException;
@@ -15,9 +15,9 @@ import util.exception.InvalidLoginException;
  */
 @Local
 public interface GuestSessionBeanLocal {
-    public Long createNewGuest(Guest newGuest);
+    public Long createNewGuest(Customer newGuest);
     
-    public Guest retrieveGuestByUsername(String username) throws GuestNotFoundException;
+    public Customer retrieveGuestByUsername(String username) throws GuestNotFoundException;
     
-    public Guest guestLogin(String username, String password) throws InvalidLoginException;
+    public Customer guestLogin(String username, String password) throws InvalidLoginException;
 }
