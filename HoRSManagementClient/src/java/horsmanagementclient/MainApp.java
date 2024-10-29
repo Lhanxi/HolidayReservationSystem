@@ -161,6 +161,8 @@ public class MainApp {
                 }
             }
         
+        } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
+            System.out.println("1: Allocate Rooms to Current Day Reservations");
         }
         return;
     }
@@ -678,6 +680,10 @@ public class MainApp {
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
         
         reserveRoomSessionBeanRemote.reserveRooms(newReservation, roomType);
+        
+    }
+    
+    private void allocateRoomstoCurrentDayReservations() {
         
     }
     

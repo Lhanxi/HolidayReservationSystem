@@ -4,6 +4,8 @@
  */
 package ejb.session.stateless;
 
+import entity.Reservation;
+import entity.RoomType;
 import javax.ejb.Remote;
 
 /**
@@ -12,5 +14,5 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface ReserveRoomSessionBeanRemote {
-    
+    public void reserveRooms(Reservation newReservation, RoomType roomType);
 }
