@@ -10,6 +10,7 @@ import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import entity.Employee;
+import entity.Partner;
 import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
@@ -249,7 +250,18 @@ public class MainApp {
     }
     
     private void createNewPartner() {
+        Scanner scanner = new Scanner(System.in);
         
+        System.out.println("===Create New Partner==="); 
+        System.out.println("Please enter employee username");
+        System.out.print(">"); 
+        String username = scanner.next();
+        
+        System.out.println("Please enter employee password");
+        System.out.print(">"); 
+        String password = scanner.next();
+        
+        Partner partner = new Partner(username, password); 
     }
     
     private void viewAllPartners() {
