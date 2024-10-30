@@ -36,6 +36,10 @@ HoRSManagementClient/nbproject/private/
 HoRSManagementClient/build/
 HoRSManagementClient/dist/
 
+HoRSReservationClient/nbproject/private/
+HoRSReservationClient/build/
+HoRSReservationClient/dist/
+
 HolidayReservationSystemClient/nbproject/private/
 HolidayReservationSystemClient/build/
 HolidayReservationSystemClient/dist/
