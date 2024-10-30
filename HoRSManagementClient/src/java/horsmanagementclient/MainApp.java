@@ -53,119 +53,198 @@ public class MainApp {
         
         System.out.println("*** Welcome to Holiday Reservation System Management Portal ***");
         Employee employee;
+        boolean exitSystem = false;
         
-        while (true) {
-            System.out.println("Please login to begin."); 
-            System.out.print("Username: "); 
-            String username = scanner.next(); 
-            System.out.print("Password: "); 
-            String password = scanner.next(); 
-            
-            try {
-                employee = employeeSessionBeanRemote.employeeLogin(username, password);  
-                break;
-            } catch (InvalidLoginException e) {
-               System.out.println("Invalid username or password. Please try again.");
+        while (!exitSystem) {
+        
+            while (true) {
+                System.out.println("Please login to begin."); 
+                System.out.print("Username: "); 
+                String username = scanner.next(); 
+                System.out.print("Password: "); 
+                String password = scanner.next(); 
+
+                try {
+                    employee = employeeSessionBeanRemote.employeeLogin(username, password);  
+                    break;
+                } catch (InvalidLoginException e) {
+                   System.out.println("Invalid username or password. Please try again.");
+                }
             }
-        }
-        
-        if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
             
+            boolean loggedIn = true;
             
-        } else if (employee.getEmployeeType() == EmployeeType.OPERATION_MANAGER) {
-            System.out.println("Please select what you would like to do.");
-            System.out.println("1: RoomType functions");
-            System.out.println("2: Room functions");
-            Integer r = getIntegerInput();
-            if (r == 1) {
-                while (true) {
-                    //For RoomType
-                    System.out.println("Select what to do:"); 
-                    System.out.println("1: Create new room type");
-                    System.out.println("2: View room type details");
-                    System.out.println("3: Update Room Type Details");
-                    System.out.println("4: Delete Room Type");
-                    System.out.println("5: View all Room Type");
-                    System.out.println("5: Exit");
-                    Integer response = getIntegerInput();
+            while (loggedIn) {
+
+                if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
+                    System.out.println("Please select what you would like to do.");
+                    System.out.println("1: Create new employees"); 
+                    System.out.println("2: View all employees");
+                    System.out.println("3: Create new partner");
+                    System.out.println("4: View all partners");
+                    System.out.println("5: Logout");
+                    Integer response = getIntegerInput(); 
+
+                    while (response < 1 || response > 5) {
+                        System.out.println("Invalid input. Please try again."); 
+                        response = getIntegerInput();
+                    }
 
                     if (response == 1) {
-                        createNewRoomType(); 
+                        createNewEmployee();
                     } else if (response == 2) {
-                        viewRoomTypeDetails(); 
+                        viewAllEmployees();
                     } else if (response == 3) {
-                        updateRoomType(); 
+                        createNewPartner();
                     } else if (response == 4) {
-                        deleteRoomType();
-                    } else if (response == 5) {
-                        viewAllRoomTypes();
-                    } else if (response == 6) {
+                        viewAllPartners();
+                    } else if (response ==5) {
+                        loggedIn = false;
                         break;
+                    } 
+                    
+                } else if (employee.getEmployeeType() == EmployeeType.OPERATION_MANAGER) {
+                    System.out.println("Please select what you would like to do.");
+                    System.out.println("1: RoomType functions");
+                    System.out.println("2: Room functions");
+                    Integer r = getIntegerInput();
+                    if (r == 1) {
+                        while (true) {
+                            //For RoomType
+                            System.out.println("Select what to do:"); 
+                            System.out.println("1: Create new room type");
+                            System.out.println("2: View room type details");
+                            System.out.println("3: Update Room Type Details");
+                            System.out.println("4: Delete Room Type");
+                            System.out.println("5: View all Room Type");
+                            System.out.println("6: Exit");
+                            Integer response = getIntegerInput();
+
+                            if (response == 1) {
+                                createNewRoomType(); 
+                            } else if (response == 2) {
+                                viewRoomTypeDetails(); 
+                            } else if (response == 3) {
+                                updateRoomType(); 
+                            } else if (response == 4) {
+                                deleteRoomType();
+                            } else if (response == 5) {
+                                viewAllRoomTypes();
+                            } else if (response == 6) {
+                                break;
+                            }
+                        }
+
+                    } else if (r ==2) {
+                    //for Room
+                    System.out.println("Select what to do:"); 
+                    System.out.println("1: Create New Room"); 
+                    System.out.println("2: Update Room");
+                    System.out.println("3: Delete Room");
+                    System.out.println("4: View All Rooms");
+                    System.out.print(">"); 
+                    Integer newResponse = getIntegerInput();
+
+                    if (newResponse == 1) {
+                        createNewRoom(); 
+                    } else if (newResponse == 2) {
+                        updateRoom(); 
+                    } else if (newResponse == 3) {
+                        deleteRoom();
+                    } else if (newResponse == 4 ){
+                        viewAllRooms();
                     }
-                }
-        
-            } else if (r ==2) {
-            //for Room
-            System.out.println("Select what to do:"); 
-            System.out.println("1: Create New Room"); 
-            System.out.println("2: Update Room");
-            System.out.println("3: Delete Room");
-            System.out.println("4: View All Rooms");
-            System.out.print(">"); 
-            Integer newResponse = getIntegerInput();
-        
-            if (newResponse == 1) {
-                createNewRoom(); 
-            } else if (newResponse == 2) {
-                updateRoom(); 
-            } else if (newResponse == 3) {
-                deleteRoom();
-            } else if (newResponse == 4 ){
-                viewAllRooms();
-            }
-            }
-        } else if (employee.getEmployeeType() == EmployeeType.SALES_MANAGER) {
-            //for RoomRate
-            System.out.println("Select what to do");
-            System.out.println("1: Create New Room Rate"); 
-            System.out.println("2: Update RoomRate");
-            System.out.println("3: Delete Room Rate");
-            System.out.println("4: View All Room Rates");
-            Integer re = getIntegerInput();
+                    }
+                } else if (employee.getEmployeeType() == EmployeeType.SALES_MANAGER) {
+                    //for RoomRate
+                    System.out.println("Select what to do");
+                    System.out.println("1: Create New Room Rate"); 
+                    System.out.println("2: Update RoomRate");
+                    System.out.println("3: Delete Room Rate");
+                    System.out.println("4: View All Room Rates");
+                    Integer re = getIntegerInput();
 
-            if (re == 1) {
-                createNewRoomRate();
-            } else if (re == 2) {
-                updateRoomRate();
-            } else if (re == 3) {
-                System.out.println("not available yet LOL"); 
-            } else if (re == 4 ) {
-                viewAllRoomRates();
-            }
-        } else if (employee.getEmployeeType() == EmployeeType.GUEST_RELATION_OFFICER) {
-            while (true) {
-                System.out.println("Select what to do");
-                System.out.println("1: Walk-in Search Room"); 
-                System.out.println("2: Check-in Guest");
-                System.out.println("3: Check-out Guest");
-                System.out.println("4: Done");
-                Integer re = getIntegerInput();
+                    if (re == 1) {
+                        createNewRoomRate();
+                    } else if (re == 2) {
+                        updateRoomRate();
+                    } else if (re == 3) {
+                        System.out.println("not available yet LOL"); 
+                    } else if (re == 4 ) {
+                        viewAllRoomRates();
+                    }
+                } else if (employee.getEmployeeType() == EmployeeType.GUEST_RELATION_OFFICER) {
+                    while (true) {
+                        System.out.println("Select what to do");
+                        System.out.println("1: Walk-in Search Room"); 
+                        System.out.println("2: Check-in Guest");
+                        System.out.println("3: Check-out Guest");
+                        System.out.println("4: Done");
+                        Integer re = getIntegerInput();
 
-                if (re == 1) {
-                    walkInSearchRoom();
-                } else if (re == 2) {
-                    
-                } else if (re == 3) {
-                    
-                } else if (re == 4) {
-                    break;
+                        if (re == 1) {
+                            walkInSearchRoom();
+                        } else if (re == 2) {
+
+                        } else if (re == 3) {
+
+                        } else if (re == 4) {
+                            break;
+                        }
+                    }
+
+                } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
+                    System.out.println("1: Allocate Rooms to Current Day Reservations");
                 }
+                return;
             }
-        
-        } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
-            System.out.println("1: Allocate Rooms to Current Day Reservations");
         }
-        return;
+    }
+    
+    private void createNewEmployee() {
+        Scanner scanner = new Scanner(System.in);
+        Integer response = 0;
+
+        System.out.println("===Create New Employee==="); 
+        System.out.println("Please enter employee username");
+        System.out.print(">"); 
+        String username = scanner.next();
+        
+        System.out.println("Please enter employee password");
+        System.out.print(">"); 
+        String password = scanner.next();
+        
+        while (response < 1 || response > 4) {
+            System.out.println("Please select the employee type");
+            System.out.println("1: System Admin");
+            System.out.println("2: Operation Manager");
+            System.out.println("3: Sales Manager");
+            System.out.println("4: Guest Relation Officer");
+            response = getIntegerInput();
+        }
+        
+        EmployeeType employeeType = EmployeeType.SYSTEM_ADMIN; 
+        
+        if (response == 2) {
+            employeeType = EmployeeType.OPERATION_MANAGER; 
+        } else if (response == 3) {
+            employeeType = EmployeeType.SALES_MANAGER;
+        } else if (response == 4) {
+            employeeType = EmployeeType.GUEST_RELATION_OFFICER;
+        }
+        Employee employee = new Employee(username, password, employeeType); 
+        employeeSessionBeanRemote.createNewEmployee(employee);   
+    }
+    
+    private void viewAllEmployees() {
+    }
+    
+    private void createNewPartner() {
+        
+    }
+    
+    private void viewAllPartners() {
+        
     }
     
     private void createNewRoomType() {
