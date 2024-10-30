@@ -67,7 +67,7 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         //conducts the check for whether the room has been disabled
         List<Room> rooms = roomQuery.getResultList();
         for (Room room : rooms) {
-            if (room.getIsDisabled()) {
+            if (room.isDisabled()) {
                 rooms.remove(room);
             }
         }
@@ -108,7 +108,8 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         List<RoomType> roomTypes = roomTypeQuery.getResultList();
         return roomTypes;
     }
-    
+
+/*
     public void allocateRoomsToCurrentDayReservations() {
         //need to update this when we have created a method to call the current date
         Query reservationQuery = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate = :startDate");
@@ -121,6 +122,8 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         
         
     }
+
+*/
     
     private void createAllocationExceptionReport(RoomReservation r) {
         AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(); 

@@ -25,11 +25,10 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
 
     @Override
-    public void reserveRooms(Reservation newReservation, RoomType roomType) {
+    public void createReservation(Reservation newReservation, RoomType roomType) {
         //creates a new Reservation
         em.persist(newReservation); 
         newReservation.setRoomType(roomType); 
-        
     }
 
             

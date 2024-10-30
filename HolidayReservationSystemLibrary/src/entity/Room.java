@@ -5,6 +5,7 @@
 package entity;
 
 import java.io.Serializable;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,29 +23,38 @@ public class Room implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
+    @Column(nullable = false)
+    private String roomNumber; 
+    @Column(nullable = false)
+    private Boolean roomStatus; //true is available, false is not available
     @ManyToOne
     private RoomType roomType;
-    private String roomNumber; 
-    private Boolean roomStatus; //true is available, i.e. no one is occupying the room/has not been allocated for the current day use
-    private Boolean isDisabled; //use to indicate that no new reservations should be done on it, toggled when deletion but room currently occupied
+    @Column(nullable=false)
+    private boolean isDisabled;
 
     public Room() {
     }
 
-    public Room(RoomType roomType, String roomNumber, Boolean roomStatus) {
+    public Room(RoomType roomType, String roomNumber, Boolean roomStatus, boolean isDisabled) {
         this.roomType = roomType;
         this.roomNumber = roomNumber;
         this.roomStatus = roomStatus;
+        this.isDisabled = isDisabled;
     }
-    
+    /**
+     * @return the roomType
+     */
     public RoomType getRoomType() {
         return roomType;
     }
 
+    /**
+     * @param roomType the roomType to set
+     */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
     }
-
+    
     public Boolean getRoomStatus() {
         return roomStatus;
     }
@@ -69,11 +79,11 @@ public class Room implements Serializable {
         this.roomNumber = roomNumber;
     }
 
-    public Boolean getIsDisabled() {
+    public boolean isDisabled() {
         return isDisabled;
     }
 
-    public void setIsDisabled(Boolean isDisabled) {
+    public void setIsDisabled(boolean isDisabled) {
         this.isDisabled = isDisabled;
     }
     

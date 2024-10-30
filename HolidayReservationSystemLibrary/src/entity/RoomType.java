@@ -23,31 +23,33 @@ public class RoomType implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomTypeId;
-    private String roomType; //this is the roomType
+    private String name;
     private String description;
     private String size;
-    private Boolean disabled; 
-    private Integer ranking; //used to determine the order of the rooms 
+    private String bedCapacity;
+    private String amenities;
+    private boolean isDisabled; 
+    private Integer ranking;
 
     public RoomType() {
     }
 
-    public RoomType(String name, String description, String size, String bedCapacity, String amenities, Integer ranking) {
-        this.roomType = name;
+    public RoomType(String name, String description, String size, String bedCapacity, String amenities, boolean isDisabled, Integer ranking) {
+        this.name = name;
         this.description = description;
         this.size = size;
         this.bedCapacity = bedCapacity;
         this.amenities = amenities;
-        this.disabled = false; //by default when you create a roomType is should be enabled
+        this.isDisabled = isDisabled;
         this.ranking = ranking;
     }
 
-    public String getRoomType() {
-        return roomType;
+    public String getName() {
+        return name;
     }
 
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -81,9 +83,6 @@ public class RoomType implements Serializable {
     public void setAmenities(String amenities) {
         this.amenities = amenities;
     }
-    private String bedCapacity;
-    private String amenities; 
-    
 
     public Long getRoomTypeId() {
         return roomTypeId;
@@ -92,17 +91,13 @@ public class RoomType implements Serializable {
     public void setRoomTypeId(Long roomTypeId) {
         this.roomTypeId = roomTypeId;
     }
-    
-    public void disableRoom() {
-        this.disabled = true;
+
+    public boolean isIsDisabled() {
+        return isDisabled;
     }
 
-    public Boolean getDisabled() {
-        return disabled;
-    }
-
-    public void setDisabled(Boolean disabled) {
-        this.disabled = disabled;
+    public void setIsDisabled(boolean isDisabled) {
+        this.isDisabled = isDisabled;
     }
 
     public Integer getRanking() {

@@ -71,6 +71,7 @@ public class MainApp {
         
         if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
             
+            
         } else if (employee.getEmployeeType() == EmployeeType.OPERATION_MANAGER) {
             System.out.println("Please select what you would like to do.");
             System.out.println("1: RoomType functions");
@@ -193,7 +194,7 @@ public class MainApp {
         System.out.println("Please indicate the room ranking"); 
         Integer ranking = getIntegerInput();
         
-        RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, ranking);
+        RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, false, ranking);
         
         Long roomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType); 
         
@@ -207,13 +208,13 @@ public class MainApp {
         System.out.println("Select the room type that you would like to view");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getRoomType());
+            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
         }
         System.out.print(">"); 
         Integer response = scanner.nextInt(); 
 
         System.out.println("RoomId: " + roomTypesList.get(response).getRoomTypeId());
-        System.out.println("Room Name: " + roomTypesList.get(response).getRoomType());
+        System.out.println("Room Name: " + roomTypesList.get(response).getName());
         System.out.println("Description: " + roomTypesList.get(response).getDescription());
         System.out.println("Bed Capacity: " + roomTypesList.get(response).getBedCapacity());
         System.out.println("Amenities: " + roomTypesList.get(response).getAmenities());
@@ -226,7 +227,7 @@ public class MainApp {
         System.out.println("Select the room that you would like to update");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getRoomType());
+            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
         }
         
         Integer response = scanner.nextInt(); 
@@ -234,7 +235,7 @@ public class MainApp {
         
         String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size =%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getRoomType(),
+                    roomType.getName(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
@@ -242,7 +243,7 @@ public class MainApp {
         System.out.println("Selected room" + output);
         
         Long roomTypeId = roomType.getRoomTypeId();
-        String newRoomTypeName = roomType.getRoomType();
+        String newRoomTypeName = roomType.getName();
         String newDescription = roomType.getDescription();
         String newSize = roomType.getSize();
         String newBedCapacity = roomType.getBedCapacity();
@@ -293,7 +294,7 @@ public class MainApp {
         System.out.println("Please select the room type that you want to delete.");
         List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomType()); 
+            System.out.println(i + ": " + roomTypesList.get(i).getName()); 
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypesList.get(response); 
@@ -308,7 +309,7 @@ public class MainApp {
         for (RoomType roomType: roomTypesList) {
             String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size=%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getRoomType(),
+                    roomType.getName(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
@@ -323,7 +324,7 @@ public class MainApp {
         System.out.println("Select the room type for the room"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getRoomType());
+            System.out.print(i + ": " + roomTypes.get(i).getName());
         }
         System.out.print(">"); 
         Integer response = getIntegerInput();
@@ -344,7 +345,7 @@ public class MainApp {
             }
         }
         
-        Room room = new Room(roomType, roomNumber, true);
+        Room room = new Room(roomType, roomNumber, true, false);
         
         roomSessionBeanRemote.createNewRoom(room); 
     }
@@ -406,7 +407,7 @@ public class MainApp {
                 System.out.println("Select the room type for the room"); 
                 List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
                 for (int i = 0; i < roomTypes.size(); i++) {
-                    System.out.print(i + ": " + roomTypes.get(i).getRoomType());
+                    System.out.print(i + ": " + roomTypes.get(i).getName());
                 }
                 System.out.println(">");
                 Integer r = getIntegerInput();
@@ -454,7 +455,7 @@ public class MainApp {
         System.out.println("Please select room type"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getRoomType());
+            System.out.print(i + ": " + roomTypes.get(i).getName());
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
@@ -602,7 +603,7 @@ public class MainApp {
             
             String output = String.format("roomId=%s; RoomName=%s; Description=%s; Size=%s; BedCapacity=%s; Amenities=%s", 
                     roomType.getRoomTypeId(),
-                    roomType.getRoomType(),
+                    roomType.getName(),
                     roomType.getDescription(),
                     roomType.getSize(),
                     roomType.getBedCapacity(), 
@@ -635,7 +636,7 @@ public class MainApp {
             System.out.println("Please select the Room Type");
             roomType = selectRoomType();
             Integer ranking = roomType.getRanking();
-            String name = roomType.getRoomType();
+            String name = roomType.getName();
             System.out.println("Please enter start date (DD/MM/YYYY)"); 
             startDate = new Date(getValidDate());//walk-in check in should only be done on the current day
             System.out.println("Please enter end date (DD/MM/YYYY)"); 
@@ -679,7 +680,7 @@ public class MainApp {
         
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
         
-        reserveRoomSessionBeanRemote.reserveRooms(newReservation, roomType);
+        reserveRoomSessionBeanRemote.createReservation(newReservation, roomType);
         
     }
     

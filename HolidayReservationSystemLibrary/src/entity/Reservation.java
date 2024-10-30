@@ -6,12 +6,18 @@ package entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.ArrayList;
 import javax.persistence.OneToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 /**
  *
@@ -23,19 +29,18 @@ public class Reservation implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private Long reservationId;
+    @Temporal(TemporalType.DATE)
     private Date startDate;
+    @Temporal(TemporalType.DATE)
     private Date endDate; 
+    @Column(nullable = false)
+    @NotNull
     private Integer numRooms;
-    
-    @ManyToOne
-    private Guest guest;
-    
-    @ManyToOne
-    private Partner partner;
-    
-    @OneToOne 
+    @OneToOne
     private RoomType roomType;
+    @OneToMany(mappedBy="reservation") 
+    private List<RoomReservation> roomReservations;
 
     public Reservation() {
     }
@@ -44,14 +49,15 @@ public class Reservation implements Serializable {
         this.startDate = startDate;
         this.endDate = endDate; 
         this.numRooms = numRooms;
+        this.roomReservations = new ArrayList<RoomReservation>();
     }
 
-    public Long getId() {
-        return id;
+    public Long getReservationId() {
+        return reservationId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setReservationId(Long reservationId) {
+        this.reservationId = reservationId;
     }
 
     public Date getStartDate() {
@@ -77,29 +83,46 @@ public class Reservation implements Serializable {
     public void setNumRooms(Integer numRooms) {
         this.numRooms = numRooms;
     }
-    
-    
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
     }
+   
     
+        /**
+     * @return the roomReservations
+     */
+    public List<RoomReservation> getRoomReservations() {
+        return roomReservations;
+    }
+
+    /**
+     * @param roomReservations the roomReservations to set
+     */
+    public void setRoomReservations(List<RoomReservation> roomReservations) {
+        this.roomReservations = roomReservations;
+    }
     
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (id != null ? id.hashCode() : 0);
+        hash += (reservationId != null ? reservationId.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
+        // TODO: Warning - this method won't work in the case the reservationId fields are not set
         if (!(object instanceof Reservation)) {
             return false;
         }
         Reservation other = (Reservation) object;
-        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+        if ((this.reservationId == null && other.reservationId != null) || (this.reservationId != null && !this.reservationId.equals(other.reservationId))) {
             return false;
         }
         return true;
@@ -107,7 +130,7 @@ public class Reservation implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Reservation[ id=" + id + " ]";
+        return "entity.Reservation[ id=" + reservationId + " ]";
     }
     
 }

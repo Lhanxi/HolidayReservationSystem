@@ -40,7 +40,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 
-        roomType.setRoomType(roomTypeName);
+        roomType.setName(roomTypeName);
         roomType.setDescription(newDescription);
         roomType.setSize(newSize);
         roomType.setBedCapacity(newBedCapacity);
@@ -54,7 +54,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             em.remove(roomType);
             return "Room Type successfully deleted";
         } else {
-            roomType.disableRoom();
+            roomType.setIsDisabled(true);
         }
         return "Room Type deletion failed, Room Type is being used. Room Type has been disabled.";
     }
