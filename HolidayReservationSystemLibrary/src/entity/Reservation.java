@@ -39,7 +39,7 @@ public class Reservation implements Serializable {
     private Integer numRooms;
     @OneToOne
     private RoomType roomType;
-    @OneToMany(mappedBy="reservation") 
+    @OneToMany 
     private List<RoomReservation> roomReservations;
 
     public Reservation() {
