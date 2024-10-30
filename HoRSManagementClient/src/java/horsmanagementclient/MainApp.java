@@ -237,6 +237,15 @@ public class MainApp {
     }
     
     private void viewAllEmployees() {
+        List<Employee> employees = employeeSessionBeanRemote.retrieveListOfAllEmployees();
+        for (Employee e : employees) {
+            String output = String.format("employeeId=%L; username=%s; password=%s; employeeType=%s", 
+                    e.getEmployeeId(), 
+                    e.getUsername(), 
+                    e.getPassword(), 
+                    e.getEmployeeType()); 
+            System.out.println(output);
+        }
     }
     
     private void createNewPartner() {
