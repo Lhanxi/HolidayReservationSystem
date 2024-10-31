@@ -12,8 +12,10 @@ import javax.persistence.Id;
 import java.util.List;
 import java.util.ArrayList;
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
-
+import util.enumeration.PartnerType;
 
 /**
  *
@@ -33,6 +35,10 @@ public class Partner implements Serializable {
     @Column(nullable = false)
     private String password;
     
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PartnerType partnerType;
+    
     @OneToMany
     private List<Reservation> reservations;
     
@@ -41,11 +47,12 @@ public class Partner implements Serializable {
        reservations = new ArrayList<Reservation>();
     }
 
-    public Partner(String username, String password) {
+    public Partner(String username, String password, PartnerType partnerType) {
         this();
         
         this.username = username;
         this.password = password;
+        this.partnerType = partnerType;
     }
 
     public Long getPartnerId() {
@@ -122,6 +129,17 @@ public class Partner implements Serializable {
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
+    /**
+     * @return the partnerType
+     */
+    public PartnerType getPartnerType() {
+        return partnerType;
+    }
 
-    
+    /**
+     * @param partnerType the partnerType to set
+     */
+    public void setPartnerType(PartnerType partnerType) {
+        this.partnerType = partnerType;
+    }
 }

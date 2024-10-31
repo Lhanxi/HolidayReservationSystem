@@ -29,7 +29,7 @@ public class Customer extends Visitor implements Serializable {
     @Column(nullable = false)
     private String passportNumber;
     
-    @OneToMany(mappedBy = "guest")
+    @OneToMany
     private List<Reservation> reservations;
     
     public Customer() {
