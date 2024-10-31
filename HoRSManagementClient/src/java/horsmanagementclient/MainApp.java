@@ -76,7 +76,7 @@ public class MainApp {
             boolean loggedIn = true;
             
             while (loggedIn) {
-
+                
                 if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
                     System.out.println("Please select what you would like to do.");
                     System.out.println("1: Create new employees"); 
@@ -197,7 +197,6 @@ public class MainApp {
                 } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
                     System.out.println("1: Allocate Rooms to Current Day Reservations");
                 }
-                return;
             }
         }
     }
@@ -239,14 +238,20 @@ public class MainApp {
     
     private void viewAllEmployees() {
         List<Employee> employees = employeeSessionBeanRemote.retrieveListOfAllEmployees();
+        
+        System.out.println("===List of all employees==="); 
+        System.out.println("");
+        
         for (Employee e : employees) {
-            String output = String.format("employeeId=%L; username=%s; password=%s; employeeType=%s", 
+            String output = String.format("employeeId=%d; username=%s; password=%s; employeeType=%s", 
                     e.getEmployeeId(), 
                     e.getUsername(), 
                     e.getPassword(), 
                     e.getEmployeeType()); 
             System.out.println(output);
         }
+        
+        System.out.println("");
     }
     
     private void createNewPartner() {

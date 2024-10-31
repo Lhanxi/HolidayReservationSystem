@@ -43,7 +43,6 @@ public class Partner implements Serializable {
 
     public Partner(String username, String password) {
         this();
-        
         this.username = username;
         this.password = password;
     }

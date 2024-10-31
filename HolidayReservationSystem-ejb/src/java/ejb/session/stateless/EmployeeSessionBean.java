@@ -50,6 +50,13 @@ public class EmployeeSessionBean implements EmployeeSessionBeanRemote, EmployeeS
         }
     }
     
+    public boolean isValidNewUsername(String username) {
+        //returns true if there are no other users with that username
+        Query query = entityManager.createQuery("SELECT e FROM Employee WHERE e.username = :username"); 
+        query.setParameter("username", username); 
+        return query.getResultList().isEmpty();
+    }
+    
     @Override
     public Employee employeeLogin(String username, String password) throws InvalidLoginException {
         try {
