@@ -34,7 +34,7 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     }
     
     public List<RoomRate> getAllRoomRates() {
-        Query query = em.createQuery("SELECT r FROM RoomRate");
+        Query query = em.createQuery("SELECT r FROM RoomRate r");
         return query.getResultList();
     }
     

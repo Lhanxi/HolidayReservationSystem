@@ -16,12 +16,14 @@ import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import oracle.jrockit.jfr.parser.ParseException;
 import util.enumeration.EmployeeType;
 import util.enumeration.RateTypeEnum;
 import util.exception.DuplicateUsernameException;
@@ -600,7 +602,7 @@ public class MainApp {
         String name = scanner.next();
         
         System.out.println("Please select room type"); 
-        List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
+        List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
             System.out.print(i + ": " + roomTypes.get(i).getName());
         }
@@ -626,20 +628,16 @@ public class MainApp {
             }
         }
         
-        System.out.println("Please enter the rate per night");
-        System.out.print(">"); 
-        String r = scanner.next(); 
-        BigDecimal ratePerNight = new BigDecimal(r);
+        BigDecimal ratePerNight = getBigDecimalInput("Please enter rate per night");
         
         System.out.println("Please enter the start date in the format DD/MM/YYYY");
         System.out.print(">");
-        String s = scanner.next();
-        Date startDate = new Date(s);
+        Date startDate = new Date(getValidDate());
         
         System.out.println("Please enter the end date in the format DD/MM/YYYY");
         System.out.print(">");
         String d = scanner.next(); 
-        Date endDate = new Date(d);
+        Date endDate = new Date(getValidDate());
         
         //still need to do some of the setting later
         
@@ -855,6 +853,30 @@ public class MainApp {
         return input;
     }
     
+    public BigDecimal getBigDecimalInput(String prompt) {
+        Scanner scanner = new Scanner(System.in);
+        BigDecimal value = null;
+        boolean validInput = false;
+
+        while (!validInput) {
+            System.out.println(prompt);
+            System.out.print("> ");
+            String input = scanner.nextLine();
+
+            try {
+                value = new BigDecimal(input);
+                if (value.signum() < 0) {
+                    throw new NumberFormatException("Value must be non-negative.");
+                }
+                validInput = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid BigDecimal number.");
+            }
+        }
+
+        return value;
+    }
+    
     public String getValidDate() {
         Scanner scanner = new Scanner(System.in);
         String dateInput;
@@ -867,7 +889,7 @@ public class MainApp {
 
             if (isValidDate(dateInput)) {
                 System.out.println("The date format is valid: " + dateInput);
-                break; // Exit the loop if the date is valid
+                break; 
             } else {
                 System.out.println("The date format is invalid. Please try again.");
             }
