@@ -49,6 +49,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     @Override
     public Room getRoom(String roomNumber) {
         Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber = :roomNumber");
+        query.setParameter("roomNumber", roomNumber);
         Room room = (Room) query.getSingleResult();
         return room;
     }

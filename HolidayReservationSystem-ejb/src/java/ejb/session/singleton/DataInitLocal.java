@@ -5,6 +5,7 @@
 package ejb.session.singleton;
 
 import javax.ejb.Local;
+import util.exception.DuplicateUsernameException;
 
 /**
  *
@@ -12,5 +13,5 @@ import javax.ejb.Local;
  */
 @Local
 public interface DataInitLocal {
-    
+    public void defaultSystemAccount() throws Exception;
 }

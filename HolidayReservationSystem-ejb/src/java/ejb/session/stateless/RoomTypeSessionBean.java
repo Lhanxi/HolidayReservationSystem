@@ -27,14 +27,12 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     @Override
     public Long createNewRoomType(RoomType roomType) {
         em.persist(roomType); 
-        em.flush();
         return roomType.getRoomTypeId();
     }
     
     @Override
     public List<RoomType> getRoomTypeList() {
         Query query = em.createQuery("SELECT r FROM RoomType r"); 
-        
         return query.getResultList();
     }
     

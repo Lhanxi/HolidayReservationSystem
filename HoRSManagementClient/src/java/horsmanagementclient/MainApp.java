@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Scanner;
 import util.enumeration.EmployeeType;
 import util.enumeration.RateTypeEnum;
+import util.exception.DuplicateUsernameException;
 import util.exception.InvalidLoginException;
 /**
  *
@@ -105,56 +106,66 @@ public class MainApp {
                     } 
                     
                 } else if (employee.getEmployeeType() == EmployeeType.OPERATION_MANAGER) {
-                    System.out.println("Please select what you would like to do.");
-                    System.out.println("1: RoomType functions");
-                    System.out.println("2: Room functions");
-                    Integer r = getIntegerInput();
-                    if (r == 1) {
-                        while (true) {
-                            //For RoomType
-                            System.out.println("Select what to do:"); 
-                            System.out.println("1: Create new room type");
-                            System.out.println("2: View room type details");
-                            System.out.println("3: Update Room Type Details");
-                            System.out.println("4: Delete Room Type");
-                            System.out.println("5: View all Room Type");
-                            System.out.println("6: Exit");
-                            Integer response = getIntegerInput();
+                    while (true) {
+                        System.out.println("Please select what you would like to do.");
+                        System.out.println("1: RoomType functions");
+                        System.out.println("2: Room functions");
+                        System.out.println("3: Logout");
+                        Integer r = getIntegerInput();
+                        if (r == 1) {
+                            while (true) {
+                                //For RoomType
+                                System.out.println("Select what to do:"); 
+                                System.out.println("1: Create new room type");
+                                System.out.println("2: View room type details");
+                                System.out.println("3: Update Room Type Details");
+                                System.out.println("4: Delete Room Type");
+                                System.out.println("5: View all Room Type");
+                                System.out.println("6: Back");
+                                Integer response = getIntegerInput();
 
-                            if (response == 1) {
-                                createNewRoomType(); 
-                            } else if (response == 2) {
-                                viewRoomTypeDetails(); 
-                            } else if (response == 3) {
-                                updateRoomType(); 
-                            } else if (response == 4) {
-                                deleteRoomType();
-                            } else if (response == 5) {
-                                viewAllRoomTypes();
-                            } else if (response == 6) {
-                                break;
+                                if (response == 1) {
+                                    createNewRoomType(); 
+                                } else if (response == 2) {
+                                    viewRoomTypeDetails(); 
+                                } else if (response == 3) {
+                                    updateRoomType(); 
+                                } else if (response == 4) {
+                                    deleteRoomType();
+                                } else if (response == 5) {
+                                    viewAllRoomTypes();
+                                } else if (response == 6) {
+                                    break;
+                                }
                             }
+
+                        } else if (r ==2) {
+                            while (true) {
+                                //for Room
+                                System.out.println("Select what to do:"); 
+                                System.out.println("1: Create New Room"); 
+                                System.out.println("2: Update Room");
+                                System.out.println("3: Delete Room");
+                                System.out.println("4: View All Rooms");
+                                System.out.println("5: Back");
+                                Integer newResponse = getIntegerInput();
+
+                                if (newResponse == 1) {
+                                    createNewRoom(); 
+                                } else if (newResponse == 2) {
+                                    updateRoom(); 
+                                } else if (newResponse == 3) {
+                                    deleteRoom();
+                                } else if (newResponse == 4 ){
+                                    viewAllRooms();
+                                } else if (newResponse == 5) {
+                                    break;
+                                }
+                            }
+                        } else if (r == 3) {
+                            loggedIn = false;
+                            break;
                         }
-
-                    } else if (r ==2) {
-                    //for Room
-                    System.out.println("Select what to do:"); 
-                    System.out.println("1: Create New Room"); 
-                    System.out.println("2: Update Room");
-                    System.out.println("3: Delete Room");
-                    System.out.println("4: View All Rooms");
-                    System.out.print(">"); 
-                    Integer newResponse = getIntegerInput();
-
-                    if (newResponse == 1) {
-                        createNewRoom(); 
-                    } else if (newResponse == 2) {
-                        updateRoom(); 
-                    } else if (newResponse == 3) {
-                        deleteRoom();
-                    } else if (newResponse == 4 ){
-                        viewAllRooms();
-                    }
                     }
                 } else if (employee.getEmployeeType() == EmployeeType.SALES_MANAGER) {
                     //for RoomRate
@@ -201,7 +212,7 @@ public class MainApp {
         }
     }
     
-    private void createNewEmployee() {
+    private void createNewEmployee() throws DuplicateUsernameException {
         Scanner scanner = new Scanner(System.in);
         Integer response = 0;
 
@@ -232,8 +243,21 @@ public class MainApp {
         } else if (response == 4) {
             employeeType = EmployeeType.GUEST_RELATION_OFFICER;
         }
-        Employee employee = new Employee(username, password, employeeType); 
-        employeeSessionBeanRemote.createNewEmployee(employee);   
+        boolean isCreated = false;
+        
+        do {
+            Employee employee = new Employee(username, password, employeeType); 
+            try {
+                employeeSessionBeanRemote.createNewEmployee(employee);
+                System.out.println("Employee created successfully!");
+                isCreated = true;
+            } catch (Exception ex) {
+                System.out.println("Error: " + ex.getMessage() + " Please enter a different username.");
+                System.out.println("Please enter employee username:");
+                System.out.print("> "); 
+                username = scanner.next();
+            }
+        } while (!isCreated);
     }
     
     private void viewAllEmployees() {
@@ -279,10 +303,11 @@ public class MainApp {
         System.out.println("Please enter the room type name.");
         System.out.print(">"); 
         String roomNameType = scanner.next();
+        scanner.nextLine();
         
         System.out.println("Please include the description for the room type"); 
         System.out.print(">"); 
-        String description = scanner.next();
+        String description = scanner.nextLine();
         
         System.out.println("Please indicate the size of the room"); 
         System.out.print(">"); 
@@ -291,10 +316,11 @@ public class MainApp {
         System.out.println("Please indicate the bed capacity of the room"); 
         System.out.print(">"); 
         String bedCapacity = scanner.next(); 
+        scanner.nextLine();
         
         System.out.println("Please indicate the room amentities, separating them with a comma"); 
         System.out.print(">"); 
-        String amenities = scanner.next();
+        String amenities = scanner.nextLine();
         
         System.out.println("Please indicate the room ranking"); 
         Integer ranking = getIntegerInput();
