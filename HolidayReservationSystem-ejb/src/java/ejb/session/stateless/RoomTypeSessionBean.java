@@ -43,6 +43,17 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         return query.getResultList();
     }
     
+    @Override
+    public List<RoomType> getEnabledRoomTypeList() {
+        List<RoomType> roomTypes = getRoomTypeList(); 
+        for (RoomType r : roomTypes) {
+            if (r.isIsDisabled()) {
+                roomTypes.remove(r);
+            }
+        }
+        return roomTypes;
+    }
+    
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 
         roomType.setName(roomTypeName);

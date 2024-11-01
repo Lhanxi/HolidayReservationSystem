@@ -55,7 +55,8 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     }
     
     @Override
-    public void updateRoom(Room room, RoomType roomType, String roomNumber, Boolean status) {
+    public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status) {
+        Room room = em.find(Room.class, roomId);
         //unidirectional so dont need to update room in roomType
         room.setRoomType(roomType);
         room.setRoomNumber(roomNumber);

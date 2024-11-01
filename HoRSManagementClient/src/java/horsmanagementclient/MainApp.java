@@ -454,11 +454,9 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
  
         System.out.println("Select the room type for the room"); 
-        List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
+        List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            if (!roomTypes.get(i).isIsDisabled()) {
-                System.out.print(i + ": " + roomTypes.get(i).getName());
-            }
+            System.out.print(i + ": " + roomTypes.get(i).getName());
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
@@ -513,6 +511,7 @@ public class MainApp {
         
         while (true) {
             System.out.println("Please enter the room number that you want to update");
+            System.out.print(">");
             roomNumber = scanner.next();
             //valid rooms are ones where there is no room with that number, want to check that there is a room with that number here
             if (!roomSessionBeanRemote.isValidRoomNumber(roomNumber)) {
@@ -523,6 +522,7 @@ public class MainApp {
         }
         
         Room room = roomSessionBeanRemote.getRoom(roomNumber);
+        Long roomId = room.getRoomId();
         boolean status = room.getRoomStatus();
         RoomType roomType = room.getRoomType();
         
@@ -534,25 +534,37 @@ public class MainApp {
                 System.out.println("2: Room Number"); //need to pay more attention to the changing of the roomType 
                 System.out.println("3: Toggle Room Status"); 
                 System.out.println("4: Done"); 
-                System.out.print(">");
 
                 response = getIntegerInput();
             }
             
             if (response == 1) {
-                System.out.println("Select the room type for the room"); 
-                List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
-                for (int i = 0; i < roomTypes.size(); i++) {
-                    System.out.print(i + ": " + roomTypes.get(i).getName());
+                
+                Integer r = -1;
+                List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
+                
+                while (r < 0 || r > roomTypes.size()) {
+                    System.out.println("Select the room type for the room"); 
+                    for (int i = 0; i < roomTypes.size(); i++) {
+                        System.out.println(i + ": " + roomTypes.get(i).getName());
+                    }
+                    System.out.println(">");
+                    r = getIntegerInput();
+                    roomType = roomTypes.get(r);
                 }
-                System.out.println(">");
-                Integer r = getIntegerInput();
-                roomType = roomTypes.get(r);
-                     
             } else if (response == 2) {
-                System.out.println("Please enter new room number"); 
-                System.out.print(">");
-                roomNumber = scanner.next();
+                boolean isValidRoomNumber = false;
+                
+                while (!isValidRoomNumber) {
+                    System.out.println("Please enter new room number"); 
+                    System.out.print(">");
+                    roomNumber = scanner.next();
+                    isValidRoomNumber = roomSessionBeanRemote.isValidRoomNumber(roomNumber);
+                    if (!isValidRoomNumber) {
+                        System.out.println("A room with that room number exists, please enter a different room number.");
+                        System.out.println("");
+                    }
+                }
             } else if (response == 3) {
                 if (status) {
                     System.out.println("Toggled to unavailable"); 
@@ -566,8 +578,7 @@ public class MainApp {
             }
         }
         
-        roomSessionBeanRemote.updateRoom(room, roomType, roomNumber, status);
-        
+        roomSessionBeanRemote.updateRoom(roomId, roomType, roomNumber, status);
     }
     
     //update this afterwards

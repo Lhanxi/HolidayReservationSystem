@@ -19,6 +19,6 @@ public interface RoomSessionBeanRemote {
     public List<Room> viewAllRooms();
     public boolean isValidRoomNumber(String roomNumber);
     public Room getRoom(String roomNumber);
-    public void updateRoom(Room room, RoomType roomType, String roomNumber, Boolean status);
+    public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status);
     public void deleteRoom(String roomNumber);
 }
