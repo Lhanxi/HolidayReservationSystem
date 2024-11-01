@@ -26,10 +26,17 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     
     @Override
     public Long createNewRoomType(RoomType roomType) {
-        em.persist(roomType); 
-        return roomType.getRoomTypeId();
+    try {
+        em.persist(roomType);
+        em.flush(); // Explicitly flush to push changes immediately to the database
+        System.out.println("RoomType created with ID: " + roomType.getRoomTypeId());
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        System.out.println("Error persisting RoomType: " + ex.getMessage());
     }
-    
+    return roomType.getRoomTypeId();
+}
+
     @Override
     public List<RoomType> getRoomTypeList() {
         Query query = em.createQuery("SELECT r FROM RoomType r"); 
@@ -45,9 +52,10 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         roomType.setAmenities(newAmenities);
     }
     
-    
-    public String deleteRoomType(RoomType roomType) {
+    @Override
+    public String deleteRoomType(Long roomTypeId) {
         //check whether there are any rooms that depend on this roomType
+        RoomType roomType = em.find(RoomType.class, roomTypeId);
         if (checkRoomTypeForRooms(roomType) && checkRoomTypeForRoomRates(roomType)) {
             em.remove(roomType);
             return "Room Type successfully deleted";

@@ -429,8 +429,9 @@ public class MainApp {
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypesList.get(response); 
+        Long roomTypeId = roomType.getRoomTypeId();
         
-        String output = roomTypeSessionBeanRemote.deleteRoomType(roomType);
+        String output = roomTypeSessionBeanRemote.deleteRoomType(roomTypeId);
         System.out.println(output);
     }
     

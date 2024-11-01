@@ -17,6 +17,6 @@ public interface RoomTypeSessionBeanLocal {
     public Long createNewRoomType(RoomType roomType);
     public List<RoomType> getRoomTypeList();
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities);
-    public String deleteRoomType(RoomType roomType);
+    public String deleteRoomType(Long roomTypeId);
     
 }
