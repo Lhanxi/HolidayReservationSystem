@@ -452,13 +452,14 @@ public class MainApp {
     
     private void createNewRoom() {
         Scanner scanner = new Scanner(System.in);
-        
+ 
         System.out.println("Select the room type for the room"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getName());
+            if (!roomTypes.get(i).isIsDisabled()) {
+                System.out.print(i + ": " + roomTypes.get(i).getName());
+            }
         }
-        System.out.print(">"); 
         Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
         
@@ -479,7 +480,10 @@ public class MainApp {
         
         Room room = new Room(roomType, roomNumber, true, false);
         
-        roomSessionBeanRemote.createNewRoom(room); 
+        Long roomID = roomSessionBeanRemote.createNewRoom(room);
+        
+        System.out.println("Room successfully created! Room ID: " + roomID);
+        System.out.println("");
     }
     
     private void deleteRoom() {
