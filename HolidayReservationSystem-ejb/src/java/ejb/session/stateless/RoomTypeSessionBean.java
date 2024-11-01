@@ -5,6 +5,7 @@
 package ejb.session.stateless;
 
 import entity.RoomType;
+import java.util.Iterator;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -46,13 +47,18 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     @Override
     public List<RoomType> getEnabledRoomTypeList() {
         List<RoomType> roomTypes = getRoomTypeList(); 
-        for (RoomType r : roomTypes) {
-            if (r.isIsDisabled()) {
-                roomTypes.remove(r);
+        Iterator<RoomType> iterator = roomTypes.iterator();
+
+        while (iterator.hasNext()) {
+            RoomType roomType = iterator.next();
+            if (roomType.isIsDisabled()) {
+                iterator.remove();  // Safely removes the element
             }
         }
-        return roomTypes;
-    }
+
+    return roomTypes;
+}
+
     
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 

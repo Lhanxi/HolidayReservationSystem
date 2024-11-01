@@ -562,7 +562,7 @@ public class MainApp {
                     isValidRoomNumber = roomSessionBeanRemote.isValidRoomNumber(roomNumber);
                     if (!isValidRoomNumber) {
                         System.out.println("A room with that room number exists, please enter a different room number.");
-                        System.out.println("");
+                        System.out.println(""); 
                     }
                 }
             } else if (response == 3) {
