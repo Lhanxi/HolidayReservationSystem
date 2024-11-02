@@ -5,6 +5,7 @@
 package ejb.session.stateless;
 
 import java.util.Date;
+import java.util.HashMap;
 import javax.ejb.Local;
 
 /**
@@ -13,7 +14,5 @@ import javax.ejb.Local;
  */
 @Local
 public interface HotelInventorySessionBeanLocal {
-    public boolean roomTypeIsAvailableForReservation(Date startDate, Date endDate, Integer ranking);
-    public int numberOfAvailableRoomsForReservation(Date startDate, Date endDate, Integer ranking);
-    
+    public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate);
 }

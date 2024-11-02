@@ -16,14 +16,15 @@ import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-import oracle.jrockit.jfr.parser.ParseException;
 import util.enumeration.EmployeeType;
 import util.enumeration.RateTypeEnum;
 import util.exception.DuplicateUsernameException;
@@ -664,7 +665,6 @@ public class MainApp {
         while (true) {
             System.out.println("Please enter the start date in the format DD/MM/YYYY");
             startDate = getDateInput();
-            System.out.println(startDate);
 
             System.out.println("Please enter the end date in the format DD/MM/YYYY");
             endDate = getDateInput();
@@ -830,41 +830,43 @@ public class MainApp {
     
     private void walkInSearchRoom() {
         Scanner scanner = new Scanner(System.in);
-        RoomType roomType;
+        
         Date startDate, endDate;
+        
         while (true) {
-            System.out.println("Please select the Room Type");
-            roomType = selectRoomType();
-            Integer ranking = roomType.getRanking();
-            String name = roomType.getName();
-            System.out.println("Please enter start date (DD/MM/YYYY)"); 
-            startDate = getDateInput();//walk-in check in should only be done on the current day
-            System.out.println("Please enter end date (DD/MM/YYYY)"); 
+            System.out.println("Please enter start date."); 
+            startDate = getDateInput();
+            System.out.println("");
+            
+            System.out.println("Please enter end date"); 
             endDate = getDateInput();
+            System.out.println("");
             
-            while (!hotelInventorySessionBeanRemote.roomTypeIsAvailableForReservation(startDate, endDate, ranking)) {
-                System.out.println("Sorry there are no availabilities for that Room Type, please select another Room Type.");
-                roomType = selectRoomType(); 
-                //assume that the other details will remain the same
-            }
-            
-            System.out.println("Continue to reserve this Room Type?"); 
-            System.out.println("1: Yes"); 
-            System.out.println("2: No, select a different Room Type"); 
-            Integer response = getIntegerInput();
-            
-            if (response == 1) {
-                break;
+            if (endDate.before(startDate)) {
+                System.out.println("End Date cannot be before start date. Please try again.");
             } else {
-                continue;
+                break; 
             }
         }
         
-        walkInReserveRoom(roomType, startDate, endDate);
+        HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
+        List<String> roomTypes = new ArrayList<>();
         
+        for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
+            roomTypes.add(entry.getKey());
+        }
+        
+        System.out.println("Available room types. Please select which room type to make a reservation");
+        for (int i = 0; i < roomTypes.size(); i++) {
+            System.out.println(i + ": " + availableRoomTypes.get(roomTypes.get(i)));
+        }
+        
+        Integer response = getIntegerInput();
+        //walkInReserveRoom(startDate, endDate);
     }
-    
-    private void walkInReserveRoom(RoomType roomType, Date startDate, Date endDate) {
+
+/* 
+    private void walkInReserveRoom(Date startDate, Date endDate) {
         Scanner scanner = new Scanner(System.in);
         int ranking = roomType.getRanking();
         
@@ -884,6 +886,7 @@ public class MainApp {
         
     }
     
+*/
     private void allocateRoomstoCurrentDayReservations() {
         
     }
