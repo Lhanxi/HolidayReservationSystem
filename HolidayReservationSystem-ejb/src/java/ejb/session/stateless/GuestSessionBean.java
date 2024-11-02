@@ -25,12 +25,12 @@ import util.exception.ReservationNotFoundException;
  * @author leunghanxi
  */
 @Stateless
-public class CustomerSessionBean implements CustomerSessionBeanRemote, CustomerSessionBeanLocal {
+public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBeanLocal {
     
     @PersistenceContext(unitName = "HolidayReservationSystem-ejbPU")
     private EntityManager entityManager;
     
-    public CustomerSessionBean() {
+    public GuestSessionBean() {
     }
     
     @Override

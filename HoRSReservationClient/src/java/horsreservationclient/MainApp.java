@@ -17,7 +17,6 @@ import entity.RoomReservation;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
-import ejb.session.stateless.CustomerSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
@@ -31,7 +30,6 @@ import util.exception.InvalidCustomerCreationException;
  * @author leunghanxi
  */
 public class MainApp {
-    private CustomerSessionBeanRemote customerSessionBeanRemote;
     private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
     private RoomSessionBeanRemote roomSessionBeanRemote;
     private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
@@ -41,8 +39,7 @@ public class MainApp {
     public MainApp() {
     }
     
-    public MainApp(CustomerSessionBeanRemote customerSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote) {
-        this.customerSessionBeanRemote = customerSessionBeanRemote;
+    public MainApp(RoomRateSessionBeanRemote roomRateSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomTypeSessionBeanRemote roomTypeSessionBeanRemote) {
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
@@ -80,7 +77,7 @@ public class MainApp {
     
     public void loginCustomer() {
         Scanner scanner = new Scanner(System.in);
-        try {
+        //try {
             while (true) {
                 String username = "";
                 String password = "";
@@ -90,20 +87,20 @@ public class MainApp {
                 System.out.print("Enter password> ");
                 password = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0) {
-                    customer = customerSessionBeanRemote.customerLogin(username, password);
+                   // customer = customerSessionBeanRemote.customerLogin(username, password);
                     System.out.println(username + " successfully logged in!\n");
-                    this.showCustomerMenu();
+                    //this.showCustomerMenu();
                 }
             }
-        } catch (InvalidLoginException ex){
-            System.out.println(ex.getMessage());
-        }
+       // } catch (InvalidLoginException ex){
+          //  System.out.println(ex.getMessage());
+       // }
         
     }
     
     public void registerCustomer() {
         Scanner scanner = new Scanner(System.in);
-        try {
+        //try {
             while (true) {
                 String username = "";
                 String password = "";
@@ -117,14 +114,14 @@ public class MainApp {
                 passportNumber = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0 && passportNumber.length() > 0) {
                     customer = new Customer(username, password, passportNumber);
-                    Long customerId = customerSessionBeanRemote.createNewCustomer(customer);
+                    //Long customerId = customerSessionBeanRemote.createNewCustomer(customer);
                     System.out.println(username + " successfully registered!\n");
                     this.showCustomerMenu();
                 }
             }
-        } catch (InvalidCustomerCreationException ex) {
-            System.out.println(ex.getMessage());
-        }
+        //} //catch (InvalidCustomerCreationException ex) {
+            //System.out.println(ex.getMessage());
+        //}
     }
     
     public void showCustomerMenu() {
