@@ -45,9 +45,10 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         }
         
         for (Reservation r : reservations) {
-            String roomTypeName = r.getRoomType().getName(); 
+            String roomTypeName = r.getRoomType().getName();
+            int roomsReserved = r.getNumRooms();
             int currentCount = roomCount.get(roomTypeName);
-            roomCount.put(roomTypeName, currentCount - 1);
+            roomCount.put(roomTypeName, currentCount - roomsReserved);
         }
         
         HashMap<String, Integer> availableRoomTypes = new HashMap<String, Integer>();

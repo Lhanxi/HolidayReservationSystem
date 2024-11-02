@@ -95,5 +95,11 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         return query.getResultList().isEmpty();
     }
     
+    @Override
+    public RoomType getRoomTypeByName(String roomTypeName) {
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.name =:roomTypeName");
+        query.setParameter("roomTypeName", roomTypeName);
+        return (RoomType) query.getSingleResult();
+    }
 
 }

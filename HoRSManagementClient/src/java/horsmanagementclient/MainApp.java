@@ -858,19 +858,27 @@ public class MainApp {
         
         System.out.println("Available room types. Please select which room type to make a reservation");
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.println(i + ": " + availableRoomTypes.get(roomTypes.get(i)));
+            System.out.println(i + ": " + roomTypes.get(i) + availableRoomTypes.get(roomTypes.get(i)));
         }
         
-        Integer response = getIntegerInput();
-        //walkInReserveRoom(startDate, endDate);
+        Integer response = -1;
+        String roomTypeName;
+        while (response < 0 || response > roomTypes.size()) {
+            response = getIntegerInput();
+            if (response < 0 || response > roomTypes.size()) {
+                System.out.println("Invalid response, please try again");
+                continue;
+            }
+        }
+        roomTypeName = roomTypes.get(response);
+        walkInReserveRoom(roomTypeName, startDate, endDate, availableRoomTypes.get(roomTypeName));
     }
 
-/* 
-    private void walkInReserveRoom(Date startDate, Date endDate) {
+
+    private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms) {
         Scanner scanner = new Scanner(System.in);
-        int ranking = roomType.getRanking();
-        
-        int numAvailRooms = hotelInventorySessionBeanRemote.numberOfAvailableRoomsForReservation(startDate, endDate, ranking);
+        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+        Long roomTypeId = roomType.getRoomTypeId();
         
         System.out.println("Please select the number of rooms to reserve. You can select up to " + numAvailRooms + " rooms.");
         Integer numRooms = getIntegerInput();
@@ -886,7 +894,6 @@ public class MainApp {
         
     }
     
-*/
     private void allocateRoomstoCurrentDayReservations() {
         
     }
