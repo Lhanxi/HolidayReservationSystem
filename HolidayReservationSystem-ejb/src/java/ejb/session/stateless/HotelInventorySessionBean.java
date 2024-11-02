@@ -63,7 +63,15 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
     
     private List<Room> getAllRooms() {
         Query query = em.createQuery("SELECT r FROM Room r");
-        return query.getResultList();
+        List<Room> rooms = query.getResultList();
+        List<Room> availRooms = new ArrayList<>();
+        
+        for (Room r : rooms) {
+            if (!r.isDisabled()) {
+                availRooms.add(r);
+            }
+        }
+        return availRooms;
     }
     
     private List<Reservation> getReservationsForPeriod(Date startDate, Date endDate) {
