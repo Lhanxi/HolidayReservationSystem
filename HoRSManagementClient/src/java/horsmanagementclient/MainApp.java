@@ -604,7 +604,7 @@ public class MainApp {
         System.out.println("Please select room type"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getName());
+            System.out.println(i + ": " + roomTypes.get(i).getName());
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
@@ -629,16 +629,22 @@ public class MainApp {
         }
         
         BigDecimal ratePerNight = getBigDecimalInput("Please enter rate per night");
+        Date startDate, endDate;
         
-        System.out.println("Please enter the start date in the format DD/MM/YYYY");
-        System.out.print(">");
-        Date startDate = new Date(getValidDate());
-        
-        System.out.println("Please enter the end date in the format DD/MM/YYYY");
-        System.out.print(">");
-        String d = scanner.next(); 
-        Date endDate = new Date(getValidDate());
-        
+        while (true) {
+            System.out.println("Please enter the start date in the format DD/MM/YYYY");
+            startDate = getDateInput();
+            System.out.println(startDate);
+
+            System.out.println("Please enter the end date in the format DD/MM/YYYY");
+            endDate = getDateInput();
+
+            if (endDate.before(startDate)) {
+                System.out.println("End Date cannot be before start date. Please try again.");
+            } else {
+                break; 
+            }
+        }
         //still need to do some of the setting later
         
         RoomRate newRoomRate = new RoomRate(name, roomType, rateType, ratePerNight, startDate, endDate);
@@ -783,9 +789,9 @@ public class MainApp {
             Integer ranking = roomType.getRanking();
             String name = roomType.getName();
             System.out.println("Please enter start date (DD/MM/YYYY)"); 
-            startDate = new Date(getValidDate());//walk-in check in should only be done on the current day
+            startDate = getDateInput();//walk-in check in should only be done on the current day
             System.out.println("Please enter end date (DD/MM/YYYY)"); 
-            endDate = new Date(getValidDate());
+            endDate = getDateInput();
             
             while (!hotelInventorySessionBeanRemote.roomTypeIsAvailableForReservation(startDate, endDate, ranking)) {
                 System.out.println("Sorry there are no availabilities for that Room Type, please select another Room Type.");
@@ -876,11 +882,10 @@ public class MainApp {
 
         return value;
     }
-    
-    public String getValidDate() {
+        
+      public static Date getDateInput() {
         Scanner scanner = new Scanner(System.in);
         String dateInput;
-        
         while (true) {
             System.out.print(">");
             dateInput = scanner.next(); 
@@ -889,12 +894,12 @@ public class MainApp {
 
             if (isValidDate(dateInput)) {
                 System.out.println("The date format is valid: " + dateInput);
-                break; 
+                LocalDate localDate = LocalDate.parse(dateInput, formatter);
+                return java.sql.Date.valueOf(localDate); 
             } else {
                 System.out.println("The date format is invalid. Please try again.");
             }
         }
-        return dateInput;
     }
         
     public static boolean isValidDate(String date) {
