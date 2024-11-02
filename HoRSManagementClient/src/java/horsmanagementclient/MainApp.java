@@ -376,10 +376,10 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         
         List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
-        System.out.println("Select the room that you would like to update");
+        System.out.println("Select the room type that you would like to update");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
+            System.out.println(i + ": " + roomTypesList.get(i).getName());
         }
         
         Integer response = scanner.nextInt(); 
@@ -477,7 +477,7 @@ public class MainApp {
         System.out.println("Select the room type for the room"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.print(i + ": " + roomTypes.get(i).getName());
+            System.out.println(i + ": " + roomTypes.get(i).getName());
         }
         Integer response = getIntegerInput();
         RoomType roomType = roomTypes.get(response);
@@ -521,8 +521,8 @@ public class MainApp {
             }
         }
         
-        roomSessionBeanRemote.deleteRoom(roomNumber);
-        System.out.println("Room " + roomNumber + " was successfully deleted");
+        String output = roomSessionBeanRemote.deleteRoom(roomNumber);
+        System.out.println(output);
     }
     
     private void updateRoom() {
@@ -546,15 +546,17 @@ public class MainApp {
         Long roomId = room.getRoomId();
         boolean status = room.getRoomStatus();
         RoomType roomType = room.getRoomType();
+        boolean isDisabled = room.isDisabled();
         
         while (true) {
             Integer response = 0; 
-            while (response < 1 || response > 4) {
+            while (response < 1 || response > 5) {
                 System.out.println("Please select the detail that you would like to update"); 
                 System.out.println("1: Room Type"); 
                 System.out.println("2: Room Number"); //need to pay more attention to the changing of the roomType 
                 System.out.println("3: Toggle Room Status"); 
-                System.out.println("4: Done"); 
+                System.out.println("4: Enable/Disable Room");
+                System.out.println("5: Done"); 
 
                 response = getIntegerInput();
             }
@@ -595,11 +597,20 @@ public class MainApp {
                     status = true;
                     }
             } else if (response == 4) {
-                    break;
+                if (isDisabled) {
+                    isDisabled = false;
+                    System.out.println("Room set to enabled");
+                } else {
+                    isDisabled = true; 
+                    System.out.println("Room set to disabled");
+                }
+            } else if (response == 5) {
+                break;
             }
+                
         }
         
-        roomSessionBeanRemote.updateRoom(roomId, roomType, roomNumber, status);
+        roomSessionBeanRemote.updateRoom(roomId, roomType, roomNumber, status, isDisabled);
     }
     
     //update this afterwards

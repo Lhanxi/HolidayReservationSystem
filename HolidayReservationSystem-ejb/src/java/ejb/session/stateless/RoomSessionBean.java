@@ -55,16 +55,17 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     }
     
     @Override
-    public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status) {
+    public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status, Boolean isDisabled) {
         Room room = em.find(Room.class, roomId);
         //unidirectional so dont need to update room in roomType
         room.setRoomType(roomType);
         room.setRoomNumber(roomNumber);
         room.setRoomStatus(status);
+        room.setIsDisabled(isDisabled);
     }
     
     @Override
-    public void deleteRoom(String roomNumber) {
+    public String deleteRoom(String roomNumber) {
         Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber = :roomNumber"); 
         query.setParameter("roomNumber", roomNumber); 
         Room room = (Room) query.getSingleResult();
@@ -73,8 +74,10 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
             //if no one is using the room, then we can safely delete the room
             room.setRoomType(null);
             em.remove(room);
+            return "Room successfully deleted";
         } else {
             room.setIsDisabled(Boolean.TRUE);
         }
+        return "Room cannot be deleted as it is currently being used. Room has been set to disabled";
     }
 }
