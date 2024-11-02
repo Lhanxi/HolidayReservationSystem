@@ -891,7 +891,8 @@ public class MainApp {
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
         
         reserveRoomSessionBeanRemote.createReservation(newReservation, roomType);
-        
+        BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newReservation);
+        System.out.println("Total cost: " + totalCost);
     }
     
     private void allocateRoomstoCurrentDayReservations() {
