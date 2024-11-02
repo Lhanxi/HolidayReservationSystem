@@ -81,7 +81,10 @@ public class MainApp {
             while (loggedIn) {
                 
                 if (employee.getEmployeeType() == EmployeeType.SYSTEM_ADMIN) {
-                    System.out.println("Please select what you would like to do.");
+                    System.out.println("");
+                    System.out.println("============");
+                    System.out.println("Select what to do:"); 
+                    System.out.println("");
                     System.out.println("1: Create new employees"); 
                     System.out.println("2: View all employees");
                     System.out.println("3: Create new partner");
@@ -117,7 +120,10 @@ public class MainApp {
                         if (r == 1) {
                             while (true) {
                                 //For RoomType
+                                System.out.println("");
+                                System.out.println("============");
                                 System.out.println("Select what to do:"); 
+                                System.out.println("");
                                 System.out.println("1: Create new room type");
                                 System.out.println("2: View room type details");
                                 System.out.println("3: Update Room Type Details");
@@ -144,7 +150,10 @@ public class MainApp {
                         } else if (r ==2) {
                             while (true) {
                                 //for Room
+                                System.out.println("");
+                                System.out.println("============");
                                 System.out.println("Select what to do:"); 
+                                System.out.println("");
                                 System.out.println("1: Create New Room"); 
                                 System.out.println("2: Update Room");
                                 System.out.println("3: Delete Room");
@@ -171,21 +180,30 @@ public class MainApp {
                     }
                 } else if (employee.getEmployeeType() == EmployeeType.SALES_MANAGER) {
                     //for RoomRate
-                    System.out.println("Select what to do");
-                    System.out.println("1: Create New Room Rate"); 
-                    System.out.println("2: Update RoomRate");
-                    System.out.println("3: Delete Room Rate");
-                    System.out.println("4: View All Room Rates");
-                    Integer re = getIntegerInput();
+                    while (true) {
+                        System.out.println("");
+                        System.out.println("============");
+                        System.out.println("Select what to do:"); 
+                        System.out.println("");
+                        System.out.println("1: Create New Room Rate"); 
+                        System.out.println("2: Update RoomRate");
+                        System.out.println("3: Delete Room Rate");
+                        System.out.println("4: View All Room Rates");
+                        System.out.println("5: Logout");
+                        Integer re = getIntegerInput();
 
-                    if (re == 1) {
-                        createNewRoomRate();
-                    } else if (re == 2) {
-                        updateRoomRate();
-                    } else if (re == 3) {
-                        System.out.println("not available yet LOL"); 
-                    } else if (re == 4 ) {
-                        viewAllRoomRates();
+                        if (re == 1) {
+                            createNewRoomRate();
+                        } else if (re == 2) {
+                            updateRoomRate();
+                        } else if (re == 3) {
+                            System.out.println("not available yet LOL"); 
+                        } else if (re == 4 ) {
+                            viewAllRoomRates();
+                        } else if (re == 5) {
+                            loggedIn = false;
+                            break;
+                        }
                     }
                 } else if (employee.getEmployeeType() == EmployeeType.GUEST_RELATION_OFFICER) {
                     while (true) {
@@ -208,6 +226,7 @@ public class MainApp {
                     }
 
                 } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
+                    //used to force the allocation of rooms
                     System.out.println("1: Allocate Rooms to Current Day Reservations");
                 }
             }
@@ -650,7 +669,7 @@ public class MainApp {
         RoomRate newRoomRate = new RoomRate(name, roomType, rateType, ratePerNight, startDate, endDate);
         
         roomRateSessionBeanRemote.createNewRoomRate(newRoomRate);
-               
+        System.out.println("New Room Rate successfully created!");
     }
     
     private void updateRoomRate() {
@@ -660,22 +679,24 @@ public class MainApp {
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
         for (int i = 0; i < roomRates.size(); i++) {
             RoomRate r = roomRates.get(i);
-            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
-                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
+            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; startDate=%s; endDate=%s", 
+                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(i+ ": " + output);
         }
         Integer response = getIntegerInput();
         
         RoomRate selectedRoomRate = roomRates.get(response);
+        Long selectedRoomRateId = selectedRoomRate.getRoomRateId();
         
         String name = selectedRoomRate.getName();
         RoomType roomType = selectedRoomRate.getRoomType();
         RateTypeEnum rateType = selectedRoomRate.getRateTypeEnum(); 
-        BigDecimal roomRate = selectedRoomRate.getRoomRate();
+        BigDecimal roomRateAmount = selectedRoomRate.getRoomRateAmount();
         Date startDate = selectedRoomRate.getStartDate(); 
         Date endDate = selectedRoomRate.getEndDate(); 
         
         while (true) {
+            System.out.println("");
             System.out.println("Please select which part of the room rate you would like to update"); 
             System.out.println("1: Name");
             System.out.println("2: RoomType");
@@ -687,23 +708,40 @@ public class MainApp {
             response = getIntegerInput();
             
             if (response == 1) {
+                System.out.println("Please enter new room rate name");
+                System.out.print(">");
                 name = scanner.next();
             } else if (response == 2) {
                 roomType = selectRoomType();
             } else if (response == 3) {
                 rateType = selectRateTypeEnum();
             } else if (response == 4) {
-                roomRate = scanner.nextBigDecimal();
+                roomRateAmount = getBigDecimalInput("Please enter new room rate amount");
             } else if (response == 5) {
-                startDate = new Date(scanner.next());
+                System.out.println("Please enter new start date");
+                Date s = getDateInput();
+                if (s.after(endDate)) {
+                    System.out.println("Invalid start date. Start date cannot be after end date. Please change end date first");
+                } else {
+                    startDate = s;
+                }
+                
             } else if (response == 6) {
-                endDate = new Date(scanner.next());
+                System.out.println("Please enter new end date");
+                
+                Date e = getDateInput();
+                if (e.before(startDate)) {
+                    System.out.println("Invalid end date. End date cannot be before start date. Please change start date first");
+                } else {
+                    endDate = e;
+                }
+               
             } else if (response == 7) {
                 break;
             }
             
         }
-        
+        roomRateSessionBeanRemote.updateRoomRate(selectedRoomRateId, name, roomType, rateType, roomRateAmount, startDate, endDate);
     }
     
     private void deleteRoomRate() {
@@ -718,7 +756,7 @@ public class MainApp {
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
         for (RoomRate r : roomRates) {
             String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
-                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
+                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(output);
         }
     }
@@ -746,7 +784,7 @@ public class MainApp {
     
     private RoomType selectRoomType() {
         Scanner scanner = new Scanner(System.in);
-        List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getRoomTypeList(); 
+        List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         System.out.println("Please select the room type");
         
         for (int i = 0; i < roomTypesList.size(); i++) {
@@ -772,7 +810,7 @@ public class MainApp {
         for (int i = 0; i < roomRates.size(); i++) {
             RoomRate r = roomRates.get(i);
             String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
-                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRate(), r.getStartDate(), r.getEndDate());
+                    r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(i + ": " + output);
         }
         Integer response = getIntegerInput();
