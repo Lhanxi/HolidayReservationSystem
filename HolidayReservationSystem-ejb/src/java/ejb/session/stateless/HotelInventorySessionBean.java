@@ -34,7 +34,7 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
     
     @Override
     public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate) {
-        List<Room> rooms = getAllRooms(); 
+        List<Room> rooms = getAllEnabledRooms(); 
         List<Reservation> reservations = getReservationsForPeriod(startDate, endDate);
         
         HashMap<String, Integer> roomCount = new HashMap<String, Integer>(); //count the avail room for each room type
@@ -61,7 +61,8 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         return availableRoomTypes;
     }
     
-    private List<Room> getAllRooms() {
+    @Override
+    public List<Room> getAllEnabledRooms() {
         Query query = em.createQuery("SELECT r FROM Room r");
         List<Room> rooms = query.getResultList();
         List<Room> availRooms = new ArrayList<>();

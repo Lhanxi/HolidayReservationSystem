@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import util.enumeration.AllocationExceptionReportTypeEnum;
 
 /**
  *
@@ -25,8 +26,14 @@ public class AllocationExceptionReport implements Serializable {
     
     @OneToOne
     private RoomReservation roomReservation;
+    
+    private AllocationExceptionReportTypeEnum allocationExceptionReportTypeEnum;
 
     public AllocationExceptionReport() {
+    }
+
+    public AllocationExceptionReport(AllocationExceptionReportTypeEnum allocationExceptionReportTypeEnum) {
+        this.allocationExceptionReportTypeEnum = allocationExceptionReportTypeEnum;
     }
     
     public Long getId() {
@@ -39,6 +46,14 @@ public class AllocationExceptionReport implements Serializable {
     
     public void setRoomReservation(RoomReservation roomReservation) {
         this.roomReservation = roomReservation;
+    }
+
+    public AllocationExceptionReportTypeEnum getAllocationExceptionReportTypeEnum() {
+        return allocationExceptionReportTypeEnum;
+    }
+
+    public void setAllocationExceptionReportTypeEnum(AllocationExceptionReportTypeEnum allocationExceptionReportTypeEnum) {
+        this.allocationExceptionReportTypeEnum = allocationExceptionReportTypeEnum;
     }
 
     @Override
