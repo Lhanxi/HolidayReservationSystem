@@ -51,7 +51,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     private void updateRoomTypeRankings(List<RoomType> roomTypes, Integer ranking) {
         //increases all the ranking of all room types after the newRanking
         //if the rnaking is at the end and more than the room size, does nothing
-        for (int i = roomTypes.size(); i >= ranking; i--) {
+        for (int i = roomTypes.size() - 1; i >= ranking; i--) {
             RoomType roomType = roomTypes.get(i); 
             roomType.setRanking(i + 1);
         }

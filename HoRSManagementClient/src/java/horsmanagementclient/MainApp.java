@@ -814,7 +814,7 @@ public class MainApp {
                     roomType.getBedCapacity(), 
                     roomType.getAmenities(),
                     roomType.getRanking());
-            System.out.println(i + ":" + output);
+            System.out.println(i + ": " + output);
         }
         Integer response = getIntegerInput();
         
@@ -837,12 +837,12 @@ public class MainApp {
             String output = String.format("RoomName: %s; Ranking: %d", 
                     roomType.getName(), 
                     roomType.getRanking());
-            System.out.println(i + ":" + output);
+            System.out.println(i + ": " + output);
         }
-        System.out.println((roomTypesList.size() + 1) + ": Insert Room Type at the end");
+        System.out.println((roomTypesList.size()) + ": Insert Room Type at the end");
         Integer response = -1; 
         
-        while (response < 0 || response > roomTypesList.size() + 1) {
+        while (response < 0 || response > roomTypesList.size()) {
             response = getIntegerInput();
         }
         return response; 
