@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidCustomerCreationException;
+import util.exception.ReservationNotFoundException;
 /**
  *
  * @author leunghanxi
@@ -234,33 +235,35 @@ public class MainApp {
     }
     
     public void viewReservationDetails() {
-        Scanner scanner = new Scanner(System.in);
-        int response = 0;
-        while (true) {
-            System.out.println("=== Search Hotel Room ===\n");
-            System.out.println("Please Select a Room Type\n");
-            System.out.println("1: Reserve Hotel Room");
-            System.out.println("3: View All Reservations");
-            System.out.println("4: Exit\n");
-            
-            response = 0;
-            while (response < 1 || response > 4) {
-                response = getIntegerInput();
-                if (response == 1) {
-                    this.searchHotelRoom();
-                } else if (response == 2) {
-                    
-                } else if (response == 3) {
-                    this.viewAllReservations();
-                } else {
-                    break;
+        try {
+            Scanner scanner = new Scanner(System.in);
+            int response = 0;
+            String reservationId;
+            while (true) {
+                System.out.println("=== Reservation Details ===\n");
+                System.out.println("Please Enter Reservation Id");
+                System.out.print(">");
+                reservationId = scanner.next().trim();
+                Reservation reservation = guestSessionBeanRemote.retrieveReservationById(Long.parseLong(reservationId));
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType() + "\n");
+                
+                System.out.println("Would you like to view more reservations?\n");
+                System.out.println("1. Yes");
+                System.out.println("2. No");
+                while (response < 1 || response > 2) {
+                    response = getIntegerInput();
+                    if (response == 1) {
+                        this.viewReservationDetails();
+                    } else if (response == 2) {
+                        this.showCustomerMenu();
+                    }
+                    scanner.close();
                 }
+                
             }
-            if (response == 4) {
-                break;
-            }
+        } catch (ReservationNotFoundException ex) {
+            System.out.println(ex.getMessage());
         }
-        scanner.close();
     }
     
     public void viewAllReservations() {
@@ -268,9 +271,26 @@ public class MainApp {
         int counter = 1;
         System.out.println("=== All Reservations ===\n");
         for (Reservation reservation : reservations) {
-            System.out.println(counter + ". Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType());
+            System.out.println(counter + ". Reservation Id: " + reservation.getReservationId());
+            counter += 1;
         }
-        this.showCustomerMenu();
+        Scanner scanner = new Scanner(System.in);
+        int response = 0;
+        while (true) {
+            System.out.println("=== Do you want to view a specific reservation? ===\n");
+            System.out.println("1. Yes");
+            System.out.println("2: No");
+            
+            response = 0;
+            while (response < 1 || response > 2) {
+                response = getIntegerInput();
+                if (response == 1) {
+                    this.viewReservationDetails();
+                } else if (response == 2) {
+                    this.showCustomerMenu();
+                }
+            }
+        }
     }
     
     
@@ -323,5 +343,4 @@ public class MainApp {
             return false;
         }
     }
-
 }
