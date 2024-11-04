@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package horsmanagementclient;
+import ejb.session.stateless.AllocateRoomSessionBeanRemote;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
 import ejb.session.stateless.HotelInventorySessionBeanRemote;
 import ejb.session.stateless.ReserveRoomSessionBeanRemote;
@@ -17,6 +18,9 @@ import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -40,17 +44,19 @@ public class MainApp {
     private EmployeeSessionBeanRemote employeeSessionBeanRemote;
     private HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
     private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
+    private AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote;
     
     public MainApp() {
     }
 
-    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote) {
+    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote) {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.hotelInventorySessionBeanRemote = hotelInventorySessionBeanRemote;
         this.reserveRoomSessionBeanRemote = reserveRoomSessionBeanRemote;
+        this.allocateRoomSessionBeanRemote = allocateRoomSessionBeanRemote;
     }
     
     public void run() throws Exception {
@@ -222,13 +228,28 @@ public class MainApp {
                         } else if (re == 3) {
 
                         } else if (re == 4) {
+                            loggedIn = false;
                             break;
                         }
                     }
 
                 } else if (employee.getEmployeeType() == EmployeeType.SYSTEM) {
-                    //used to force the allocation of rooms
-                    System.out.println("1: Allocate Rooms to Current Day Reservations");
+                    while (true) {
+                        System.out.println("1: Allocate Rooms to Current Day Reservations"); 
+                        System.out.println("2: Logout");
+                        Integer response = 0;
+
+                        while (response < 1 || response > 2) {
+                            response = getIntegerInput();
+                        }
+                        
+                        if (response == 1) {
+                            allocateRoomstoCurrentDayReservations();
+                        } else if (response == 2) {
+                            loggedIn = false;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -924,13 +945,17 @@ public class MainApp {
         
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
         
-        reserveRoomSessionBeanRemote.createReservation(newReservation, roomType);
-        BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newReservation);
+        Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType);
+        BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newReservation, newRoomTypeId);
         System.out.println("Total cost: " + totalCost);
     }
     
     private void allocateRoomstoCurrentDayReservations() {
+        allocateRoomSessionBeanRemote.allocateRooms();
+        System.out.println("Rooms have been allocated");
         
+        Date currentDate = getCurrentDate();
+        System.out.println(currentDate);
     }
     
     //utility functions
@@ -1006,5 +1031,13 @@ public class MainApp {
             return false;
         }
     }
+    
+        
+    private Date getCurrentDate() {
+        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime zonedDateTime = now.atZone(ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
+    }
+    
     
 }

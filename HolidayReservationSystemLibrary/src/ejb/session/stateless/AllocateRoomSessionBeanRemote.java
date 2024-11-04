@@ -12,5 +12,5 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface AllocateRoomSessionBeanRemote {
-    
+    public void allocateRooms();
 }

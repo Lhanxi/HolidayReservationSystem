@@ -8,12 +8,15 @@ import entity.Reservation;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import util.enumeration.RateTypeEnum;
@@ -33,20 +36,28 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
 
     @Override
-    public void createReservation(Reservation newReservation, RoomType roomType) {
+    public Long createReservation(Reservation newReservation, RoomType roomType) {
         //creates a new Reservation
         em.persist(newReservation); 
         newReservation.setRoomType(roomType); 
+        RoomType r = newReservation.getRoomType();
+        return r.getRoomTypeId();
     }
     
     @Override
-    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation) {
-        RoomType roomType = reservation.getRoomType();
-        
+    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation, Long roomTypeId) {
+        RoomType roomType = em.find(RoomType.class, roomTypeId);
+       
+        RateTypeEnum rateTypeEnum = RateTypeEnum.PUBLISHED;
+
         Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType = :roomType AND r.rateTypeEnum = :rateTypeEnum");
         query.setParameter("roomType", roomType);
-        query.setParameter("rateTypeEnum", RateTypeEnum.PUBLISHED);
-        RoomRate roomRate = (RoomRate) query.getSingleResult();
+        query.setParameter("rateTypeEnum", rateTypeEnum);
+        List<RoomRate> roomRates = query.getResultList();
+        if (roomRates.isEmpty()) {
+            throw new NoResultException("No matching RoomRate found for the given RoomType and RateTypeEnum.");
+        }
+        RoomRate roomRate = roomRates.get(0);
         BigDecimal publishedRate = roomRate.getRoomRateAmount();
         
         BigDecimal numOfRooms = BigDecimal.valueOf(reservation.getNumRooms());
@@ -55,13 +66,28 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         return numOfRooms.multiply(numOfDays).multiply(publishedRate);
 
     }
-
+/*
     private long calculateDaysBetween(Date startDate, Date endDate) {
         LocalDate start = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        
+
         // Calculate days between inclusive
         return ChronoUnit.DAYS.between(start, end) + 1;
     }
+  */  
+    private long calculateDaysBetween(Date startDate, Date endDate) {
+    // Convert java.sql.Date to LocalDate by using getTime() and Instant.ofEpochMilli()
+    LocalDate start = Instant.ofEpochMilli(startDate.getTime())
+                             .atZone(ZoneId.systemDefault())
+                             .toLocalDate();
+    LocalDate end = Instant.ofEpochMilli(endDate.getTime())
+                           .atZone(ZoneId.systemDefault())
+                           .toLocalDate();
+
+    // Calculate days between, inclusive
+    return ChronoUnit.DAYS.between(start, end) + 1;
+}
+
+
             
 }

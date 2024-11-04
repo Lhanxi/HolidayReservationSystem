@@ -47,6 +47,7 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         allocateRooms();
     } 
     
+    @Override
     public void allocateRooms() {
         Date currentDate = getCurrentDate();
         
