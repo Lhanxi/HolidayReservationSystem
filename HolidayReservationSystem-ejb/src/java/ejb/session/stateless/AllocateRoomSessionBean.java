@@ -88,10 +88,10 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
             
             //check for each room
             for (int j = 0; j < numRooms; j++) {
+                //if that room type has 0 left
                 if (roomTypeCount.get(roomType).size() <= 0) {
                     //check for the next best ranking
-                    int ranking = roomType.getRanking();
-                    RoomType newRoomType = getNextRankingRoomType(ranking);
+                    RoomType newRoomType = getNextRankingRoomType(roomType);
                     
                     //check if the new one has
                     if (roomTypeCount.get(newRoomType).size() > 0) {
@@ -133,10 +133,20 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
     }
     
     
-    private RoomType getNextRankingRoomType(int ranking) {
-        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.ranking =:ranking");
+    private RoomType getNextRankingRoomType(RoomType roomType) {
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.ranking >=:ranking");
+        Integer ranking = roomType.getRanking();
         query.setParameter("ranking", ranking);
-        return (RoomType) query.getSingleResult();
+        List<RoomType> roomTypes = query.getResultList();
+        RoomType nextRoomType = roomType;
+        
+        for (RoomType r : roomTypes) {
+            if (r.getRanking() > ranking && !r.isIsDisabled()) {
+                nextRoomType = r;
+                break;
+            }
+        }
+        return nextRoomType;
     }
     
     

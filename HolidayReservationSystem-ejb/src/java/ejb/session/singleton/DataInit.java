@@ -38,5 +38,17 @@ public class DataInit implements DataInitLocal {
                 System.err.println("Failed to create default admin account: " + ex.getMessage());
             }
         }
+        
+        try {
+            employeeSessionBeanLocal.retrieveEmployeeByUsername("system");
+        } catch (EmployeeNotFoundException e) {
+            // Create the default system administrator if not found
+            Employee system = new Employee("system", "systempassword", EmployeeType.SYSTEM);
+            try {
+                employeeSessionBeanLocal.createNewEmployee(system);
+            } catch (DuplicateUsernameException ex) {
+                System.err.println("Failed to create default admin account: " + ex.getMessage());
+            }
+        }
     }
 }

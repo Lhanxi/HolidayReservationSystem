@@ -5,12 +5,11 @@
 package entity;
 
 import java.io.Serializable;
-import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
 /**
  *
@@ -29,19 +28,19 @@ public class RoomType implements Serializable {
     private String bedCapacity;
     private String amenities;
     private boolean isDisabled; 
+    @Column(unique = true)
     private Integer ranking;
 
     public RoomType() {
     }
 
-    public RoomType(String name, String description, String size, String bedCapacity, String amenities, boolean isDisabled, Integer ranking) {
+    public RoomType(String name, String description, String size, String bedCapacity, String amenities, boolean isDisabled) {
         this.name = name;
         this.description = description;
         this.size = size;
         this.bedCapacity = bedCapacity;
         this.amenities = amenities;
         this.isDisabled = isDisabled;
-        this.ranking = ranking;
     }
 
     public String getName() {

@@ -26,17 +26,34 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public Long createNewRoomType(RoomType roomType) {
+    public Long createNewRoomType(RoomType newRoomType, Integer ranking) {
     try {
-        em.persist(roomType);
-        em.flush(); // Explicitly flush to push changes immediately to the database
-        System.out.println("RoomType created with ID: " + roomType.getRoomTypeId());
-    } catch (Exception ex) {
-        ex.printStackTrace();
-        System.out.println("Error persisting RoomType: " + ex.getMessage());
+        List<RoomType> roomTypes = getRoomTypeList();
+        
+        if (roomTypes.size() > 1) {
+            roomTypes.sort((r1, r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
+        }
+        
+        updateRoomTypeRankings(roomTypes, ranking);
+        
+        newRoomType.setRanking(ranking);
+        em.persist(newRoomType);
+        System.out.println("RoomType created with ID: " + newRoomType.getRoomTypeId());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("Error persisting RoomType: " + ex.getMessage());
+        }
+        return newRoomType.getRoomTypeId();
     }
-    return roomType.getRoomTypeId();
-}
+    
+    private void updateRoomTypeRankings(List<RoomType> roomTypes, Integer ranking) {
+        //increases all the ranking of all room types after the newRanking
+        //if the rnaking is at the end and more than the room size, does nothing
+        for (int i = roomTypes.size(); i >= ranking; i--) {
+            RoomType roomType = roomTypes.get(i); 
+            roomType.setRanking(i + 1);
+        }
+    }
 
     @Override
     public List<RoomType> getRoomTypeList() {
@@ -57,16 +74,24 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         }
 
     return roomTypes;
-}
+    }
 
-    
-    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities) {
+    @Override
+    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer ranking) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 
         roomType.setName(roomTypeName);
         roomType.setDescription(newDescription);
         roomType.setSize(newSize);
         roomType.setBedCapacity(newBedCapacity);
         roomType.setAmenities(newAmenities);
+        
+        //if they want to change the ranking
+        if (ranking != roomType.getRanking()) {
+            List<RoomType> roomTypes = getRoomTypeList();
+            updateRoomTypeRankings(roomTypes, ranking);
+            roomType.setRanking(ranking);
+        }
+        
     }
     
     @Override
@@ -101,5 +126,6 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         query.setParameter("roomTypeName", roomTypeName);
         return (RoomType) query.getSingleResult();
     }
+   
 
 }
