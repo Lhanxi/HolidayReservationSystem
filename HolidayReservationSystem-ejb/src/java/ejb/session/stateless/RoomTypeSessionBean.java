@@ -8,6 +8,7 @@ import entity.RoomType;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -89,6 +90,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         roomType.setAmenities(newAmenities);
 
         // Check if ranking needs to be updated
+        //even if the roomType is disabled, just maintain the rankings
         if (!newRanking.equals(roomType.getRanking())) {
             updateRoomRanking(roomType, newRanking);
         }
@@ -124,72 +126,36 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         // Set the updated ranking to roomType
         roomType.setRanking(newRanking);
     }
+    
 
-    
-/*
-    @Override
-    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer ranking) {
-        RoomType roomType = em.find(RoomType.class, roomTypeId); 
-        roomType.setName(roomTypeName);
-        roomType.setDescription(newDescription);
-        roomType.setSize(newSize);
-        roomType.setBedCapacity(newBedCapacity);
-        roomType.setAmenities(newAmenities);
-        
-        //if they want to change the ranking
-        if (ranking != roomType.getRanking()) {
-            List<RoomType> roomTypes = getRoomTypeList();
-            roomTypes.sort((r1 , r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
-            if (ranking < roomType.getRanking()) {
-                updateRoomRankingBySwappingLeft(roomTypes, ranking, roomType);
-            } else if (ranking > roomType.getRanking()) {
-                updateRoomRankingBySwappingRight(roomTypes, ranking, roomType);
-            }
-        }
-        
-    }
- 
-    private void updateRoomRankingBySwappingRight(List<RoomType> roomTypes, Integer ranking, RoomType roomType) {
-        int dummy = roomTypes.size() + 1; //there are no roomTypes of this ranking currently
-        int currentRanking = roomType.getRanking();
-        
-        for (int i = ranking; i < roomTypes.size(); i++) {
-            RoomType r = roomTypes.get(i); 
-            roomType.setRanking(i+1);
-        }
-        roomType.setRanking(ranking);
-        
-        for (int i = currentRanking + 1; i < roomTypes.size(); i++) {
-            RoomType r = roomTypes.get(i); 
-            roomType.setRanking(i);
-        }
-        
-    }
-    
-    private void updateRoomRankingBySwappingLeft(List<RoomType> roomTypes, Integer ranking, RoomType roomType) {
-        int dummy = roomTypes.size() + 1; //there are no roomTypes of this ranking currently
-        while (roomType.getRanking() != ranking) {
-            int roomTypeIndex = roomTypes.indexOf(roomType);
-            RoomType rightRoomType = roomTypes.get(roomTypeIndex - 1); 
-            rightRoomType.setRanking(dummy); 
-            roomType.setRanking(roomTypeIndex - 1);
-            rightRoomType.setRanking(roomTypeIndex);
-        }   
-    }
-*/
-    
     @Override
     public String deleteRoomType(Long roomTypeId) {
-        //check whether there are any rooms that depend on this roomType
         RoomType roomType = em.find(RoomType.class, roomTypeId);
+
+        // Fetch the list of room types, sorted by ranking
+        List<RoomType> roomTypes = getRoomTypeList();
+        roomTypes.sort(Comparator.comparingInt(RoomType::getRanking));
+        int index = roomTypes.indexOf(roomType); 
+        roomTypes.remove(roomType);
+
         if (checkRoomTypeForRooms(roomType) && checkRoomTypeForRoomRates(roomType)) {
             em.remove(roomType);
+            em.flush();
+            updateRoomTypeRankingForDelete(roomTypes, index);
             return "Room Type successfully deleted";
         } else {
             roomType.setIsDisabled(true);
+            return "Room Type deletion failed, Room Type is being used. Room Type has been disabled.";
         }
-        return "Room Type deletion failed, Room Type is being used. Room Type has been disabled.";
     }
+
+    private void updateRoomTypeRankingForDelete(List<RoomType> roomTypes, Integer index) {
+        for (int i = index; i < roomTypes.size(); i++) {
+            RoomType roomType = roomTypes.get(i); 
+            roomType.setRanking(roomType.getRanking() - 1);
+        }
+    }
+
     
     private boolean checkRoomTypeForRooms(RoomType roomType) {
         Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomType = :roomType"); 
