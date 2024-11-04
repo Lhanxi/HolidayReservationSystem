@@ -32,12 +32,14 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         
         if (roomTypes.size() > 1) {
             roomTypes.sort((r1, r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
+            updateRoomTypeRankings(roomTypes, ranking);
         }
-        
-        updateRoomTypeRankings(roomTypes, ranking);
-        
+
         newRoomType.setRanking(ranking);
+        
         em.persist(newRoomType);
+        em.flush();
+        
         System.out.println("RoomType created with ID: " + newRoomType.getRoomTypeId());
         } catch (Exception ex) {
             ex.printStackTrace();
