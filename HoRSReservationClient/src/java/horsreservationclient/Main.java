@@ -5,10 +5,12 @@
 package horsreservationclient;
 
 import javax.ejb.EJB;
+import ejb.session.stateless.HotelInventorySessionBeanRemote;
+import ejb.session.stateless.ReserveRoomSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
-
+import ejb.session.stateless.GuestSessionBeanRemote;
 /**
  *
  * @author leunghanxi
@@ -27,8 +29,14 @@ public class Main {
     
     @EJB
     private static RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
-    public static void main(String[] args) {
-        MainApp mainApp = new MainApp(roomRateSessionBeanRemote, roomSessionBeanRemote, roomTypeSessionBeanRemote);
-        mainApp.runApp();
+    @EJB
+    private static HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
+    @EJB 
+    private static ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
+    @EJB
+    private static GuestSessionBeanRemote guestSessionBeanRemote;
+    public static void main(String[] args) throws Exception {
+        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote, guestSessionBeanRemote); 
+        mainApp.runApp(); 
     }
 }

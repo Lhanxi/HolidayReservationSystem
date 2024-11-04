@@ -5,8 +5,8 @@
 package ejb.session.stateless;
 
 import entity.Reservation;
-import entity.RoomReservation;
 import entity.RoomType;
+import java.math.BigDecimal;
 import javax.ejb.Remote;
 
 /**
@@ -16,4 +16,6 @@ import javax.ejb.Remote;
 @Remote
 public interface ReserveRoomSessionBeanRemote {
     public void createReservation(Reservation newReservation, RoomType roomType);
+
+    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation);
 }

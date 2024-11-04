@@ -9,8 +9,11 @@ import entity.Reservation;
 import entity.Room;
 import entity.RoomReservation;
 import entity.RoomType;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,13 +31,72 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
 
     public HotelInventorySessionBean() {
     }
+    
+    @Override
+    public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate) {
+        List<Room> rooms = getAllEnabledRooms(); 
+        List<Reservation> reservations = getReservationsForPeriod(startDate, endDate);
+        
+        HashMap<String, Integer> roomCount = new HashMap<String, Integer>(); //count the avail room for each room type
+        
+        for (Room room : rooms) {
+            String roomTypeName = room.getRoomType().getName();
+            roomCount.put(roomTypeName, roomCount.getOrDefault(roomTypeName, 0) + 1);
+        }
+        
+        for (Reservation r : reservations) {
+            String roomTypeName = r.getRoomType().getName();
+            int roomsReserved = r.getNumRooms();
+            int currentCount = roomCount.get(roomTypeName);
+            roomCount.put(roomTypeName, currentCount - roomsReserved);
+        }
+        
+        HashMap<String, Integer> availableRoomTypes = new HashMap<String, Integer>();
+        
+        for (Map.Entry<String, Integer> entry : roomCount.entrySet()) {
+            if (entry.getValue() > 0) {
+                availableRoomTypes.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return availableRoomTypes;
+    }
+    
+    @Override
+    public List<Room> getAllEnabledRooms() {
+        Query query = em.createQuery("SELECT r FROM Room r");
+        List<Room> rooms = query.getResultList();
+        List<Room> availRooms = new ArrayList<>();
+        
+        for (Room r : rooms) {
+            if (!r.isDisabled()) {
+                availRooms.add(r);
+            }
+        }
+        return availRooms;
+    }
+    
+    private List<Reservation> getReservationsForPeriod(Date startDate, Date endDate) {
+        Query query = em.createQuery("SELECT r FROM Reservation r");
+        List<Reservation> reservations = query.getResultList();
+        List<Reservation> periodReservations = new ArrayList<>();
+        for (Reservation r : reservations) {
+            if ((r.getStartDate().compareTo(startDate) >= 0 && r.getStartDate().compareTo(endDate) <= 0) ||
+                (r.getEndDate().compareTo(endDate) <= 0 && r.getEndDate().compareTo(startDate) >= 0)) {
+                periodReservations.add(r);
+            }
+        }
+        return periodReservations;
+    }
+    
+/*
 
     @Override
     public boolean roomTypeIsAvailableForReservation(Date startDate, Date endDate, Integer ranking) {
         //dynamically generate the inventory of the hotel to prevent sync errors
+        //gets the two types of roomTypes for the ranking
         List<RoomType> roomTypes = getListOfRoomTypes(ranking);
         List<Room> rooms = getRoomsOfRoomType(roomTypes);
-        List<Reservation> reservations = getReservationsForPeriod(startDate, endDate, roomTypes);
+        List<Reservation> reservations = getReservationsForRoomType(roomTypes);
         int count = getCountOfAvailableRooms(reservations, startDate, endDate);
        
         //if more rooms than booking then can make reservation
@@ -46,7 +108,7 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         //used to get the max number of reservations that can be made 
         List<RoomType> roomTypes = getListOfRoomTypes(ranking);
         List<Room> rooms = getRoomsOfRoomType(roomTypes);
-        List<Reservation> reservations = getReservationsForPeriod(startDate, endDate, roomTypes);
+        List<Reservation> reservations = getReservationsForRoomType(roomTypes);
         int count = getCountOfAvailableRooms(reservations, startDate, endDate);
        
         //if more rooms than booking then can make reservation
@@ -74,7 +136,7 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         return rooms;
     }
 
-    private List<Reservation> getReservationsForPeriod(Date startDate, Date endDate, List<RoomType> roomTypes) {
+    private List<Reservation> getReservationsForRoomType(List<RoomType> roomTypes) {
         //gets all the reservations with that roomType 
         Query reservationQuery = em.createQuery("SELECT r FROM Reservation r WHERE r.roomType IN (:roomType1, :roomType2)"); 
         if (roomTypes.size() == 1) {
@@ -90,7 +152,7 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
     }
     
     private int getCountOfAvailableRooms(List<Reservation> reservations, Date startDate, Date endDate) {
-         int count = 0; 
+        int count = 0; 
         for (Reservation r : reservations) {
             if ((r.getStartDate().compareTo(startDate) >= 0 && r.getStartDate().compareTo(endDate) <= 0) ||
                 (r.getEndDate().compareTo(endDate) <= 0 && r.getEndDate().compareTo(startDate) >= 0)) {
@@ -99,7 +161,8 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         }
         return count;
     }
-    
+
+/*
     private List<RoomType> getListOfRoomTypes(Integer ranking) {
         Query roomTypeQuery = em.createQuery("SELECT r FROM RoomType r WHERE r.ranking IN (:ranking, :rankingPlusOne)");
         roomTypeQuery.setParameter("ranking", ranking);

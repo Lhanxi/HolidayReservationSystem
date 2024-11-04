@@ -27,7 +27,7 @@ public class Partner implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long PartnerId;
+    private Long partnerId;
     
     @Column(nullable = false)
     private String username;
@@ -56,28 +56,28 @@ public class Partner implements Serializable {
     }
 
     public Long getPartnerId() {
-        return PartnerId;
+        return partnerId;
     }
 
     public void setPartnerId(Long PartnerId) {
-        this.PartnerId = PartnerId;
+        this.partnerId = PartnerId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (PartnerId != null ? PartnerId.hashCode() : 0);
+        hash += (partnerId != null ? partnerId.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the PartnerId fields are not set
+        // TODO: Warning - this method won't work in the case the partnerId fields are not set
         if (!(object instanceof Partner)) {
             return false;
         }
         Partner other = (Partner) object;
-        if ((this.PartnerId == null && other.PartnerId != null) || (this.PartnerId != null && !this.PartnerId.equals(other.PartnerId))) {
+        if ((this.partnerId == null && other.partnerId != null) || (this.partnerId != null && !this.partnerId.equals(other.partnerId))) {
             return false;
         }
         return true;
@@ -85,7 +85,7 @@ public class Partner implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Partner[ id=" + PartnerId + " ]";
+        return "entity.Partner[ id=" + partnerId + " ]";
     }
 
     /**

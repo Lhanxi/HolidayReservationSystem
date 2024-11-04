@@ -4,7 +4,10 @@
  */
 package ejb.session.stateless;
 
+import entity.Room;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import javax.ejb.Remote;
 
 /**
@@ -13,6 +16,7 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface HotelInventorySessionBeanRemote {
-    public boolean roomTypeIsAvailableForReservation(Date startDate, Date endDate, Integer ranking);
-    public int numberOfAvailableRoomsForReservation(Date startDate, Date endDate, Integer ranking);
+    public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate);
+
+    public List<Room> getAllEnabledRooms();
 }

@@ -86,8 +86,9 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) {
         Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.customer.guestId = :inGuestId");
         query.setParameter("inGuestId", customerId);
-
+        
         List<Reservation> reservations = (List<Reservation>) query.getResultList();
+        reservations.size();
         return reservations;
     }
 }

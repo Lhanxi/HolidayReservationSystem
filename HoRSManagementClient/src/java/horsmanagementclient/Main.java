@@ -10,6 +10,7 @@ import ejb.session.stateless.ReserveRoomSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.PartnerSessionBeanRemote;
 import javax.ejb.EJB;
 
 /**
@@ -29,11 +30,13 @@ public class Main {
     private static HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
     @EJB 
     private static ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
+    @EJB
+    private static PartnerSessionBeanRemote partnerSessionBeanRemote;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, employeeSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote); 
+        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, employeeSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote, partnerSessionBeanRemote); 
         mainApp.run(); 
         
     }

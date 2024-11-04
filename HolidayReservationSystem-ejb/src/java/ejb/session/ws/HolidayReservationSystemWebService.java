@@ -43,6 +43,7 @@ public class HolidayReservationSystemWebService {
      * This is a sample web service operation
      */
     /**
+     * @return 
     @WebMethod(operationName = "doLogin")
     public Partner doLogin() {
         return "Hello " + " !";
@@ -50,8 +51,8 @@ public class HolidayReservationSystemWebService {
     **/
     
     @WebMethod(operationName = "retrieveAllPartnerReservations")
-    public List<Reservation> retrieveAllPartnerReservations() {
-        List<Reservation> reservations = partnerSessionBeanLocal.retrieveAllReservationByPartnerId(Long.MAX_VALUE);
+    public List<Reservation> retrieveAllPartnerReservations(@WebParam(name = "partnerId") Long partnerId) {
+        List<Reservation> reservations = partnerSessionBeanLocal.retrieveAllReservationByPartnerId(partnerId);
         
         for (Reservation reservation : reservations) {
             if (reservation.getRoomReservations() != null) {
