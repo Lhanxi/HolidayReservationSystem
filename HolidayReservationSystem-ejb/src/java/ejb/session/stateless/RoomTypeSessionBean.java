@@ -5,6 +5,7 @@
 package ejb.session.stateless;
 
 import entity.RoomType;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -77,7 +78,55 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
 
     return roomTypes;
     }
+    
+    @Override
+    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer newRanking) {
+        RoomType roomType = em.find(RoomType.class, roomTypeId); 
+        roomType.setName(roomTypeName);
+        roomType.setDescription(newDescription);
+        roomType.setSize(newSize);
+        roomType.setBedCapacity(newBedCapacity);
+        roomType.setAmenities(newAmenities);
 
+        // Check if ranking needs to be updated
+        if (!newRanking.equals(roomType.getRanking())) {
+            updateRoomRanking(roomType, newRanking);
+        }
+    }
+
+    private void updateRoomRanking(RoomType roomType, Integer newRanking) {
+        List<RoomType> roomTypes = getRoomTypeList();
+        int currentRanking = roomType.getRanking();
+
+        // Temporarily set roomType's ranking to a value outside the normal range
+        int tempRanking = roomTypes.size() + 1;
+        roomType.setRanking(tempRanking);
+        em.flush();  // Persist the temporary ranking change to prevent SQL conflicts
+
+        // Sort room types by current ranking to ensure sequential updates
+        roomTypes.sort(Comparator.comparingInt(RoomType::getRanking));
+
+        // Shift rankings as needed to accommodate the new ranking
+        if (newRanking < currentRanking) {
+            for (RoomType r : roomTypes) {
+                if (r.getRanking() >= newRanking && r.getRanking() < currentRanking) {
+                    r.setRanking(r.getRanking() + 1);
+                }
+            }
+        } else {
+            for (RoomType r : roomTypes) {
+                if (r.getRanking() <= newRanking && r.getRanking() > currentRanking) {
+                    r.setRanking(r.getRanking() - 1);
+                }
+            }
+        }
+
+        // Set the updated ranking to roomType
+        roomType.setRanking(newRanking);
+    }
+
+    
+/*
     @Override
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer ranking) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 
@@ -90,11 +139,44 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         //if they want to change the ranking
         if (ranking != roomType.getRanking()) {
             List<RoomType> roomTypes = getRoomTypeList();
-            updateRoomTypeRankings(roomTypes, ranking);
-            roomType.setRanking(ranking);
+            roomTypes.sort((r1 , r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
+            if (ranking < roomType.getRanking()) {
+                updateRoomRankingBySwappingLeft(roomTypes, ranking, roomType);
+            } else if (ranking > roomType.getRanking()) {
+                updateRoomRankingBySwappingRight(roomTypes, ranking, roomType);
+            }
         }
         
     }
+ 
+    private void updateRoomRankingBySwappingRight(List<RoomType> roomTypes, Integer ranking, RoomType roomType) {
+        int dummy = roomTypes.size() + 1; //there are no roomTypes of this ranking currently
+        int currentRanking = roomType.getRanking();
+        
+        for (int i = ranking; i < roomTypes.size(); i++) {
+            RoomType r = roomTypes.get(i); 
+            roomType.setRanking(i+1);
+        }
+        roomType.setRanking(ranking);
+        
+        for (int i = currentRanking + 1; i < roomTypes.size(); i++) {
+            RoomType r = roomTypes.get(i); 
+            roomType.setRanking(i);
+        }
+        
+    }
+    
+    private void updateRoomRankingBySwappingLeft(List<RoomType> roomTypes, Integer ranking, RoomType roomType) {
+        int dummy = roomTypes.size() + 1; //there are no roomTypes of this ranking currently
+        while (roomType.getRanking() != ranking) {
+            int roomTypeIndex = roomTypes.indexOf(roomType);
+            RoomType rightRoomType = roomTypes.get(roomTypeIndex - 1); 
+            rightRoomType.setRanking(dummy); 
+            roomType.setRanking(roomTypeIndex - 1);
+            rightRoomType.setRanking(roomTypeIndex);
+        }   
+    }
+*/
     
     @Override
     public String deleteRoomType(Long roomTypeId) {

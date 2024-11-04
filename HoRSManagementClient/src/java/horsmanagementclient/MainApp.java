@@ -830,6 +830,7 @@ public class MainApp {
         } 
         
         System.out.println("Please select the room type that you would like to insert the room type before.");
+        roomTypesList.sort((r1, r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
 
         for (int i = 0; i < roomTypesList.size(); i++) {
             RoomType roomType = roomTypesList.get(i);
