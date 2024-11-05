@@ -885,7 +885,7 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         List<RoomType> roomTypesList = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
         if (roomTypesList.size() == 0) {
-            System.out.println("First room type to be created, ranking 1 assigned"); 
+            System.out.println("First room type to be created, ranking 0 assigned"); 
             return 0; //this means that it is the first room Type to be created
         } 
         
