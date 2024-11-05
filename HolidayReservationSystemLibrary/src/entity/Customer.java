@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.ArrayList;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
 /**
@@ -17,31 +20,21 @@ import javax.persistence.OneToMany;
  */
 @Entity
 public class Customer extends Visitor implements Serializable {
-
-    private static final long serialVersionUID = 1L;
     
     @Column(nullable = false)
     private String username;
     
     @Column(nullable = false)
     private String password;
-    
-    @Column(nullable = false)
-    private String passportNumber;
-    
-    @OneToMany
-    private List<Reservation> reservations;
-    
+
     public Customer() {
         super();
-        reservations = new ArrayList<Reservation>();
     }
     
-    public Customer(String username, String password, String passportNumber) {
-        super();
+    public Customer(String username, String password, String name, String passportNumber) {
+        super(name, passportNumber);
         this.username = username;
         this.password = password;
-        this.passportNumber = passportNumber;
     }
     
     
@@ -97,8 +90,8 @@ public class Customer extends Visitor implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    /**
+    
+        /**
      * @return the reservations
      */
     public List<Reservation> getReservations() {
@@ -111,17 +104,12 @@ public class Customer extends Visitor implements Serializable {
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
-    /**
-     * @return the passportNumber
-     */
-    public String getPassportNumber() {
-        return passportNumber;
+
+    public Long getGuestId() {
+        return super.getGuestId();
     }
 
-    /**
-     * @param passportNumber the passportNumber to set
-     */
-    public void setPassportNumber(String passportNumber) {
-        this.passportNumber = passportNumber;
+    public void setGuestId(Long guestId) {
+        super.guestId = guestId;
     }
 }

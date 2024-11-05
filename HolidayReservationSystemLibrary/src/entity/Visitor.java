@@ -5,12 +5,16 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.OneToMany;
 
 /**
  *
@@ -19,14 +23,30 @@ import javax.persistence.InheritanceType;
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 public class Visitor implements Serializable {
-
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     protected Long guestId;
     
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(nullable = false)
+    private String passportNumber;
+    
+    @OneToMany
+    protected List<Reservation> reservations;
+    
 
     public Visitor() {
+        this.reservations = new ArrayList<Reservation>();
+    }
+
+    public Visitor(String name, String passportNumber) {
+        this.name = name;
+        this.passportNumber = passportNumber;
+        this.reservations = new ArrayList<Reservation>();
     }
 
     public Long getGuestId() {
@@ -36,6 +56,48 @@ public class Visitor implements Serializable {
     public void setGuestId(Long guestId) {
         this.guestId = guestId;
     }
+    /**
+     * @return the passportNumber
+     */
+    public String getPassportNumber() {
+        return passportNumber;
+    }
+    
+    /**
+     * @param passportNumber the passportNumber to set
+     */
+    public void setPassportNumber(String passportNumber) {
+        this.passportNumber = passportNumber;
+    }
+    
+    /**
+     * @return the reservations
+     */
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    /**
+     * @param reservations the reservations to set
+     */
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
+    }
+    
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+    
 
     @Override
     public int hashCode() {

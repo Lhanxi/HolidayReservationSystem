@@ -40,9 +40,8 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
             entityManager.flush();
             return newCustomer.getGuestId();
         } catch (PersistenceException ex) {
-            throw new InvalidCustomerCreationException("Invalid partner creation. Please try again!");
+            throw new InvalidCustomerCreationException("Invalid customer creation. Please try again!");
         }
-        
     }
     
     @Override

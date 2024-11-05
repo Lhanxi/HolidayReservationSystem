@@ -14,6 +14,7 @@ import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.GuestSessionBeanRemote;
 import entity.Reservation;
+import entity.RoomType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -111,15 +112,18 @@ public class MainApp {
                 String username = "";
                 String password = "";
                 String passportNumber = "";
+                String name = "";
                 System.out.println("=== Customer Registration Page ===\n");
                 System.out.print("Enter username> ");
                 username = scanner.nextLine().trim();
                 System.out.print("Enter password> ");
                 password = scanner.nextLine().trim();
+                System.out.print("Enter name> ");
+                name = scanner.nextLine().trim();
                 System.out.print("Enter passport number> ");
                 passportNumber = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0 && passportNumber.length() > 0) {
-                    customer = new Customer(username, password, passportNumber);
+                    customer = new Customer(username, password, name, passportNumber);
                     Long customerId = guestSessionBeanRemote.createNewCustomer(customer);
                     System.out.println(username + " successfully registered!\n");
                     this.showCustomerMenu();
@@ -215,7 +219,7 @@ public class MainApp {
             }
         }
         response = 0;
-        String choice;
+        String choice = "";
         System.out.println("=== Select the room type ===\n");
         int counter = 1; 
         for (String roomType : roomTypes) {
@@ -232,6 +236,14 @@ public class MainApp {
                 continue;
             }
         }
+        int numOfRooms;
+        System.out.println("=== Enter the number of rooms ===\n");
+        numOfRooms = this.getIntegerInput();
+        Reservation reservation = new Reservation(startDate, endDate, numOfRooms);
+        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
+        reserveRoomSessionBeanRemote.createReservation(reservation, roomType);
+        System.out.println("=== Reservation succesfully created ===\n");
+        this.showCustomerMenu();
     }
     
     public void viewReservationDetails() {
