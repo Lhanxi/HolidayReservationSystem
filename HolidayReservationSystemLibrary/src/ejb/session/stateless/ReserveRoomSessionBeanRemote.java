@@ -15,7 +15,6 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface ReserveRoomSessionBeanRemote {
-    public void createReservation(Reservation newReservation, RoomType roomType);
-
-    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation);
+    public Long createReservation(Reservation newReservation, RoomType roomType);
+    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation, Long roomTypeId);
 }

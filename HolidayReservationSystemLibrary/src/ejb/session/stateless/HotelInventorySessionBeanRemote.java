@@ -17,6 +17,9 @@ import javax.ejb.Remote;
 @Remote
 public interface HotelInventorySessionBeanRemote {
     public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate);
+<<<<<<< HEAD
 
+=======
+>>>>>>> newTesting
     public List<Room> getAllEnabledRooms();
 }

@@ -49,7 +49,6 @@ public class Partner implements Serializable {
 
     public Partner(String username, String password, PartnerType partnerType) {
         this();
-        
         this.username = username;
         this.password = password;
         this.partnerType = partnerType;

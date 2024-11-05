@@ -38,11 +38,15 @@ public class RoomRate implements Serializable {
 
     public RoomRate() {}
     
-    public RoomRate(String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRate, Date startDate, Date endDate) {
+    public RoomRate(String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate) {
         this.name = name;
         this.roomType = roomType;
         this.rateTypeEnum = rateTypeEnum;
+<<<<<<< HEAD
         this.roomRateAmount = roomRate;
+=======
+        this.roomRateAmount = roomRateAmount;
+>>>>>>> newTesting
         this.startDate = startDate;
         this.endDate = endDate;
     }

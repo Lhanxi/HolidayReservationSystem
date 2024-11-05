@@ -7,6 +7,7 @@ package ejb.session.stateless;
 import entity.Employee;
 import java.util.List;
 import javax.ejb.Local;
+import util.exception.DuplicateUsernameException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.InvalidLoginException;
 
@@ -16,7 +17,7 @@ import util.exception.InvalidLoginException;
  */
 @Local
 public interface EmployeeSessionBeanLocal {
-    public Long createNewEmployee(Employee newEmployee);
+    public Long createNewEmployee(Employee newEmployee) throws DuplicateUsernameException;
     public List<Employee> retrieveListOfAllEmployees();
     public Employee employeeLogin(String username, String password) throws InvalidLoginException; 
     public Employee retrieveEmployeeByUsername(String username) throws EmployeeNotFoundException;

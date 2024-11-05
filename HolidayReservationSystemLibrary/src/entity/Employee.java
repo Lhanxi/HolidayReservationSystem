@@ -26,7 +26,7 @@ public class Employee implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long employeeId;
     
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
     
     @Column(nullable = false)
