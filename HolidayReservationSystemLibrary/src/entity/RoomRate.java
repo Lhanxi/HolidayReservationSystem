@@ -42,11 +42,7 @@ public class RoomRate implements Serializable {
         this.name = name;
         this.roomType = roomType;
         this.rateTypeEnum = rateTypeEnum;
-<<<<<<< HEAD
-        this.roomRateAmount = roomRate;
-=======
         this.roomRateAmount = roomRateAmount;
->>>>>>> newTesting
         this.startDate = startDate;
         this.endDate = endDate;
     }

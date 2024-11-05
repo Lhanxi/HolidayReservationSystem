@@ -534,15 +534,19 @@ public class MainApp {
     
     private void createNewRoom() {
         Scanner scanner = new Scanner(System.in);
- 
+        
         System.out.println("Select the room type for the room"); 
         List<RoomType> roomTypes = roomTypeSessionBeanRemote.getEnabledRoomTypeList(); 
+        
         for (int i = 0; i < roomTypes.size(); i++) {
             System.out.println(i + ": " + roomTypes.get(i).getName());
         }
-        Integer response = getIntegerInput();
-        RoomType roomType = roomTypes.get(response);
         
+        Integer response = -1;
+        while (response < 0 || response > roomTypes.size() - 1) {
+            response = getIntegerInput();
+        }
+        RoomType roomType = roomTypes.get(response);
         String roomNumber = "";
         
         while (true) {
@@ -924,11 +928,11 @@ public class MainApp {
         Date startDate, endDate;
         
         while (true) {
-            System.out.println("Please enter start date."); 
+            System.out.println("Please enter start date in the format DD/MM/YYYY"); 
             startDate = getDateInput();
             System.out.println("");
             
-            System.out.println("Please enter end date"); 
+            System.out.println("Please enter end date in the format DD/MM/YYYY"); 
             endDate = getDateInput();
             System.out.println("");
             
