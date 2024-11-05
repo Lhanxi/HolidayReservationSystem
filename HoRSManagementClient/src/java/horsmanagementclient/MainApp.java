@@ -830,7 +830,7 @@ public class MainApp {
     private void viewAllRoomRates(){
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
         for (RoomRate r : roomRates) {
-            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; validityPeriod=%s", 
+            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; startDate=%s, endDate=%s", 
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(output);
         }
