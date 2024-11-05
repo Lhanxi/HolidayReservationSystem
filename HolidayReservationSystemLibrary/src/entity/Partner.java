@@ -12,8 +12,10 @@ import javax.persistence.Id;
 import java.util.List;
 import java.util.ArrayList;
 import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
-
+import util.enumeration.PartnerType;
 
 /**
  *
@@ -25,13 +27,17 @@ public class Partner implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long PartnerId;
+    private Long partnerId;
     
     @Column(nullable = false)
     private String username;
     
     @Column(nullable = false)
     private String password;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PartnerType partnerType;
     
     @OneToMany
     private List<Reservation> reservations;
@@ -41,35 +47,36 @@ public class Partner implements Serializable {
        reservations = new ArrayList<Reservation>();
     }
 
-    public Partner(String username, String password) {
+    public Partner(String username, String password, PartnerType partnerType) {
         this();
         this.username = username;
         this.password = password;
+        this.partnerType = partnerType;
     }
 
     public Long getPartnerId() {
-        return PartnerId;
+        return partnerId;
     }
 
     public void setPartnerId(Long PartnerId) {
-        this.PartnerId = PartnerId;
+        this.partnerId = PartnerId;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (PartnerId != null ? PartnerId.hashCode() : 0);
+        hash += (partnerId != null ? partnerId.hashCode() : 0);
         return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the PartnerId fields are not set
+        // TODO: Warning - this method won't work in the case the partnerId fields are not set
         if (!(object instanceof Partner)) {
             return false;
         }
         Partner other = (Partner) object;
-        if ((this.PartnerId == null && other.PartnerId != null) || (this.PartnerId != null && !this.PartnerId.equals(other.PartnerId))) {
+        if ((this.partnerId == null && other.partnerId != null) || (this.partnerId != null && !this.partnerId.equals(other.partnerId))) {
             return false;
         }
         return true;
@@ -77,7 +84,7 @@ public class Partner implements Serializable {
 
     @Override
     public String toString() {
-        return "entity.Partner[ id=" + PartnerId + " ]";
+        return "entity.Partner[ id=" + partnerId + " ]";
     }
 
     /**
@@ -121,6 +128,17 @@ public class Partner implements Serializable {
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
     }
+    /**
+     * @return the partnerType
+     */
+    public PartnerType getPartnerType() {
+        return partnerType;
+    }
 
-    
+    /**
+     * @param partnerType the partnerType to set
+     */
+    public void setPartnerType(PartnerType partnerType) {
+        this.partnerType = partnerType;
+    }
 }

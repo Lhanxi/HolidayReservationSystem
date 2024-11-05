@@ -19,6 +19,7 @@ import util.enumeration.RateTypeEnum;
 @Remote
 public interface RoomRateSessionBeanRemote {
     public Long createNewRoomRate(RoomRate roomRate);
+
     public List<RoomRate> getAllRoomRates();
     public void updateRoomRate(Long roomRateId, String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate);
 }

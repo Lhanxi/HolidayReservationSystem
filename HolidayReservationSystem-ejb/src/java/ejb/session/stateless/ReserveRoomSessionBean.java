@@ -89,5 +89,15 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
 }
 
 
-            
-}
+    /* 
+
+    private long calculateDaysBetween(Date startDate, Date endDate) {
+        LocalDate start = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate end = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        
+        // Calculate days between inclusive
+        return ChronoUnit.DAYS.between(start, end) + 1;
+    }
+         
+*/
+    }

@@ -4,6 +4,13 @@
  */
 package horsreservationclient;
 
+import javax.ejb.EJB;
+import ejb.session.stateless.HotelInventorySessionBeanRemote;
+import ejb.session.stateless.ReserveRoomSessionBeanRemote;
+import ejb.session.stateless.RoomRateSessionBeanRemote;
+import ejb.session.stateless.RoomSessionBeanRemote;
+import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.GuestSessionBeanRemote;
 /**
  *
  * @author leunghanxi
@@ -13,8 +20,23 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
+
+    @EJB
+    private static RoomRateSessionBeanRemote roomRateSessionBeanRemote;
+
+    @EJB
+    private static RoomSessionBeanRemote roomSessionBeanRemote;
     
+    @EJB
+    private static RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
+    @EJB
+    private static HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
+    @EJB 
+    private static ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
+    @EJB
+    private static GuestSessionBeanRemote guestSessionBeanRemote;
+    public static void main(String[] args) throws Exception {
+        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote, guestSessionBeanRemote); 
+        mainApp.runApp(); 
+    }
 }

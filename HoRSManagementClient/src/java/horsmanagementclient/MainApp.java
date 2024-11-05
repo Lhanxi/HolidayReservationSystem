@@ -10,6 +10,7 @@ import ejb.session.stateless.ReserveRoomSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
+import ejb.session.stateless.PartnerSessionBeanRemote;
 import entity.Employee;
 import entity.Partner;
 import entity.Reservation;
@@ -30,9 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import util.enumeration.EmployeeType;
+import util.enumeration.PartnerType;
 import util.enumeration.RateTypeEnum;
 import util.exception.DuplicateUsernameException;
 import util.exception.InvalidLoginException;
+import util.exception.InvalidPartnerCreationException;
 /**
  *
  * @author jeremy
@@ -44,18 +47,20 @@ public class MainApp {
     private EmployeeSessionBeanRemote employeeSessionBeanRemote;
     private HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
     private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
+    private PartnerSessionBeanRemote partnerSessionBeanRemote;
     private AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote;
     
     public MainApp() {
     }
 
-    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote) {
+    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote) {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
         this.employeeSessionBeanRemote = employeeSessionBeanRemote;
         this.hotelInventorySessionBeanRemote = hotelInventorySessionBeanRemote;
         this.reserveRoomSessionBeanRemote = reserveRoomSessionBeanRemote;
+        this.partnerSessionBeanRemote = partnerSessionBeanRemote;
         this.allocateRoomSessionBeanRemote = allocateRoomSessionBeanRemote;
     }
     
@@ -322,22 +327,52 @@ public class MainApp {
     }
     
     private void createNewPartner() {
-        Scanner scanner = new Scanner(System.in);
-        
-        System.out.println("===Create New Partner==="); 
-        System.out.println("Please enter employee username");
-        System.out.print(">"); 
-        String username = scanner.next();
-        
-        System.out.println("Please enter employee password");
-        System.out.print(">"); 
-        String password = scanner.next();
-        
-        Partner partner = new Partner(username, password); 
+        try {
+            Scanner scanner = new Scanner(System.in);
+            Integer response = 0;
+            PartnerType partnerType = PartnerType.EMPLOYEE;
+
+            System.out.println("===Create New Partner==="); 
+            System.out.println("Please enter employee username");
+            System.out.print(">"); 
+            String username = scanner.next();
+
+            System.out.println("Please enter employee password");
+            System.out.print(">"); 
+            String password = scanner.next();
+
+            while (response < 1 || response > 4) {
+                System.out.println("Please select the partner type");
+                System.out.println("1: Partner Employee");
+                System.out.println("2: Partner Reservation Manager");
+                response = getIntegerInput();
+            }
+
+            if (response == 2) {
+                partnerType = PartnerType.RESERVATION_MANAGER;
+            }
+            Partner partner = new Partner(username, password, partnerType);
+            partnerSessionBeanRemote.createNewPartner(partner);
+        } catch (InvalidPartnerCreationException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
     
     private void viewAllPartners() {
+        List<Partner> partners = partnerSessionBeanRemote.retrieveListOfAllPartners();
+        System.out.println("===List of all partners==="); 
+        System.out.println("");
         
+        for (Partner p : partners) {
+            String output = String.format("partnerId=%d; username=%s; password=%s; partnerType=%s", 
+                    p.getPartnerId(), 
+                    p.getUsername(), 
+                    p.getPassword(), 
+                    p.getPartnerType()); 
+            System.out.println(output);
+        }
+       
+        System.out.println("");
     }
     
     private void createNewRoomType() {
@@ -1002,7 +1037,7 @@ public class MainApp {
         return value;
     }
         
-      public static Date getDateInput() {
+    public static Date getDateInput() {
         Scanner scanner = new Scanner(System.in);
         String dateInput;
         while (true) {

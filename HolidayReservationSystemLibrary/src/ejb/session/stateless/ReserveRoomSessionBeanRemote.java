@@ -5,7 +5,6 @@
 package ejb.session.stateless;
 
 import entity.Reservation;
-import entity.RoomReservation;
 import entity.RoomType;
 import java.math.BigDecimal;
 import javax.ejb.Remote;
