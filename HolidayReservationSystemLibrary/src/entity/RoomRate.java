@@ -32,17 +32,17 @@ public class RoomRate implements Serializable {
     private RoomType roomType;
     @Enumerated(EnumType.STRING)
     private RateTypeEnum rateTypeEnum;
-    private BigDecimal roomRate; 
+    private BigDecimal roomRateAmount; 
     private Date startDate; //check if we want to use this 
     private Date endDate;
 
     public RoomRate() {}
     
-    public RoomRate(String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRate, Date startDate, Date endDate) {
+    public RoomRate(String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate) {
         this.name = name;
         this.roomType = roomType;
         this.rateTypeEnum = rateTypeEnum;
-        this.roomRate = roomRate;
+        this.roomRateAmount = roomRateAmount;
         this.startDate = startDate;
         this.endDate = endDate;
     }
@@ -80,12 +80,12 @@ public class RoomRate implements Serializable {
         this.rateTypeEnum = rateTypeEnum;
     }
 
-    public BigDecimal getRoomRate() {
-        return roomRate;
+    public BigDecimal getRoomRateAmount() {
+        return roomRateAmount;
     }
 
-    public void setRoomRate(BigDecimal roomRate) {
-        this.roomRate = roomRate;
+    public void setRoomRateAmount(BigDecimal roomRateAmount) {
+        this.roomRateAmount = roomRateAmount;
     }
 
     public Date getStartDate() {

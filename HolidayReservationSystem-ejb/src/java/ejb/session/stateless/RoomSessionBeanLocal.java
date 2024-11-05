@@ -24,8 +24,8 @@ public interface RoomSessionBeanLocal {
 
     public Room getRoom(String roomNumber);
 
-    public void updateRoom(Room room, RoomType roomType, String roomNumber, Boolean status);
+    public String deleteRoom(String roomNumber);
 
-    public void deleteRoom(String roomNumber);
+    public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status, Boolean isDisabled);
     
 }

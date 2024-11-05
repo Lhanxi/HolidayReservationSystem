@@ -4,10 +4,6 @@
  */
 package ejb.session.stateless;
 
-import entity.Room;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import javax.ejb.Remote;
 
 /**
@@ -15,7 +11,6 @@ import javax.ejb.Remote;
  * @author jeremy
  */
 @Remote
-public interface HotelInventorySessionBeanRemote {
-    public HashMap<String, Integer> getAvailableRoomTypes(Date startDate, Date endDate);
-    public List<Room> getAllEnabledRooms();
+public interface AllocateRoomSessionBeanRemote {
+    public void allocateRooms();
 }

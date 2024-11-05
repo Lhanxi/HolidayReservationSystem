@@ -14,8 +14,10 @@ import javax.ejb.Remote;
  */
 @Remote
 public interface RoomTypeSessionBeanRemote {
-    public Long createNewRoomType(RoomType roomType);
+    public Long createNewRoomType(RoomType newRoomType, Integer ranking);
     public List<RoomType> getRoomTypeList();
-    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities);
-    public String deleteRoomType(RoomType roomType);
+    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer ranking);
+    public String deleteRoomType(Long roomTypeId);
+    public List<RoomType> getEnabledRoomTypeList();
+    public RoomType getRoomTypeByName(String roomTypeName);
 }

@@ -7,11 +7,14 @@ package ejb.session.stateless;
 import java.util.List;
 import javax.ejb.Stateless;
 import entity.Employee;
+import java.sql.SQLIntegrityConstraintViolationException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import util.exception.DuplicateUsernameException;
 import util.exception.EmployeeNotFoundException;
 import util.exception.InvalidLoginException;
 /**
@@ -27,10 +30,14 @@ public class EmployeeSessionBean implements EmployeeSessionBeanRemote, EmployeeS
     }
     
     @Override
-    public Long createNewEmployee(Employee newEmployee) {
-        entityManager.persist(newEmployee);
-        entityManager.flush();
-        return newEmployee.getEmployeeId();
+    public Long createNewEmployee(Employee newEmployee) throws DuplicateUsernameException {
+        try {
+            entityManager.persist(newEmployee);
+            entityManager.flush();
+            return newEmployee.getEmployeeId();
+        } catch (PersistenceException ex) {
+                throw new DuplicateUsernameException("The username already exists"); 
+        }
     }
     
     @Override
@@ -48,6 +55,13 @@ public class EmployeeSessionBean implements EmployeeSessionBeanRemote, EmployeeS
         } catch(NoResultException | NonUniqueResultException ex) {
             throw new EmployeeNotFoundException("Employee Username " + username + "does not exist");
         }
+    }
+    
+    public boolean isValidNewUsername(String username) {
+        //returns true if there are no other users with that username
+        Query query = entityManager.createQuery("SELECT e FROM Employee WHERE e.username = :username"); 
+        query.setParameter("username", username); 
+        return query.getResultList().isEmpty();
     }
     
     @Override
