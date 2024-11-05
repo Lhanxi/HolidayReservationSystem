@@ -98,16 +98,21 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
                     if (roomTypeCount.get(newRoomType).size() > 0) {
                         Room allocatedRoom = roomTypeCount.get(newRoomType).get(0); 
                         RoomReservation roomReservation = createRoomReservation(allocatedRoom, newRoomType);
-                        roomTypeCount.get(newRoomType).remove(allocatedRoom);
+                        roomTypeCount.get(newRoomType).remove(allocatedRoom); //takes it out from the current roomts
                         createAllocationExceptionReport(roomReservation, AllocationExceptionReportTypeEnum.TYPE_1);
+                        
+                        //set the reservation
+                        r.getRoomReservations().add(roomReservation);
                     } else {
                         RoomReservation roomReservation = createRoomReservation(newRoomType); 
+                        r.getRoomReservations().add(roomReservation);
                         createAllocationExceptionReport(roomReservation, AllocationExceptionReportTypeEnum.TYPE_2);
                     }
                 } else if (roomTypeCount.get(roomType).size() > 0) {
                     Room allocatedRoom = roomTypeCount.get(roomType).get(0); 
                     RoomReservation roomReservation = createRoomReservation(allocatedRoom, roomType);
                     roomTypeCount.get(roomType).remove(allocatedRoom);
+                    r.getRoomReservations().add(roomReservation);
                 } 
             }
             

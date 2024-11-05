@@ -416,7 +416,7 @@ public class MainApp {
         System.out.println("Select the room type that you would like to view");
                 
         for (int i = 0; i < roomTypesList.size(); i++) {
-            System.out.println(i + ": " + roomTypesList.get(i).getRoomTypeId() + " , " + roomTypesList.get(i).getName());
+            System.out.println(i + ": " + roomTypesList.get(i).getName());
         }
         System.out.print(">"); 
         Integer response = scanner.nextInt(); 
