@@ -80,8 +80,8 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         List<Reservation> reservations = query.getResultList();
         List<Reservation> periodReservations = new ArrayList<>();
         for (Reservation r : reservations) {
-            if ((r.getStartDate().compareTo(startDate) >= 0 && r.getStartDate().compareTo(endDate) <= 0) ||
-                (r.getEndDate().compareTo(endDate) <= 0 && r.getEndDate().compareTo(startDate) >= 0)) {
+            if ((r.getStartDate().compareTo(startDate) >= 0 && r.getStartDate().compareTo(endDate) < 0) ||
+                (r.getEndDate().compareTo(endDate) <= 0 && r.getEndDate().compareTo(startDate) > 0)) {
                 periodReservations.add(r);
             }
         }

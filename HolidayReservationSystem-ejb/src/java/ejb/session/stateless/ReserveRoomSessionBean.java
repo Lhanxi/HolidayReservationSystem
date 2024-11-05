@@ -61,7 +61,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         BigDecimal publishedRate = roomRate.getRoomRateAmount();
         
         BigDecimal numOfRooms = BigDecimal.valueOf(reservation.getNumRooms());
-        BigDecimal numOfDays = BigDecimal.valueOf(calculateDaysBetween(reservation.getStartDate(), reservation.getEndDate()));
+        BigDecimal numOfDays = BigDecimal.valueOf(calculateDaysBetween(reservation.getStartDate(), reservation.getEndDate()) - 1);
         
         return numOfRooms.multiply(numOfDays).multiply(publishedRate);
 

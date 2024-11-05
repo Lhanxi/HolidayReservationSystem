@@ -913,7 +913,7 @@ public class MainApp {
         
         System.out.println("Available room types. Please select which room type to make a reservation");
         for (int i = 0; i < roomTypes.size(); i++) {
-            System.out.println(i + ": " + roomTypes.get(i) + availableRoomTypes.get(roomTypes.get(i)));
+            System.out.println(i + ": " + roomTypes.get(i) + ": " + availableRoomTypes.get(roomTypes.get(i)));
         }
         
         Integer response = -1;
