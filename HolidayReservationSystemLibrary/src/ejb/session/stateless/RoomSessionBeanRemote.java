@@ -24,4 +24,6 @@ public interface RoomSessionBeanRemote {
     public Room getRoom(String roomNumber);
     public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status, Boolean isDisabled);
     public String deleteRoom(String roomNumber);
+    public void updateRoomStatus(List<Room> rooms, Boolean roomStatus);
+    public void checkOut(List<String> roomNumbers);
 }

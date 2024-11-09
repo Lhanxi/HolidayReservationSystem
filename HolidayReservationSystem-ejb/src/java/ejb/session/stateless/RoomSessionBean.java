@@ -65,6 +65,26 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     }
     
     @Override
+    public void updateRoomStatus(List<Room> rooms, Boolean roomStatus) {
+        for (Room r : rooms) {
+            Room room = em.find(Room.class, r.getRoomId()); 
+            room.setRoomStatus(roomStatus); 
+        }
+    }
+    
+    @Override
+    public void checkOut(List<String> roomNumbers) {
+        Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber IN :roomNumbers");
+        query.setParameter("roomNumbers", roomNumbers);
+        List<Room> rooms = query.getResultList();
+        System.out.println("rooms length:" + rooms.size());
+        
+        updateRoomStatus(rooms, true);
+    }
+    
+    
+    
+    @Override
     public String deleteRoom(String roomNumber) {
         Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber = :roomNumber"); 
         query.setParameter("roomNumber", roomNumber); 

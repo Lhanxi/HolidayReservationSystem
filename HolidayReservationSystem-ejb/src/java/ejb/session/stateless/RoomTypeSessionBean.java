@@ -26,13 +26,12 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     
     public RoomTypeSessionBean() {
     }
-    
-    @Override
+     @Override
     public Long createNewRoomType(RoomType newRoomType, Integer ranking) {
     try {
         List<RoomType> roomTypes = getRoomTypeList();
         
-        if (roomTypes.size() > 1) {
+        if (roomTypes.size() > 0) {
             roomTypes.sort((r1, r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
             updateRoomTypeRankings(roomTypes, ranking);
         }
@@ -56,6 +55,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         for (int i = roomTypes.size() - 1; i >= ranking; i--) {
             RoomType roomType = roomTypes.get(i); 
             roomType.setRanking(i + 1);
+            em.flush();
         }
     }
 
@@ -81,7 +81,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     @Override
-    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer newRanking) {
+    public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer targetIndex) {
         RoomType roomType = em.find(RoomType.class, roomTypeId); 
         roomType.setName(roomTypeName);
         roomType.setDescription(newDescription);
@@ -91,22 +91,47 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
 
         // Check if ranking needs to be updated
         //even if the roomType is disabled, just maintain the rankings
-        if (!newRanking.equals(roomType.getRanking())) {
-            updateRoomRanking(roomType, newRanking);
+        if (targetIndex != -1) {
+            updateRoomRanking(roomType, targetIndex);
         }
     }
 
-    private void updateRoomRanking(RoomType roomType, Integer newRanking) {
+    private void updateRoomRanking(RoomType roomType, Integer targetIndex) {
         List<RoomType> roomTypes = getRoomTypeList();
-        int currentRanking = roomType.getRanking();
+        roomTypes.sort((r1, r2) -> Integer.compare(r1.getRanking(), r2.getRanking()));
+        int roomTypeCurrentIndex = roomTypes.indexOf(roomType);
+        
+        if (targetIndex == roomTypeCurrentIndex) {
+            return;
+        } else if (targetIndex == roomTypes.size() && roomTypeCurrentIndex == roomTypes.size() - 1) { //this is the case where they select move to the end but it is already at the end
+            return;
+        } else if (targetIndex == roomTypes.size()) {
+            targetIndex -= 1;
+        }
+        
+        //int currentRanking = roomType.getRanking();
 
         // Temporarily set roomType's ranking to a value outside the normal range
         int tempRanking = roomTypes.size() + 1;
         roomType.setRanking(tempRanking);
         em.flush();  // Persist the temporary ranking change to prevent SQL conflicts
-
-        // Sort room types by current ranking to ensure sequential updates
-        roomTypes.sort(Comparator.comparingInt(RoomType::getRanking));
+        
+        if (roomTypeCurrentIndex < targetIndex) {
+            for (int i = roomTypeCurrentIndex + 1; i < targetIndex; i++) {
+                RoomType r = roomTypes.get(i); 
+                r.setRanking(r.getRanking() - 1);
+                em.flush();
+            }
+            roomType.setRanking(targetIndex - 1);
+        } else {
+            for (int i = roomTypeCurrentIndex - 1; i > targetIndex - 1; i--) {
+                RoomType r = roomTypes.get(i); 
+                r.setRanking(r.getRanking() + 1);
+                em.flush();
+            }
+            roomType.setRanking(targetIndex);
+        }
+/*
 
         // Shift rankings as needed to accommodate the new ranking
         if (newRanking < currentRanking) {
@@ -122,9 +147,9 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
                 }
             }
         }
-
         // Set the updated ranking to roomType
-        roomType.setRanking(newRanking);
+        roomType.setRanking();
+*/
     }
     
 
@@ -136,12 +161,12 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         List<RoomType> roomTypes = getRoomTypeList();
         roomTypes.sort(Comparator.comparingInt(RoomType::getRanking));
         int index = roomTypes.indexOf(roomType); 
-        roomTypes.remove(roomType);
 
         if (checkRoomTypeForRooms(roomType) && checkRoomTypeForRoomRates(roomType)) {
-            em.remove(roomType);
+            roomType.setRanking(-1);
             em.flush();
             updateRoomTypeRankingForDelete(roomTypes, index);
+            em.remove(roomType);
             return "Room Type successfully deleted";
         } else {
             roomType.setIsDisabled(true);
@@ -150,9 +175,10 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
 
     private void updateRoomTypeRankingForDelete(List<RoomType> roomTypes, Integer index) {
-        for (int i = index; i < roomTypes.size(); i++) {
+        for (int i = index + 1; i < roomTypes.size(); i++) {
             RoomType roomType = roomTypes.get(i); 
             roomType.setRanking(roomType.getRanking() - 1);
+            em.flush();
         }
     }
 

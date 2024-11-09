@@ -6,6 +6,7 @@ package ejb.session.stateless;
 
 import entity.Customer;
 import entity.Reservation;
+import entity.Visitor;
 import java.util.List;
 import javax.ejb.Local;
 import util.exception.CustomerNotFoundException;
@@ -24,4 +25,8 @@ public interface GuestSessionBeanLocal {
     public Customer customerLogin(String username, String password) throws InvalidLoginException;
     public Reservation retrieveReservationById(Long reservationId) throws ReservationNotFoundException;
     public List<Reservation> retrieveAllReservationByCustomerId(Long customerId);
+
+    public Visitor retrieveCustomerByPassport(String passportNumber) throws CustomerNotFoundException;
+
+    public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException;
 }

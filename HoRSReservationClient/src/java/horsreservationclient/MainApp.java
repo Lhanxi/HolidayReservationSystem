@@ -241,7 +241,7 @@ public class MainApp {
         numOfRooms = this.getIntegerInput();
         Reservation reservation = new Reservation(startDate, endDate, numOfRooms);
         RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
-        reserveRoomSessionBeanRemote.createReservation(reservation, roomType);
+        reserveRoomSessionBeanRemote.createReservation(reservation, roomType, 1L); //note this is just a placeholder to deploy, 1L needs to be updated
         System.out.println("=== Reservation succesfully created ===\n");
         this.showCustomerMenu();
     }

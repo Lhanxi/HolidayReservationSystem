@@ -30,6 +30,8 @@ public class RoomReservation implements Serializable {
     private Room room;
     @ManyToOne
     private RoomType roomType;
+    @OneToOne(mappedBy="roomReservation")
+    private AllocationExceptionReport allocationExceptionReport;
 
     public RoomReservation() {
     }
@@ -66,6 +68,14 @@ public class RoomReservation implements Serializable {
      */
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
+    }
+
+    public AllocationExceptionReport getAllocationExceptionReport() {
+        return allocationExceptionReport;
+    }
+
+    public void setAllocationExceptionReport(AllocationExceptionReport allocationExceptionReport) {
+        this.allocationExceptionReport = allocationExceptionReport;
     }
 
     @Override

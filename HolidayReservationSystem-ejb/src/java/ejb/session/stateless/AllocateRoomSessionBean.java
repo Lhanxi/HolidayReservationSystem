@@ -47,10 +47,15 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         allocateRooms();
     } 
     
-    @Override
-    public void allocateRooms() {
+    public void allocateRooms(){ 
         Date currentDate = getCurrentDate();
-        
+        allocateRooms(currentDate);
+    }
+    
+    
+    
+    @Override
+    public void allocateRooms(Date currentDate) {
         //get all the rooms that are not disabled
         List<Room> rooms = hotelInventorySessionBeanLocal.getAllEnabledRooms();
         
@@ -160,6 +165,7 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(allocationExceptionReportTypeEnum);
         em.persist(allocationExceptionReport); 
         allocationExceptionReport.setRoomReservation(roomReservation);
+        roomReservation.setAllocationExceptionReport(allocationExceptionReport);
     }
     
     private RoomReservation createRoomReservation(Room room, RoomType roomType) {

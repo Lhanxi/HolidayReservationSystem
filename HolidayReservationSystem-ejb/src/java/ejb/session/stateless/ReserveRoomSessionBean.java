@@ -6,12 +6,15 @@ package ejb.session.stateless;
 
 import entity.Reservation;
 import entity.RoomRate;
+import entity.RoomReservation;
 import entity.RoomType;
+import entity.Visitor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -36,11 +39,15 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
 
     @Override
-    public Long createReservation(Reservation newReservation, RoomType roomType) {
+    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId) {
         //creates a new Reservation
         em.persist(newReservation); 
         newReservation.setRoomType(roomType); 
         RoomType r = newReservation.getRoomType();
+        
+        Visitor visitor = em.find(Visitor.class, visitorId);
+        visitor.getReservations().add(newReservation);
+        
         return r.getRoomTypeId();
     }
     
@@ -86,7 +93,23 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
 
     // Calculate days between, inclusive
     return ChronoUnit.DAYS.between(start, end) + 1;
-}
+    }
+    
+    @Override
+    public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations) {
+        List<RoomReservation> roomReservations = new ArrayList<RoomReservation>(); 
+        
+        for (Reservation r : reservations) {
+            Reservation reservation = em.find(Reservation.class, r.getReservationId());
+            List<RoomReservation> rooms = reservation.getRoomReservations();
+            
+            for (RoomReservation rr : rooms) {
+                roomReservations.add(rr);
+            }
+        }
+        
+        return roomReservations;
+    }
 
 
     /* 

@@ -7,6 +7,7 @@ package ejb.session.stateless;
 import javax.ejb.Stateless;
 import entity.Customer;
 import entity.Reservation;
+import entity.Visitor;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -44,6 +45,16 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
         }
     }
     
+    
+    public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException {
+       try {
+            entityManager.persist(newVisitor);
+            return newVisitor;
+        } catch (PersistenceException ex) {
+            throw new InvalidCustomerCreationException("Invalid passport number. Please try again!");
+        }
+    }
+    
     @Override
     public Customer retrieveCustomerByUsername(String username) throws CustomerNotFoundException {
         Query query = entityManager.createQuery("SELECT c from Customer c WHERE c.username = :inUsername");
@@ -53,6 +64,19 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
             return (Customer)query.getSingleResult();
         } catch(NoResultException | NonUniqueResultException ex) {
             throw new CustomerNotFoundException("Guest Username " + username + "does not exist");
+        }
+    }
+    
+    @Override
+    public Visitor retrieveCustomerByPassport(String passportNumber) throws CustomerNotFoundException { 
+        Query query = entityManager.createQuery("SELECT v from Visitor v WHERE v.passportNumber = :passportNumber");
+        query.setParameter("passportNumber", passportNumber);
+        try {
+            Visitor visitor = (Visitor)query.getSingleResult();
+            visitor.getReservations().size(); // load the reservations
+            return visitor;
+        } catch(NoResultException ex) {
+            throw new CustomerNotFoundException("Customer with " + passportNumber + "does not exist");
         }
     }
     

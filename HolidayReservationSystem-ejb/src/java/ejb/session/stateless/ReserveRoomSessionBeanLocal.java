@@ -5,8 +5,10 @@
 package ejb.session.stateless;
 
 import entity.Reservation;
+import entity.RoomReservation;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.util.List;
 import javax.ejb.Local;
 
 /**
@@ -15,6 +17,7 @@ import javax.ejb.Local;
  */
 @Local
 public interface ReserveRoomSessionBeanLocal {
-    public Long createReservation(Reservation newReservation, RoomType roomType);
+    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId);
     public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation, Long roomTypeId);
+    public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations);
 }

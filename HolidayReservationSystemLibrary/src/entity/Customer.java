@@ -26,7 +26,7 @@ public class Customer extends Visitor implements Serializable {
     
     @Column(nullable = false)
     private String password;
-
+    
     public Customer() {
         super();
     }
