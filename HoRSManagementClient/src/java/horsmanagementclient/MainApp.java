@@ -228,6 +228,8 @@ public class MainApp {
                     }
                 } else if (employee.getEmployeeType() == EmployeeType.GUEST_RELATION_OFFICER) {
                     while (true) {
+                        System.out.println("");
+                        System.out.println("============");
                         System.out.println("Select what to do");
                         System.out.println("1: Walk-in Search Room"); 
                         System.out.println("2: Check-in Guest");
@@ -278,11 +280,13 @@ public class MainApp {
         System.out.print(">"); 
         String username = scanner.next();
         
+        System.out.println("");
         System.out.println("Please enter employee password");
         System.out.print(">"); 
         String password = scanner.next();
         
         while (response < 1 || response > 4) {
+            System.out.println("");
             System.out.println("Please select the employee type");
             System.out.println("1: System Admin");
             System.out.println("2: Operation Manager");
@@ -692,8 +696,8 @@ public class MainApp {
     private void viewAllRooms() {
         List<Room> rooms = roomSessionBeanRemote.viewAllRooms(); 
         for (Room r : rooms) {
-            String output = String.format("roomId=%s, roomType=%s, roomStatus=%s", 
-                    r.getRoomId(), r.getRoomType(), r.getRoomStatus());
+            String output = String.format("roomId: %s, roomNumber: %s, roomType: %s, roomStatus: %s", 
+                    r.getRoomId(), r.getRoomNumber(),r.getRoomType(), r.getRoomStatus());
             System.out.println(output);
         }
     }
@@ -1061,17 +1065,20 @@ public class MainApp {
         List<Reservation> reservations = visitor.getReservations();
 
         //this is for the case that the visitor has multiple reservations for different dates
+        System.out.print("");
         System.out.println("Please enter today's date:"); 
         Date todayDate = getDateInput(); 
+        
         
         //get today's allocations of RoomReservations
         List<Reservation> todayReservations = new ArrayList<Reservation>();
         for (Reservation r: reservations) {
-            if (r.getStartDate() == todayDate) {
+            if (r.getStartDate().equals(todayDate)) {
                 todayReservations.add(r); 
+                
             }
         }
-        
+
         //handles the case that the visitor has come on the wrong day
         if (todayReservations.size() == 0) {
             System.out.println("Visitor has no reservations for today"); 
