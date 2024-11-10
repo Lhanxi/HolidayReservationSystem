@@ -1071,7 +1071,14 @@ public class MainApp {
                 todayReservations.add(r); 
             }
         }
-        List<RoomReservation> roomReservations = reserveRoomSessionBeanRemote.getTodayRoomAllocation(reservations);
+        
+        //handles the case that the visitor has come on the wrong day
+        if (todayReservations.size() == 0) {
+            System.out.println("Visitor has no reservations for today"); 
+            return;
+        }
+        
+        List<RoomReservation> roomReservations = reserveRoomSessionBeanRemote.getTodayRoomAllocation(todayReservations);
         
         //create list of rooms that need to be updated
         List<Room> rooms = new ArrayList<Room>();

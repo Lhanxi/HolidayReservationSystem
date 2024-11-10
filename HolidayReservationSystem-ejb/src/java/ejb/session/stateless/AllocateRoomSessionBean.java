@@ -171,14 +171,14 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
     private RoomReservation createRoomReservation(Room room, RoomType roomType) {
         RoomReservation roomReservation = new RoomReservation(room);
         em.persist(roomReservation); 
-        roomReservation.setRoomType(roomType);
+        //roomReservation.setRoomType(roomType);
         return roomReservation;
     }
     
     private RoomReservation createRoomReservation(RoomType roomType) {
         RoomReservation roomReservation = new RoomReservation();
         em.persist(roomReservation); 
-        roomReservation.setRoomType(roomType);
+        //roomReservation.setRoomType(roomType);
         return roomReservation;
     }
 }

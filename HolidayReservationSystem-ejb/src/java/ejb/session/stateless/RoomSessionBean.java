@@ -5,6 +5,7 @@
 package ejb.session.stateless;
 
 import entity.Room;
+import entity.RoomReservation;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -82,6 +83,17 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         updateRoomStatus(rooms, true);
     }
     
+    private void updateRoomReservation(List<String> roomNumbers) {
+        //this is necessary to remove the foreign key of room in room reservation, allows the rooms to be deleted after they are not in use
+        Query query = em.createQuery("SELECT r FROM RoomReservation r WHERE r.room.roomNumber IN :roomNumbers"); 
+        query.setParameter("roomNumbers", roomNumbers);
+        List<RoomReservation> roomReservations = query.getResultList(); 
+        
+        for (RoomReservation r : roomReservations) {
+            r.setRoom(null);
+        }
+    }
+     
     
     
     @Override
