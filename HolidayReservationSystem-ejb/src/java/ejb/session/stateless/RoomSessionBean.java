@@ -81,9 +81,10 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         System.out.println("rooms length:" + rooms.size());
         
         updateRoomStatus(rooms, true);
+        checkOutRoomReservations(roomNumbers);
     }
     
-    private void updateRoomReservation(List<String> roomNumbers) {
+    private void checkOutRoomReservations(List<String> roomNumbers) {
         //this is necessary to remove the foreign key of room in room reservation, allows the rooms to be deleted after they are not in use
         Query query = em.createQuery("SELECT r FROM RoomReservation r WHERE r.room.roomNumber IN :roomNumbers"); 
         query.setParameter("roomNumbers", roomNumbers);
