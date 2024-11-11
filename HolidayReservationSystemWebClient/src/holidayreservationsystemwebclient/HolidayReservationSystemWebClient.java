@@ -4,17 +4,18 @@
  */
 package holidayreservationsystemwebclient;
 
+import ws.client.HolidayReservationSystemWebService_Service;
+
 /**
  *
  * @author leunghanxi
  */
 public class HolidayReservationSystemWebClient {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
-    }
-    
+    public static void main(String[] args)
+    {
+        HolidayReservationSystemWebService_Service service = new HolidayReservationSystemWebService_Service(); 
+        MainApp mainApp = new MainApp(service);
+        mainApp.runApp();
+    }    
 }

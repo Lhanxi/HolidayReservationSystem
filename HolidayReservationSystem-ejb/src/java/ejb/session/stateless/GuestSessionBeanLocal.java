@@ -13,6 +13,7 @@ import util.exception.CustomerNotFoundException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.ReservationNotFoundException;
+import util.exception.VisitorNotFoundException;
 
 /**
  *
@@ -20,13 +21,12 @@ import util.exception.ReservationNotFoundException;
  */
 @Local
 public interface GuestSessionBeanLocal {
-    public Long createNewCustomer(Customer newCustomer) throws InvalidCustomerCreationException;
+    public Long createNewCustomer(Visitor newCustomer) throws InvalidCustomerCreationException;
     public Customer retrieveCustomerByUsername(String username) throws CustomerNotFoundException;
     public Customer customerLogin(String username, String password) throws InvalidLoginException;
+    public Visitor visitorCheckIn(String name, String passportNumber) throws VisitorNotFoundException;
     public Reservation retrieveReservationById(Long reservationId) throws ReservationNotFoundException;
-    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId);
-
+    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException;
     public Visitor retrieveCustomerByPassport(String passportNumber) throws CustomerNotFoundException;
-
     public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException;
 }

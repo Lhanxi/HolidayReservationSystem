@@ -86,11 +86,16 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
     }
     
     @Override
-    public List<Reservation> retrieveAllReservationByPartnerId(Long partnerId) {
-        Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.partner.partnerId = :inPartnerId");
-        query.setParameter("inPartnerId", partnerId);
+    public List<Reservation> retrieveAllReservationByPartnerId(Long partnerId) throws ReservationNotFoundException {
+        try {
+            Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.partner.partnerId = :inPartnerId");
+            query.setParameter("inPartnerId", partnerId);
 
-        List<Reservation> reservations = (List<Reservation>) query.getResultList();
-        return reservations;
+            List<Reservation> reservations = (List<Reservation>) query.getResultList();
+            reservations.size();
+            return reservations;
+        } catch (NoResultException | NonUniqueResultException ex) {
+            throw new ReservationNotFoundException("Reservations do not exist");
+        }
     }
-}
+} 

@@ -19,6 +19,8 @@ import util.exception.InvalidLoginException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.CustomerNotFoundException;
 import util.exception.ReservationNotFoundException;
+import javax.ejb.EJB;
+import util.exception.VisitorNotFoundException;
 
 
 /**
@@ -31,11 +33,14 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     @PersistenceContext(unitName = "HolidayReservationSystem-ejbPU")
     private EntityManager entityManager;
     
+    @EJB
+    private ReserveRoomSessionBeanLocal reserveRoomSessionBean;
+    
     public GuestSessionBean() {
     }
     
     @Override
-    public Long createNewCustomer(Customer newCustomer) throws InvalidCustomerCreationException {
+    public Long createNewCustomer(Visitor newCustomer) throws InvalidCustomerCreationException {
         try {
             entityManager.persist(newCustomer);
             entityManager.flush();
@@ -56,6 +61,18 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     }
     
     @Override
+    public Visitor visitorCheckIn(String name, String passportNumber) throws VisitorNotFoundException {
+        Query query = entityManager.createQuery("SELECT v from Visitor v WHERE v.passportNumber = :inPassportNumber");
+        query.setParameter("inPassportNumber", passportNumber);
+        
+        try {
+            return (Visitor)query.getSingleResult();
+        } catch(NoResultException | NonUniqueResultException ex) {
+            throw new VisitorNotFoundException("Visitor with passport number " + passportNumber + "does not exist");
+        }
+    }
+    
+    @Override
     public Customer retrieveCustomerByUsername(String username) throws CustomerNotFoundException {
         Query query = entityManager.createQuery("SELECT c from Customer c WHERE c.username = :inUsername");
         query.setParameter("inUsername", username);
@@ -63,7 +80,7 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
         try {
             return (Customer)query.getSingleResult();
         } catch(NoResultException | NonUniqueResultException ex) {
-            throw new CustomerNotFoundException("Guest Username " + username + "does not exist");
+            throw new CustomerNotFoundException("Customer Username " + username + "does not exist");
         }
     }
     
@@ -106,12 +123,16 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     }
     
     @Override
-    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) {
-        Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.customer.guestId = :inGuestId");
-        query.setParameter("inGuestId", customerId);
-        
-        List<Reservation> reservations = (List<Reservation>) query.getResultList();
-        reservations.size();
-        return reservations;
+    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException {
+        try {
+            Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.customer.guestId = :inGuestId");
+            query.setParameter("inGuestId", customerId);
+
+            List<Reservation> reservations = (List<Reservation>) query.getResultList();
+            reservations.size();
+            return reservations;
+        } catch (NoResultException | NonUniqueResultException ex) {
+            throw new ReservationNotFoundException("Reservations do not exist");
+        }
     }
 }

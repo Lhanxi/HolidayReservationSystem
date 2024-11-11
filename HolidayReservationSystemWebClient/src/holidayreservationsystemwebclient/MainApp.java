@@ -2,143 +2,173 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package horsreservationclient;
+package holidayreservationsystemwebclient;
 
-
-import java.util.Scanner;
-import entity.Customer;
-import ejb.session.stateless.HotelInventorySessionBeanRemote;
-import ejb.session.stateless.ReserveRoomSessionBeanRemote;
-import ejb.session.stateless.RoomRateSessionBeanRemote;
-import ejb.session.stateless.RoomSessionBeanRemote;
-import ejb.session.stateless.RoomTypeSessionBeanRemote;
-import ejb.session.stateless.GuestSessionBeanRemote;
-import entity.Reservation;
-import entity.RoomType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import util.exception.InvalidLoginException;
-import util.exception.InvalidCustomerCreationException;
-import util.exception.ReservationNotFoundException;
+import java.util.Scanner;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import ws.client.HolidayReservationSystemWebService_Service;
+import ws.client.InvalidLoginException_Exception;
+import ws.client.Partner;
+import ws.client.PartnerType;
+import ws.client.Reservation;
+import ws.client.ReservationNotFoundException_Exception;
+import ws.client.RoomType;
+
 /**
  *
  * @author leunghanxi
  */
 public class MainApp {
-    private RoomRateSessionBeanRemote roomRateSessionBeanRemote;
-    private RoomSessionBeanRemote roomSessionBeanRemote;
-    private RoomTypeSessionBeanRemote roomTypeSessionBeanRemote;
-    private HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
-    private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
-    private GuestSessionBeanRemote guestSessionBeanRemote;
+    private Partner partner;
     
-    private Customer customer;
-    
+    private HolidayReservationSystemWebService_Service service;
+
     public MainApp() {
     }
-    
-    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, GuestSessionBeanRemote guestSessionBeanRemote) {
-        this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
-        this.roomSessionBeanRemote = roomSessionBeanRemote;
-        this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
-        this.hotelInventorySessionBeanRemote = hotelInventorySessionBeanRemote;
-        this.reserveRoomSessionBeanRemote = reserveRoomSessionBeanRemote;
-        this.guestSessionBeanRemote = guestSessionBeanRemote;
+
+    public MainApp(HolidayReservationSystemWebService_Service service) {
+        this.service = service;
     }
+
     
     public void runApp() {
         Scanner scanner = new Scanner(System.in);
         int response = 0;
         while (true) {
-            System.out.println("=== Welcome to the Hotel Reservation System - Reservation Client ===\n");
-            System.out.println("1: Guest Login");
-            System.out.println("2: Register as Guest");
-            System.out.println("3: Search Hotel Room");
-            System.out.println("4: Exit\n");
+            System.out.println("=== Welcome to the Holiday Reservation System - Partner Web Client ===\n");
+            System.out.println("1: Partner Login");
+            System.out.println("2: Exit\n");
             
             response = 0;
-            while (response < 1 || response > 4) {
+            while (response < 1 || response > 2) {
                 System.out.print(">");
                 response = getIntegerInput();
                 if (response == 1) {
-                    this.loginCustomer();
-                } else if (response == 2) {
-                    this.registerCustomer();
-                } else if (response == 3) {
-                    this.searchHotelRoom();
+                    this.loginPartner();
                 } else {
                     break;
                 }
             }
-            if (response == 4) {
+            if (response == 2) {
                 break;
             }
         }
         scanner.close();
     }
     
-    public void loginCustomer() {
+    public void loginPartner() {
         Scanner scanner = new Scanner(System.in);
         try {
             while (true) {
                 String username = "";
                 String password = "";
-                System.out.println("=== Customer Login Page ===\n");
+                System.out.println("=== Partner Login Page ===\n");
                 System.out.print("Enter username> ");
                 username = scanner.nextLine().trim();
                 System.out.print("Enter password> ");
                 password = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0) {
-                    customer = guestSessionBeanRemote.customerLogin(username, password);
+                    partner = service.getHolidayReservationSystemWebServicePort().doPartnerLogin(username, password);
+                    
                     System.out.println(username + " successfully logged in!\n");
-                    this.showCustomerMenu();
+                    break;
                 }
+                
             }
-        } catch (InvalidLoginException ex){
+            if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
+                this.showPartnerEmployeeMenu();
+            } else {
+                this.showManagerMenu();
+            }
+        } catch (Exception ex){
             System.out.println(ex.getMessage());
         }
     }
     
-    public void registerCustomer() {
-        Scanner scanner = new Scanner(System.in);
-        try {
-            while (true) {
-                String username = "";
-                String password = "";
-                String passportNumber = "";
-                String name = "";
-                System.out.println("=== Customer Registration Page ===\n");
-                System.out.print("Enter username> ");
-                username = scanner.nextLine().trim();
-                System.out.print("Enter password> ");
-                password = scanner.nextLine().trim();
-                System.out.print("Enter name> ");
-                name = scanner.nextLine().trim();
-                System.out.print("Enter passport number> ");
-                passportNumber = scanner.nextLine().trim();
-                if (username.length() > 0 && password.length() > 0 && passportNumber.length() > 0) {
-                    customer = new Customer(username, password, name, passportNumber);
-                    Long customerId = guestSessionBeanRemote.createNewCustomer(customer);
-                    System.out.println(username + " successfully registered!\n");
-                    this.showCustomerMenu();
-                }
-            }
-        } catch (InvalidCustomerCreationException ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-    
-    public void showCustomerMenu() {
+    public void showPartnerEmployeeMenu() {
         Scanner scanner = new Scanner(System.in);
         int response = 0;
         while (true) {
-            System.out.println("=== Customer Menu Page ===\n");
+            System.out.println("=== Welcome to the Partner Employee Menu ===\n");
+            System.out.println("1: Search Hotel Room");
+            System.out.println("2: Exit\n");
+            
+            response = 0;
+            while (response < 1 || response > 2) {
+                System.out.print(">");
+                response = getIntegerInput();
+                if (response == 1) {
+                    this.searchHotelRoom();
+                } else {
+                    break;
+                }
+            }
+            if (response == 2) {
+                break;
+            }
+        }
+        scanner.close();
+    }
+    
+    public void searchHotelRoom() {
+        Scanner scanner = new Scanner(System.in);
+        Date startDate;
+        Date endDate;
+        try {
+            while (true) {
+                System.out.println("Please enter the start date in the format DD/MM/YYYY");
+                System.out.print(">");
+                startDate = this.getDateInput();
+                System.out.println("Please enter the end date in the format DD/MM/YYYY");
+                System.out.print(">");
+                endDate = this.getDateInput();
+
+                if (endDate.before(startDate)) {
+                    System.out.println("End Date cannot be before start date. Please try again.\n");
+                } else {
+                    break;
+                }
+
+            }
+
+            System.out.println("=== These are the available room types ===\n");
+            List<String> availableRoomTypes = service.getHolidayReservationSystemWebServicePort().searchRoom(startDate, endDate);
+            for (int i = 0; i < availableRoomTypes.size(); i++) {
+                String roomData = availableRoomTypes.get(i);
+
+                String[] parts = roomData.split(" ");
+
+                if (parts.length == 2) {
+                    String roomType = parts[0]; 
+                    String availableRooms = parts[1];  
+
+                    System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+                }
+            }
+
+            if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
+                this.showPartnerEmployeeMenu();
+            } else {
+                this.reserveHotelRoom(availableRoomTypes, startDate, endDate);
+            }
+        } catch (InvalidLoginException_Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        
+    }
+    
+    public void showManagerMenu() {
+        Scanner scanner = new Scanner(System.in);
+        int response = 0;
+        while (true) {
+            System.out.println("=== Partner Manager Menu Page ===\n");
             System.out.println("1: Search Hotel Room");
             System.out.println("2: Reserve Hotel Room");
             System.out.println("3: View All Reservations");
@@ -167,43 +197,7 @@ public class MainApp {
         scanner.close();
     }
     
-    public void searchHotelRoom() {
-        Scanner scanner = new Scanner(System.in);
-        Date startDate;
-        Date endDate;
-        while (true) {
-            System.out.println("Please enter the start date in the format DD/MM/YYYY");
-            System.out.print(">");
-            startDate = this.getDateInput();
-            System.out.println("Please enter the end date in the format DD/MM/YYYY");
-            System.out.print(">");
-            endDate = this.getDateInput();
-            
-            if (endDate.before(startDate)) {
-                System.out.println("End Date cannot be before start date. Please try again.\n");
-            } else {
-                break;
-            }
-        }
-            
-        System.out.println("=== These are the available room types ===\n");
-        HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
-        int counter = 1;
-        for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
-            String roomType = entry.getKey(); 
-            Integer availability = entry.getValue(); 
-            System.out.println(counter + ". " + roomType + " - Available: " + availability);
-            counter++;
-        }
-        if (customer != null) {
-            this.reserveHotelRoom(availableRoomTypes, startDate, endDate);
-        } else { 
-            System.out.println("You are not logged in. Please login to reserve a room!\n");
-            this.runApp();
-        }
-    }
-    
-    private void reserveHotelRoom(HashMap<String, Integer> availableRoomTypes, Date startDate, Date endDate) {
+    public void reserveHotelRoom(List<String> availableRoomTypes, Date startDate, Date endDate) {
         Scanner scanner = new Scanner(System.in);
         int response = 0;
         System.out.println("Do you want to proceed with booking a room?");
@@ -215,55 +209,67 @@ public class MainApp {
             if (response == 1) {
                 break;
             } else if (response == 2) {
-                this.showCustomerMenu();
+                this.showManagerMenu();
             } else {
                 System.out.println("Invalid Choice. Please try again!\n");
                 continue;
             }
         }
+        
         response = 0;
         String choice = "";
         System.out.println("=== Select the room type ===\n");
-
-        int counter = 1; 
+        
+        int counter = 1;
         List<String> roomTypes = new ArrayList<String>();
-        for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
-            String roomType = entry.getKey(); 
-            Integer availability = entry.getValue();
-            roomTypes.add(roomType);
-            System.out.println(counter + ". " + roomType + " - Available: " + availability);
-            counter++;
+        List<String> availablity = new ArrayList<String>();
+        for (int i = 0; i < availableRoomTypes.size(); i++) {
+            String roomData = availableRoomTypes.get(i);
+
+            String[] parts = roomData.split(" ");
+
+            if (parts.length == 2) {
+                String roomType = parts[0]; 
+                String availableRooms = parts[1]; 
+                roomTypes.add(parts[0]);
+                availablity.add(parts[1]);
+                System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+                counter++;
+            }
         }
+        
+        int availableNumOfRooms = 0;
         
         while (response < 1 || response > counter) {
             response = getIntegerInput();
             if (response >= 1 || response <= counter) {
                 choice = roomTypes.get(response - 1);
+                availableNumOfRooms = Integer.parseInt(availablity.get(response - 1));
                 break;
             } else {
                 System.out.println("Invalid Choice. Please try again!\n");
                 continue;
             }
         }
-        int numOfRooms;
-        int availableNumOfRooms = availableRoomTypes.get(choice);
-        Reservation reservation;
-        System.out.println("=== Enter the number of rooms ===\n");
         
+        int numOfRooms;
+        Reservation reservation;
+        RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(choice);
+        
+        System.out.println("=== Enter the number of rooms ===\n");
+
         while (true) {
             numOfRooms = this.getIntegerInput();
             
             if (numOfRooms < 1 || numOfRooms > availableNumOfRooms) {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
             } else {
-                reservation = new Reservation(startDate, endDate, numOfRooms);
+                Long reservationId = service.getHolidayReservationSystemWebServicePort().reserveRoom(partner.getPartnerId(), startDate, endDate, numOfRooms, roomType);
+                System.out.println("Reservation " + reservationId + " successfully reserved!\n");
                 break;
             }
         }
-        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
-        Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customer.getGuestId(), reservation, roomType);
-        System.out.println("Reservation " + reservationId + " succesfully created.\n");
-        this.showCustomerMenu();
+        this.showManagerMenu();
     }
     
     public void viewReservationDetails() {
@@ -277,7 +283,8 @@ public class MainApp {
                 System.out.println("Please Enter Reservation Id");
                 System.out.print(">");
                 reservationId = scanner.next().trim();
-                Reservation reservation = guestSessionBeanRemote.retrieveReservationById(Long.parseLong(reservationId));
+                
+                Reservation reservation = service.getHolidayReservationSystemWebServicePort().retrieveReservation(Long.parseLong(reservationId));
                 System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType() + "\n");
                 
                 System.out.println("Would you like to view more reservations?\n");
@@ -288,19 +295,19 @@ public class MainApp {
                     if (response == 1) {
                         this.viewReservationDetails();
                     } else if (response == 2) {
-                        this.showCustomerMenu();
+                        this.showManagerMenu();
                     }
                 }
                 
             }
-        } catch (ReservationNotFoundException ex) {
+        } catch (ReservationNotFoundException_Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
     
     public void viewAllReservations() {
         try {
-            List<Reservation> reservations = guestSessionBeanRemote.retrieveAllReservationByCustomerId(customer.getGuestId());
+            List<Reservation> reservations = service.getHolidayReservationSystemWebServicePort().retrieveAllPartnerReservations(partner.getPartnerId());
             int counter = 1;
             System.out.println("=== All Reservations ===\n");
             for (Reservation reservation : reservations) {
@@ -320,17 +327,16 @@ public class MainApp {
                     if (response == 1) {
                         this.viewReservationDetails();
                     } else if (response == 2) {
-                        this.showCustomerMenu();
+                        this.showManagerMenu();
                     }
                 }
             }
-        } catch (ReservationNotFoundException ex) {
+        } catch (ReservationNotFoundException_Exception ex) { 
             System.out.println(ex.getMessage());
         }
     }
     
-    
-     //utility functions
+    //utility functions
     public int getIntegerInput() {
         Scanner scanner = new Scanner(System.in);
         int input = 0;
@@ -368,7 +374,25 @@ public class MainApp {
             }
         }
     }
-        
+    
+    public XMLGregorianCalendar convertToXMLGregorianCalendar(Date date) {
+        try {
+            
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            calendar.setTime(date);
+
+            
+            java.util.GregorianCalendar gregorianCalendar = new java.util.GregorianCalendar();
+            gregorianCalendar.setTime(date);
+
+            
+            DatatypeFactory datatypeFactory = DatatypeFactory.newInstance();
+            return datatypeFactory.newXMLGregorianCalendar(gregorianCalendar);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public static boolean isValidDate(String date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         
