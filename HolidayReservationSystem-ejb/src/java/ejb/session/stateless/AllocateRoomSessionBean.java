@@ -94,7 +94,7 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         for (Reservation r : currentDayReservations) {
             int numOfRooms = r.getNumRooms(); 
             RoomType rt = r.getRoomType(); 
-            roomTypesExtra.put(rt, roomTypesExtra.get(rt) - numOfRooms);
+            roomTypesExtra.put(rt, roomTypesExtra.getOrDefault(rt, 0) - numOfRooms);
         }
 
         
@@ -106,7 +106,7 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
             //check for each room
             for (int j = 0; j < numRooms; j++) {
                 //if that room type has 0 left
-                if (roomTypeCount.get(roomType).size() <= 0) {
+                if (roomTypeCount.getOrDefault(roomType, new ArrayList<Room>()).size() <= 0) {
                     //check for the next best ranking
                     RoomType newRoomType = getNextRankingRoomType(roomType);
                     

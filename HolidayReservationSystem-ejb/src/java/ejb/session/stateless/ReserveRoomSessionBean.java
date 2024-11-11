@@ -55,6 +55,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     @Override
     public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType) { 
         em.persist(newReservation);
+        em.flush();
         newReservation.setRoomType(roomType);
         Visitor visitor = em.find(Visitor.class, visitorId);
         visitor.getReservations().add(newReservation);
@@ -64,12 +65,13 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     @Override
     public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType) { 
         em.persist(newReservation);
+        em.flush();
         newReservation.setRoomType(roomType);
         Partner partner = em.find(Partner.class, partnerId);
         partner.getReservations().add(newReservation);
         return newReservation.getReservationId();
     }
-    
+/*
     @Override
     public BigDecimal calculateReservationPriceForWalkIn(Long reservationId, Long roomTypeId) {
         Reservation reservation = em.find(Reservation.class, reservationId);
@@ -93,6 +95,23 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         return numOfRooms.multiply(numOfDays).multiply(publishedRate);
 
     }
+    
+ */
+    
+    public BigDecimal getPublishedRoomRate(RoomType roomType) throws NoResultException {
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType=:roomType AND r.rateTypeEnum =:rateTypeEnum");
+        query.setParameter("roomType", roomType); 
+        query.setParameter("rateTypeEnum", RateTypeEnum.PUBLISHED);
+        List<RoomRate> roomRates = query.getResultList();
+        
+        if (roomRates.isEmpty()) {
+            throw new NoResultException("No matching RoomRate found for the given RoomType and RateTypeEnum.");
+        }
+        
+        return roomRates.get(0).getRoomRateAmount();
+    }
+    
+    
 /*
     private long calculateDaysBetween(Date startDate, Date endDate) {
         LocalDate start = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();

@@ -12,6 +12,7 @@ import entity.Visitor;
 import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
+import javax.persistence.NoResultException;
 
 /**
  *
@@ -19,11 +20,9 @@ import javax.ejb.Local;
  */
 @Local
 public interface ReserveRoomSessionBeanLocal {
-    public Long createReservation(Reservation newReservation, RoomType roomType);
-    public BigDecimal calculateReservationPriceForWalkIn(Long reservationId, Long roomTypeId);
     public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType);
     public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType);
     public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId);
-    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation, Long roomTypeId);
     public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations);
+    public BigDecimal getPublishedRoomRate(RoomType roomType) throws NoResultException;
 }

@@ -27,6 +27,6 @@ public interface GuestSessionBeanRemote {
     public Visitor visitorCheckIn(String name, String passportNumber) throws VisitorNotFoundException;
     public Reservation retrieveReservationById(Long reservationId) throws ReservationNotFoundException;
     public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException;
-    public Visitor retrieveCustomerByPassport(String passportNumber) throws CustomerNotFoundException;
+    public Visitor retrieveCustomerByPassport(String passportNumber) throws VisitorNotFoundException;
     public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException;
 }

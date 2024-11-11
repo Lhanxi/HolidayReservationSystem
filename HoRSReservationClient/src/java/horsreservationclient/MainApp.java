@@ -39,6 +39,7 @@ public class MainApp {
     private GuestSessionBeanRemote guestSessionBeanRemote;
     
     private Customer customer;
+    private Long customerId;
     
     public MainApp() {
     }
@@ -96,6 +97,7 @@ public class MainApp {
                 password = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0) {
                     customer = guestSessionBeanRemote.customerLogin(username, password);
+                    customerId = customer.getGuestId();
                     System.out.println(username + " successfully logged in!\n");
                     this.showCustomerMenu();
                 }
@@ -124,7 +126,7 @@ public class MainApp {
                 passportNumber = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0 && passportNumber.length() > 0) {
                     customer = new Customer(username, password, name, passportNumber);
-                    Long customerId = guestSessionBeanRemote.createNewCustomer(customer);
+                    customerId = guestSessionBeanRemote.createNewCustomer(customer);
                     System.out.println(username + " successfully registered!\n");
                     this.showCustomerMenu();
                 }
@@ -261,7 +263,7 @@ public class MainApp {
             }
         }
         RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
-        Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customer.getGuestId(), reservation, roomType);
+        Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
         System.out.println("Reservation " + reservationId + " succesfully created.\n");
         this.showCustomerMenu();
     }
@@ -300,7 +302,7 @@ public class MainApp {
     
     public void viewAllReservations() {
         try {
-            List<Reservation> reservations = guestSessionBeanRemote.retrieveAllReservationByCustomerId(customer.getGuestId());
+            List<Reservation> reservations = guestSessionBeanRemote.retrieveAllReservationByCustomerId(customerId);
             int counter = 1;
             System.out.println("=== All Reservations ===\n");
             for (Reservation reservation : reservations) {

@@ -46,7 +46,7 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
             entityManager.flush();
             return newCustomer.getGuestId();
         } catch (PersistenceException ex) {
-            throw new InvalidCustomerCreationException("Invalid customer creation. Please try again!");
+            throw new InvalidCustomerCreationException("Passport number already in use, please try again");
         }
     }
     
@@ -85,7 +85,7 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     }
     
     @Override
-    public Visitor retrieveCustomerByPassport(String passportNumber) throws CustomerNotFoundException { 
+    public Visitor retrieveCustomerByPassport(String passportNumber) throws VisitorNotFoundException { 
         Query query = entityManager.createQuery("SELECT v from Visitor v WHERE v.passportNumber = :passportNumber");
         query.setParameter("passportNumber", passportNumber);
         try {
@@ -93,7 +93,7 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
             visitor.getReservations().size(); // load the reservations
             return visitor;
         } catch(NoResultException ex) {
-            throw new CustomerNotFoundException("Customer with " + passportNumber + "does not exist");
+            throw new VisitorNotFoundException("Visitor with " + passportNumber + "does not exist");
         }
     }
     
@@ -125,10 +125,8 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
     @Override
     public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException {
         try {
-            Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.customer.guestId = :inGuestId");
-            query.setParameter("inGuestId", customerId);
-
-            List<Reservation> reservations = (List<Reservation>) query.getResultList();
+            Visitor visitor = entityManager.find(Visitor.class, customerId);
+            List<Reservation> reservations = visitor.getReservations();
             reservations.size();
             return reservations;
         } catch (NoResultException | NonUniqueResultException ex) {

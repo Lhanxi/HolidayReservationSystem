@@ -947,35 +947,8 @@ public class MainApp {
         return roomRates.get(response).getRoomRateId();
     }
     
-    private void walkInSearchRoom() {
+    private void walkInSearchRoom() throws VisitorNotFoundException, InvalidCustomerCreationException{
         Scanner scanner = new Scanner(System.in);
-        
-        System.out.println("Please enter your passport number"); 
-        System.out.println(">"); 
-        String passportNumber = scanner.next(); 
-        
-        Visitor visitor = null;
-        
-        try {
-            visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passportNumber); 
-        } catch (CustomerNotFoundException ex) {
-            System.out.println("Please enter your name: "); 
-            System.out.println(">"); 
-            String name = scanner.next(); 
-            while (true) {
-                visitor = new Visitor(name, passportNumber);
-
-                try {
-                    visitor = guestSessionBeanRemote.createNewVisitor(visitor);
-                    break;
-                } catch (InvalidCustomerCreationException e) {
-                    System.out.println(e.getMessage()); 
-                    System.out.println("Please enter passport number again"); 
-                    System.out.println(">"); 
-                    passportNumber = scanner.next();
-                }
-            }
-        }
         
         Date startDate, endDate;
         
@@ -1017,63 +990,62 @@ public class MainApp {
             }
         }
         roomTypeName = roomTypes.get(response);
-        Long visitorId = visitor.getGuestId();
-        walkInReserveRoom(roomTypeName, startDate, endDate, availableRoomTypes.get(roomTypeName), visitorId);
+        walkInReserveRoom(roomTypeName, startDate, endDate, availableRoomTypes.get(roomTypeName));
     }
 
 
-    private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms, Long visitorId) {
+    private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms) throws VisitorNotFoundException, InvalidCustomerCreationException {
         Scanner scanner = new Scanner(System.in);
         int response = 0;
         Long visitorId = null;
         
-        while (true) {
-            response = 0;
-            System.out.println("=== Have you previously reserved under us? ===\n");
-            System.out.println("1. Yes");
-            System.out.println("2. No");
-            while (response < 1 || response > 2) {
-                response = getIntegerInput();
-                if (response == 1) {
-                    visitorId = this.doVisitorLogin();
-                    break;
-                } else if (response == 2) {
-                    visitorId = this.registerVisitor();
-                    break;
-                } else {
-                    System.out.println("Invalid response. Please Try Again.\n");
-                    continue;
-                }
-            }
-            if (response == 1 || response == 2) {
-                break;
-            }
-        }
+        visitorId = doVisitorLogin();
+        String r = "";
+        Integer numRooms;
+        RoomType roomType;
         
-        if (visitorId != null) {
-            RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+        while (true) {
+
+            roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
             Long roomTypeId = roomType.getRoomTypeId();
 
             System.out.println("Please select the number of rooms to reserve. You can select up to " + numAvailRooms + " rooms.");
-            Integer numRooms = getIntegerInput();
+            numRooms = getIntegerInput();
 
             while (numRooms > numAvailRooms || numRooms < 1) {
                 System.out.println("Invalid number, please select a valid number"); 
                 numRooms = getIntegerInput();
             }
 
-            Reservation newReservation = new Reservation(startDate, endDate, numRooms);
+            
 
-            Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservationForCustomer(visitorId, newReservation, roomType);
-            BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newRoomTypeId, newRoomTypeId);
-            System.out.println("Reservation successful");
-            System.out.println("Total cost: " + totalCost);
-        } else {
-            System.out.println("Visitor ID not set. Cannot proceed with reservation.");
+            BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
+            BigDecimal totalPrice = roomRatePublished.multiply(new BigDecimal(numRooms));
+            
+            System.out.println("");
+            System.out.println("Total Price: " + totalPrice); 
+            
+            while (true){
+                System.out.println("Confirm to reserve? Y/N");  
+                r = scanner.next(); 
+                if (r.equals("Y") || r.equals("N")) {
+                    break;
+                }
+            }
+            
+            if (r.equals("Y")) {
+                break;
+            } else if (r.equals("N")) {
+                continue;
+            }
         }
+        
+        Reservation newReservation = new Reservation(startDate, endDate, numRooms);
+        Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservationForCustomer(visitorId, newReservation, roomType);
+        System.out.println("Reservation successful");
     }
     
-    private Long doVisitorLogin() {
+    private Long doVisitorLogin() throws VisitorNotFoundException, InvalidCustomerCreationException {
         Scanner scanner = new Scanner(System.in);
         Visitor visitor;
         
@@ -1082,25 +1054,23 @@ public class MainApp {
         String passportNumber = "";
         
         while (true) {
-            System.out.println("Enter name>");
-            name = scanner.next().trim();
             System.out.println("Enter passport number>");
             passportNumber = scanner.next().trim();
             try {
-                visitor = guestSessionBeanRemote.visitorCheckIn(name, passportNumber);
+                visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passportNumber);
                 break;
             } catch (VisitorNotFoundException ex) {
                 System.out.println(ex.getMessage());
-                continue;
+                registerVisitor();
             }
         }
         return visitor.getGuestId();
     }
     
-    private Long registerVisitor() {
+    private Long registerVisitor() throws InvalidCustomerCreationException{
         Scanner scanner = new Scanner(System.in);
         
-        System.out.println("=== Enter your credentials ===\n");
+        System.out.println("=== Create new visitor. Enter the credentials ===\n");
         String name = "";
         String passportNumber = "";
         Long visitorId;
@@ -1108,7 +1078,7 @@ public class MainApp {
         while (true) {
             System.out.println("Enter name>");
             name = scanner.next().trim();
-            System.out.println("Enter passport number>");
+            System.out.println("Enter passport number>"); 
             passportNumber = scanner.next().trim();
             Visitor visitor = new Visitor(name, passportNumber);
             try {
@@ -1122,7 +1092,7 @@ public class MainApp {
         return visitorId;
     }
     
-    private void checkInGuest() throws CustomerNotFoundException {
+    private void checkInGuest() throws VisitorNotFoundException {
         Scanner scanner = new Scanner(System.in);
         Visitor visitor = null;
 
@@ -1137,7 +1107,7 @@ public class MainApp {
                 // Attempt to retrieve visitor by passport
                 visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passport);
 
-            } catch (CustomerNotFoundException ex) {
+            } catch (VisitorNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
         }
