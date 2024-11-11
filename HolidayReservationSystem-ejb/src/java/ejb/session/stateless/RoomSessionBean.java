@@ -5,6 +5,7 @@
 package ejb.session.stateless;
 
 import entity.Room;
+import entity.RoomReservation;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -63,6 +64,38 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         room.setRoomStatus(status);
         room.setIsDisabled(isDisabled);
     }
+    
+    @Override
+    public void updateRoomStatus(List<Room> rooms, Boolean roomStatus) {
+        for (Room r : rooms) {
+            Room room = em.find(Room.class, r.getRoomId()); 
+            room.setRoomStatus(roomStatus); 
+        }
+    }
+    
+    @Override
+    public void checkOut(List<String> roomNumbers) {
+        Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber IN :roomNumbers");
+        query.setParameter("roomNumbers", roomNumbers);
+        List<Room> rooms = query.getResultList();
+        System.out.println("rooms length:" + rooms.size());
+        
+        updateRoomStatus(rooms, true);
+        checkOutRoomReservations(roomNumbers);
+    }
+    
+    private void checkOutRoomReservations(List<String> roomNumbers) {
+        //this is necessary to remove the foreign key of room in room reservation, allows the rooms to be deleted after they are not in use
+        Query query = em.createQuery("SELECT r FROM RoomReservation r WHERE r.room.roomNumber IN :roomNumbers"); 
+        query.setParameter("roomNumbers", roomNumbers);
+        List<RoomReservation> roomReservations = query.getResultList(); 
+        
+        for (RoomReservation r : roomReservations) {
+            r.setRoom(null);
+        }
+    }
+     
+    
     
     @Override
     public String deleteRoom(String roomNumber) {

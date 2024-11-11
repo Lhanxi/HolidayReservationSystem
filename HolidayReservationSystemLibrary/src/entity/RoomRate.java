@@ -42,7 +42,6 @@ public class RoomRate implements Serializable {
         this.name = name;
         this.roomType = roomType;
         this.rateTypeEnum = rateTypeEnum;
-
         this.roomRateAmount = roomRateAmount;
         this.startDate = startDate;
         this.endDate = endDate;

@@ -4,6 +4,7 @@
  */
 package ejb.session.stateless;
 
+import java.util.Date;
 import javax.ejb.Local;
 
 /**
@@ -13,6 +14,6 @@ import javax.ejb.Local;
 @Local
 public interface AllocateRoomSessionBeanLocal {
 
-    public void allocateRooms();
+    public void allocateRooms(Date currentDate);
     
 }

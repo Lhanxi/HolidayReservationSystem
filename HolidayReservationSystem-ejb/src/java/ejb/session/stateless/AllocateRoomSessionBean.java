@@ -47,10 +47,15 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         allocateRooms();
     } 
     
-    @Override
-    public void allocateRooms() {
+    public void allocateRooms(){ 
         Date currentDate = getCurrentDate();
-        
+        allocateRooms(currentDate);
+    }
+    
+    
+    
+    @Override
+    public void allocateRooms(Date currentDate) {
         //get all the rooms that are not disabled
         List<Room> rooms = hotelInventorySessionBeanLocal.getAllEnabledRooms();
         
@@ -73,12 +78,23 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         
         //create hashMap of the roomTypes and roomCount
         HashMap<RoomType, List<Room>> roomTypeCount = new HashMap<RoomType, List<Room>>(); 
+        HashMap<RoomType, Integer> roomTypesExtra = new HashMap<RoomType, Integer>(); //used to measure the roomtypes that have not been reserved
+        
         
         for (Room room : rooms) {
             RoomType roomType = room.getRoomType();
             List<Room> roomList = roomTypeCount.getOrDefault(roomType, new ArrayList<Room>());
             roomList.add(room);
             roomTypeCount.put(roomType, roomList);
+            
+            roomTypesExtra.put(roomType, roomTypesExtra.getOrDefault(roomType, 0) + 1);
+        }
+        
+        //gets the number of extra room types 
+        for (Reservation r : currentDayReservations) {
+            int numOfRooms = r.getNumRooms(); 
+            RoomType rt = r.getRoomType(); 
+            roomTypesExtra.put(rt, roomTypesExtra.get(rt) - numOfRooms);
         }
 
         
@@ -94,20 +110,27 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
                     //check for the next best ranking
                     RoomType newRoomType = getNextRankingRoomType(roomType);
                     
-                    //check if the new one has
-                    if (roomTypeCount.get(newRoomType).size() > 0) {
+                    //check if the new one has extras
+                    if (roomTypesExtra.get(newRoomType) > 0) {
                         Room allocatedRoom = roomTypeCount.get(newRoomType).get(0); 
                         RoomReservation roomReservation = createRoomReservation(allocatedRoom, newRoomType);
-                        roomTypeCount.get(newRoomType).remove(allocatedRoom);
+                        roomTypeCount.get(newRoomType).remove(allocatedRoom); //takes it out from the current roomts
                         createAllocationExceptionReport(roomReservation, AllocationExceptionReportTypeEnum.TYPE_1);
+                        
+                        //set the reservation
+                        r.getRoomReservations().add(roomReservation);
+                        
+                        roomTypesExtra.put(newRoomType, roomTypesExtra.get(newRoomType) - 1);
                     } else {
                         RoomReservation roomReservation = createRoomReservation(newRoomType); 
+                        r.getRoomReservations().add(roomReservation);
                         createAllocationExceptionReport(roomReservation, AllocationExceptionReportTypeEnum.TYPE_2);
                     }
                 } else if (roomTypeCount.get(roomType).size() > 0) {
                     Room allocatedRoom = roomTypeCount.get(roomType).get(0); 
                     RoomReservation roomReservation = createRoomReservation(allocatedRoom, roomType);
                     roomTypeCount.get(roomType).remove(allocatedRoom);
+                    r.getRoomReservations().add(roomReservation);
                 } 
             }
             
@@ -155,19 +178,21 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         AllocationExceptionReport allocationExceptionReport = new AllocationExceptionReport(allocationExceptionReportTypeEnum);
         em.persist(allocationExceptionReport); 
         allocationExceptionReport.setRoomReservation(roomReservation);
+        roomReservation.setAllocationExceptionReport(allocationExceptionReport);
     }
     
     private RoomReservation createRoomReservation(Room room, RoomType roomType) {
         RoomReservation roomReservation = new RoomReservation(room);
         em.persist(roomReservation); 
-        roomReservation.setRoomType(roomType);
+        //roomReservation.setRoomType(roomType);
         return roomReservation;
     }
     
     private RoomReservation createRoomReservation(RoomType roomType) {
         RoomReservation roomReservation = new RoomReservation();
         em.persist(roomReservation); 
-        roomReservation.setRoomType(roomType);
+        //roomReservation.setRoomType(roomType);
         return roomReservation;
     }
+
 }
