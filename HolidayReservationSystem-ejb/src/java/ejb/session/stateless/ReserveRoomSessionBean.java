@@ -4,9 +4,11 @@
  */
 package ejb.session.stateless;
 
+import entity.Partner;
 import entity.Reservation;
 import entity.RoomRate;
 import entity.RoomType;
+import entity.Visitor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,7 +36,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     
     public ReserveRoomSessionBean() {
     }
-
+    
     @Override
     public Long createReservation(Reservation newReservation, RoomType roomType) {
         //creates a new Reservation
@@ -45,8 +47,27 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public BigDecimal calculateReservationPriceForWalkIn(Reservation reservation, Long roomTypeId) {
-        RoomType roomType = em.find(RoomType.class, roomTypeId);
+    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType) { 
+        em.persist(newReservation);
+        newReservation.setRoomType(roomType);
+        Visitor visitor = em.find(Visitor.class, visitorId);
+        visitor.getReservations().add(newReservation);
+        return newReservation.getReservationId();
+    }
+    
+    @Override
+    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType) { 
+        em.persist(newReservation);
+        newReservation.setRoomType(roomType);
+        Partner partner = em.find(Partner.class, partnerId);
+        partner.getReservations().add(newReservation);
+        return newReservation.getReservationId();
+    }
+    
+    @Override
+    public BigDecimal calculateReservationPriceForWalkIn(Long reservationId, Long roomTypeId) {
+        Reservation reservation = em.find(Reservation.class, reservationId);
+        RoomType roomType = reservation.getRoomType();
        
         RateTypeEnum rateTypeEnum = RateTypeEnum.PUBLISHED;
 

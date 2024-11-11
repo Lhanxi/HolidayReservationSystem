@@ -6,6 +6,7 @@ package horsmanagementclient;
 
 import ejb.session.stateless.AllocateRoomSessionBeanRemote;
 import ejb.session.stateless.EmployeeSessionBeanRemote;
+import ejb.session.stateless.GuestSessionBeanRemote;
 import ejb.session.stateless.HotelInventorySessionBeanRemote;
 import ejb.session.stateless.ReserveRoomSessionBeanRemote;
 import ejb.session.stateless.RoomRateSessionBeanRemote;
@@ -35,11 +36,13 @@ public class Main {
     private static PartnerSessionBeanRemote partnerSessionBeanRemote;
     @EJB
     private static AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote;
+    @EJB
+    private static GuestSessionBeanRemote guestSessionBeanRemote;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, employeeSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote, allocateRoomSessionBeanRemote, partnerSessionBeanRemote); 
+        MainApp mainApp = new MainApp(roomTypeSessionBeanRemote, roomSessionBeanRemote, roomRateSessionBeanRemote, employeeSessionBeanRemote, hotelInventorySessionBeanRemote, reserveRoomSessionBeanRemote, allocateRoomSessionBeanRemote, partnerSessionBeanRemote, guestSessionBeanRemote); 
         mainApp.run(); 
         
     }

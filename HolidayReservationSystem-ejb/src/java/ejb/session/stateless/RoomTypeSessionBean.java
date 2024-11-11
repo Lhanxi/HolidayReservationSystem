@@ -176,6 +176,4 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         query.setParameter("roomTypeName", roomTypeName);
         return (RoomType) query.getSingleResult();
     }
-   
-
 }

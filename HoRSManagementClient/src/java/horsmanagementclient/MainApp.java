@@ -11,12 +11,14 @@ import ejb.session.stateless.RoomRateSessionBeanRemote;
 import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.PartnerSessionBeanRemote;
+import ejb.session.stateless.GuestSessionBeanRemote;
 import entity.Employee;
 import entity.Partner;
 import entity.Reservation;
 import entity.Room;
 import entity.RoomRate;
 import entity.RoomType;
+import entity.Visitor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,8 +36,10 @@ import util.enumeration.EmployeeType;
 import util.enumeration.PartnerType;
 import util.enumeration.RateTypeEnum;
 import util.exception.DuplicateUsernameException;
+import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidPartnerCreationException;
+import util.exception.VisitorNotFoundException;
 /**
  *
  * @author jeremy
@@ -49,11 +53,12 @@ public class MainApp {
     private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
     private PartnerSessionBeanRemote partnerSessionBeanRemote;
     private AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote;
+    private GuestSessionBeanRemote guestSessionBeanRemote;
     
     public MainApp() {
     }
 
-    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote) {
+    public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, EmployeeSessionBeanRemote employeeSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, AllocateRoomSessionBeanRemote allocateRoomSessionBeanRemote, PartnerSessionBeanRemote partnerSessionBeanRemote, GuestSessionBeanRemote guestSessionBeanRemote) {
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
@@ -62,6 +67,7 @@ public class MainApp {
         this.reserveRoomSessionBeanRemote = reserveRoomSessionBeanRemote;
         this.partnerSessionBeanRemote = partnerSessionBeanRemote;
         this.allocateRoomSessionBeanRemote = allocateRoomSessionBeanRemote;
+        this.guestSessionBeanRemote = guestSessionBeanRemote;
     }
     
     public void run() throws Exception {
@@ -967,22 +973,102 @@ public class MainApp {
 
     private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms) {
         Scanner scanner = new Scanner(System.in);
-        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
-        Long roomTypeId = roomType.getRoomTypeId();
+        int response = 0;
+        Long visitorId = null;
         
-        System.out.println("Please select the number of rooms to reserve. You can select up to " + numAvailRooms + " rooms.");
-        Integer numRooms = getIntegerInput();
-        
-        while (numRooms > numAvailRooms || numRooms < 1) {
-            System.out.println("Invalid number, please select a valid number"); 
-            numRooms = getIntegerInput();
+        while (true) {
+            response = 0;
+            System.out.println("=== Have you previously reserved under us? ===\n");
+            System.out.println("1. Yes");
+            System.out.println("2. No");
+            while (response < 1 || response > 2) {
+                response = getIntegerInput();
+                if (response == 1) {
+                    visitorId = this.doVisitorLogin();
+                    break;
+                } else if (response == 2) {
+                    visitorId = this.registerVisitor();
+                    break;
+                } else {
+                    System.out.println("Invalid response. Please Try Again.\n");
+                    continue;
+                }
+            }
+            if (response == 1 || response == 2) {
+                break;
+            }
         }
         
-        Reservation newReservation = new Reservation(startDate, endDate, numRooms);
+        if (visitorId != null) {
+            RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+            Long roomTypeId = roomType.getRoomTypeId();
+
+            System.out.println("Please select the number of rooms to reserve. You can select up to " + numAvailRooms + " rooms.");
+            Integer numRooms = getIntegerInput();
+
+            while (numRooms > numAvailRooms || numRooms < 1) {
+                System.out.println("Invalid number, please select a valid number"); 
+                numRooms = getIntegerInput();
+            }
+
+            Reservation newReservation = new Reservation(startDate, endDate, numRooms);
+
+            Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservationForCustomer(visitorId, newReservation, roomType);
+            BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newRoomTypeId, newRoomTypeId);
+            System.out.println("Reservation successful");
+            System.out.println("Total cost: " + totalCost);
+        } else {
+            System.out.println("Visitor ID not set. Cannot proceed with reservation.");
+        }
+    }
+    
+    private Long doVisitorLogin() {
+        Scanner scanner = new Scanner(System.in);
+        Visitor visitor;
         
-        Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType);
-        BigDecimal totalCost = reserveRoomSessionBeanRemote.calculateReservationPriceForWalkIn(newReservation, newRoomTypeId);
-        System.out.println("Total cost: " + totalCost);
+        System.out.println("=== Enter your credentials ===\n");
+        String name = "";
+        String passportNumber = "";
+        
+        while (true) {
+            System.out.println("Enter name>");
+            name = scanner.next().trim();
+            System.out.println("Enter passport number>");
+            passportNumber = scanner.next().trim();
+            try {
+                visitor = guestSessionBeanRemote.visitorCheckIn(name, passportNumber);
+                break;
+            } catch (VisitorNotFoundException ex) {
+                System.out.println(ex.getMessage());
+                continue;
+            }
+        }
+        return visitor.getGuestId();
+    }
+    
+    private Long registerVisitor() {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.println("=== Enter your credentials ===\n");
+        String name = "";
+        String passportNumber = "";
+        Long visitorId;
+        
+        while (true) {
+            System.out.println("Enter name>");
+            name = scanner.next().trim();
+            System.out.println("Enter passport number>");
+            passportNumber = scanner.next().trim();
+            Visitor visitor = new Visitor(name, passportNumber);
+            try {
+                visitorId = guestSessionBeanRemote.createNewCustomer(visitor);
+                break;
+            } catch (InvalidCustomerCreationException ex) {
+                System.out.println(ex.getMessage());
+                continue;
+            }
+        }
+        return visitorId;
     }
     
     private void allocateRoomstoCurrentDayReservations() {

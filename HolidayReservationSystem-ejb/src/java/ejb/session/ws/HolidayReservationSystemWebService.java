@@ -7,6 +7,7 @@ package ejb.session.ws;
 import ejb.session.stateless.HotelInventorySessionBeanLocal;
 import ejb.session.stateless.PartnerSessionBeanLocal;
 import ejb.session.stateless.ReserveRoomSessionBeanLocal;
+import ejb.session.stateless.RoomTypeSessionBeanLocal;
 import javax.ejb.EJB;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
@@ -16,9 +17,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import entity.Partner;
 import java.util.List;
-import java.util.ArrayList;
 import entity.Reservation;
 import entity.RoomReservation;
+import entity.RoomType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import javax.xml.datatype.XMLGregorianCalendar;
+import util.exception.InvalidLoginException;
+import util.exception.ReservationNotFoundException;
 
 /**
  *
@@ -28,8 +36,8 @@ import entity.RoomReservation;
 @Stateless()
 public class HolidayReservationSystemWebService {
 
-    @EJB
-    private ReserveRoomSessionBeanLocal reserveRoomSessionBean;
+    @EJB(name = "ReserveRoomSessionBean")
+    private ReserveRoomSessionBeanLocal reserveRoomSessionBeanLocal;
 
     @EJB(name = "HotelInventorySessionBeanLocal")
     private HotelInventorySessionBeanLocal hotelInventorySessionBeanLocal;
@@ -39,33 +47,92 @@ public class HolidayReservationSystemWebService {
 
     @EJB(name = "PartnerSessionBeanLocal")
     private PartnerSessionBeanLocal partnerSessionBeanLocal;
-    /**
-     * This is a sample web service operation
-     */
-    /**
-     * @return 
-    @WebMethod(operationName = "doLogin")
-    public Partner doLogin() {
-        return "Hello " + " !";
+    
+    @EJB(name = "RoomTypeSessionBeanlocal")
+    private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
+    
+    @WebMethod(operationName = "doPartnerLogin")
+    public Partner doPartnerLogin(@WebParam(name = "username") String username, @WebParam(name = "password") String password) throws InvalidLoginException {
+        try {
+            Partner partner = partnerSessionBeanLocal.partnerLogin(username, password);
+            em.detach(partner);
+            return partner;
+        } catch(InvalidLoginException ex) {
+            throw new InvalidLoginException("Username does not exist or invalid password!");
+        }
     }
-    **/
+    
+    @WebMethod(operationName = "searchRoom")
+    public String[] searchRoom(@WebParam(name = "startDate") XMLGregorianCalendar startDate, 
+                                 @WebParam(name = "endDate") XMLGregorianCalendar endDate) throws InvalidLoginException {
+        Date startDateConverted = startDate.toGregorianCalendar().getTime();
+        Date endDateConverted = endDate.toGregorianCalendar().getTime();
+
+        HashMap<String, Integer> roomAvailability = hotelInventorySessionBeanLocal.getAvailableRoomTypes(startDateConverted, endDateConverted);
+
+        String[] resultArray = new String[roomAvailability.size()]; 
+
+        int index = 0;
+        for (Map.Entry<String, Integer> entry : roomAvailability.entrySet()) {
+            resultArray[index] = entry.getKey() + " " + entry.getValue().toString();  
+            index++;
+        }
+        return resultArray;
+    }
+    
+    @WebMethod(operationName = "retrieveRoomType")
+    public RoomType retrieveRoomType(@WebParam(name = "roomTypeName") String roomTypeName) {
+        return roomTypeSessionBeanLocal.getRoomTypeByName(roomTypeName);
+    }
+    
+    @WebMethod(operationName = "reserveRoom")
+    public Long reserveRoom(@WebParam(name = "partnerId") Long partnerId, 
+                            @WebParam(name = "startDate") XMLGregorianCalendar startDate,
+                            @WebParam(name = "endDate") XMLGregorianCalendar endDate, 
+                            @WebParam(name = "numOfRooms") Integer numOfRooms, 
+                            @WebParam(name = "roomType") RoomType roomType) {
+        Date startDateConverted = startDate.toGregorianCalendar().getTime();
+        Date endDateConverted = endDate.toGregorianCalendar().getTime();
+        Reservation newReservation = new Reservation(startDateConverted, endDateConverted, numOfRooms);
+        return reserveRoomSessionBeanLocal.createReservationForPartner(partnerId, newReservation, roomType);
+    }
+    
+    @WebMethod(operationName = "retrieveReservation")
+    public Reservation retrieveReservation(@WebParam(name = "reservationId") Long reservationId) throws ReservationNotFoundException {
+        try {
+            Reservation reservation = partnerSessionBeanLocal.retrieveReservationById(reservationId);
+            em.detach(reservation.getRoomReservations());
+            em.detach(reservation.getRoomType());
+            em.detach(reservation);
+
+            return reservation;
+        } catch (ReservationNotFoundException ex) {
+            throw new ReservationNotFoundException("Reservation ID " + reservationId + " does not exist");
+        }
+    }
     
     @WebMethod(operationName = "retrieveAllPartnerReservations")
-    public List<Reservation> retrieveAllPartnerReservations(@WebParam(name = "partnerId") Long partnerId) {
-        List<Reservation> reservations = partnerSessionBeanLocal.retrieveAllReservationByPartnerId(partnerId);
-        
-        for (Reservation reservation : reservations) {
-            if (reservation.getRoomReservations() != null) {
-                
-                List<RoomReservation> roomReservations = reservation.getRoomReservations(); 
-                roomReservations.size();
-                em.detach(roomReservations);
+    public Reservation[] retrieveAllPartnerReservations(@WebParam(name = "partnerId") Long partnerId) throws ReservationNotFoundException {
+        try {
+            List<Reservation> reservations = partnerSessionBeanLocal.retrieveAllReservationByPartnerId(partnerId);
+
+            for (Reservation reservation : reservations) {
+                if (reservation.getRoomReservations() != null) {
+                    List<RoomReservation> roomReservations = new ArrayList<>(reservation.getRoomReservations());
+                    roomReservations.size(); 
+                    em.detach(roomReservations);
+                    reservation.setRoomReservations(roomReservations);
+                }
+                if (reservation.getRoomType() != null) {
+                    em.detach(reservation.getRoomType());
+                }
+                em.detach(reservation);
             }
-            if (reservation.getRoomType() != null) {
-                em.detach(reservation.getRoomType());
-            }
-            em.detach(reservation);
+
+            return reservations.toArray(new Reservation[0]);
+
+        } catch (ReservationNotFoundException ex) {
+            throw new ReservationNotFoundException("Reservations do not exist");
         }
-        return reservations;
     }
 }

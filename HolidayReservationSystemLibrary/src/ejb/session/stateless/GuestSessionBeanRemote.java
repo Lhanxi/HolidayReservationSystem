@@ -6,12 +6,14 @@ package ejb.session.stateless;
 
 import entity.Customer;
 import entity.Reservation;
+import entity.Visitor;
 import java.util.List;
 import javax.ejb.Remote;
 import util.exception.CustomerNotFoundException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.ReservationNotFoundException;
+import util.exception.VisitorNotFoundException;
 
 /**
  *
@@ -19,9 +21,10 @@ import util.exception.ReservationNotFoundException;
  */
 @Remote
 public interface GuestSessionBeanRemote {
-    public Long createNewCustomer(Customer newCustomer) throws InvalidCustomerCreationException;
+    public Long createNewCustomer(Visitor newCustomer) throws InvalidCustomerCreationException;
     public Customer retrieveCustomerByUsername(String username) throws CustomerNotFoundException;
     public Customer customerLogin(String username, String password) throws InvalidLoginException;
+    public Visitor visitorCheckIn(String name, String passportNumber) throws VisitorNotFoundException;
     public Reservation retrieveReservationById(Long reservationId) throws ReservationNotFoundException;
-    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId);
+    public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException;
 }
