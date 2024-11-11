@@ -95,14 +95,14 @@ public class Customer extends Visitor implements Serializable {
      * @return the reservations
      */
     public List<Reservation> getReservations() {
-        return reservations;
+        return super.reservations;
     }
 
     /**
      * @param reservations the reservations to set
      */
     public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
+        super.reservations = reservations;
     }
 
     public Long getGuestId() {
