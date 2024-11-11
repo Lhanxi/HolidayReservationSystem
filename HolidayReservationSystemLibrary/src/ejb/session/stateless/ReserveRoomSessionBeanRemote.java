@@ -22,7 +22,7 @@ import javax.persistence.NoResultException;
 public interface ReserveRoomSessionBeanRemote {
     public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType);
     public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType);
-    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId);
+    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId, Long roomRateId);
     public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations);
     public BigDecimal getPublishedRoomRate(RoomType roomType) throws NoResultException;
 }

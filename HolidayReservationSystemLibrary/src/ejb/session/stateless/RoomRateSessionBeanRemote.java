@@ -22,4 +22,7 @@ public interface RoomRateSessionBeanRemote {
 
     public List<RoomRate> getAllRoomRates();
     public void updateRoomRate(Long roomRateId, String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate);
+    public Long getRoomRateForRoomType(RoomType roomType, RateTypeEnum rateTypeEnum);
+    public String deleteRoomRate(Long roomRateId);
+    public List<RoomRate> getEnabledRoomRates();
 }

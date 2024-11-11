@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.ArrayList;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -41,6 +42,8 @@ public class Reservation implements Serializable {
     private RoomType roomType;
     @OneToMany 
     private List<RoomReservation> roomReservations;
+    @ManyToOne
+    private RoomRate roomRate;
 
     public Reservation() {
     }
@@ -91,6 +94,15 @@ public class Reservation implements Serializable {
     public void setRoomType(RoomType roomType) {
         this.roomType = roomType;
     }
+
+    public RoomRate getRoomRate() {
+        return roomRate;
+    }
+
+    public void setRoomRate(RoomRate roomRate) {
+        this.roomRate = roomRate;
+    }
+    
    
     
         /**
