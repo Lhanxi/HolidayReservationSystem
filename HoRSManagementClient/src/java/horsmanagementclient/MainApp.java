@@ -1064,19 +1064,19 @@ public class MainApp {
         
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
         Long roomRateId = roomRateSessionBeanRemote.getRoomRateForRoomType(roomType, RateTypeEnum.PUBLISHED); //getting for published because this is walk-in
-        Long newRoomTypeId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType, visitorId, roomRateId);
-        System.out.println("Reservation successful");
+        Long newReservationId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType, visitorId, roomRateId);
+        System.out.println("Reservation successfully created. ReservationId : " + newReservationId);
     }
     
     private Long doVisitorLogin() throws VisitorNotFoundException, InvalidCustomerCreationException {
         Scanner scanner = new Scanner(System.in);
-        Visitor visitor;
+        Visitor visitor = null;
         
         System.out.println("=== Enter your credentials ===\n");
         String name = "";
         String passportNumber = "";
         
-        while (true) {
+        while (visitor == null) {
             System.out.println("Enter passport number>");
             passportNumber = scanner.next().trim();
             try {
@@ -1084,7 +1084,8 @@ public class MainApp {
                 break;
             } catch (VisitorNotFoundException ex) {
                 System.out.println(ex.getMessage());
-                registerVisitor();
+                Long visitorId = registerVisitor();
+                visitor = guestSessionBeanRemote.receiveCustomerById(visitorId);
             }
         }
         return visitor.getGuestId();
@@ -1102,7 +1103,7 @@ public class MainApp {
             System.out.println("Enter name>");
             name = scanner.next().trim();
             System.out.println("Enter passport number>"); 
-            passportNumber = scanner.nextLine().trim();
+            passportNumber = scanner.next();
             Visitor visitor = new Visitor(name, passportNumber);
             try {
                 visitorId = guestSessionBeanRemote.createNewCustomer(visitor);

@@ -50,6 +50,12 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
         }
     }
     
+    @Override
+    public Visitor receiveCustomerById(Long customerId) {
+        Visitor visitor = entityManager.find(Visitor.class, customerId); 
+        return visitor;
+    }
+    
     
     public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException {
        try {
@@ -68,7 +74,7 @@ public class GuestSessionBean implements GuestSessionBeanRemote, GuestSessionBea
         try {
             return (Visitor)query.getSingleResult();
         } catch(NoResultException | NonUniqueResultException ex) {
-            throw new VisitorNotFoundException("Visitor with passport number " + passportNumber + "does not exist");
+            throw new VisitorNotFoundException("Visitor with passport number " + passportNumber + " does not exist");
         }
     }
     
