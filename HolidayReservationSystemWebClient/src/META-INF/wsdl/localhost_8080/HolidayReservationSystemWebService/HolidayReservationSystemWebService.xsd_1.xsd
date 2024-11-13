@@ -20,6 +20,10 @@
 
 <xs:element name="retrieveReservationResponse" type="tns:retrieveReservationResponse"/>
 
+<xs:element name="retrieveRoomRateCost" type="tns:retrieveRoomRateCost"/>
+
+<xs:element name="retrieveRoomRateCostResponse" type="tns:retrieveRoomRateCostResponse"/>
+
 <xs:element name="retrieveRoomType" type="tns:retrieveRoomType"/>
 
 <xs:element name="retrieveRoomTypeResponse" type="tns:retrieveRoomTypeResponse"/>
@@ -27,6 +31,34 @@
 <xs:element name="searchRoom" type="tns:searchRoom"/>
 
 <xs:element name="searchRoomResponse" type="tns:searchRoomResponse"/>
+
+<xs:complexType name="retrieveRoomRateCost">
+<xs:sequence>
+<xs:element name="startDate" type="xs:anySimpleType" minOccurs="0"/>
+<xs:element name="endDate" type="xs:anySimpleType" minOccurs="0"/>
+<xs:element name="roomType" type="tns:roomType" minOccurs="0"/>
+<xs:element name="numOfRooms" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="roomType">
+<xs:sequence>
+<xs:element name="amenities" type="xs:string" minOccurs="0"/>
+<xs:element name="bedCapacity" type="xs:string" minOccurs="0"/>
+<xs:element name="description" type="xs:string" minOccurs="0"/>
+<xs:element name="isDisabled" type="xs:boolean"/>
+<xs:element name="name" type="xs:string" minOccurs="0"/>
+<xs:element name="ranking" type="xs:int" minOccurs="0"/>
+<xs:element name="roomTypeId" type="xs:long" minOccurs="0"/>
+<xs:element name="size" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="retrieveRoomRateCostResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:decimal" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
 
 <xs:complexType name="retrieveAllPartnerReservations">
 <xs:sequence>
@@ -53,9 +85,16 @@
 
 <xs:complexType name="roomReservation">
 <xs:sequence>
+<xs:element name="allocationExceptionReport" type="tns:allocationExceptionReport" minOccurs="0"/>
 <xs:element name="room" type="tns:room" minOccurs="0"/>
 <xs:element name="roomReservationId" type="xs:long" minOccurs="0"/>
-<xs:element name="roomType" type="tns:roomType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="allocationExceptionReport">
+<xs:sequence>
+<xs:element name="allocationExceptionReportTypeEnum" type="tns:allocationExceptionReportTypeEnum" minOccurs="0"/>
+<xs:element name="id" type="xs:long" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -65,19 +104,6 @@
 <xs:element name="roomNumber" type="xs:string" minOccurs="0"/>
 <xs:element name="roomStatus" type="xs:boolean" minOccurs="0"/>
 <xs:element name="roomType" type="tns:roomType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="roomType">
-<xs:sequence>
-<xs:element name="amenities" type="xs:string" minOccurs="0"/>
-<xs:element name="bedCapacity" type="xs:string" minOccurs="0"/>
-<xs:element name="description" type="xs:string" minOccurs="0"/>
-<xs:element name="isDisabled" type="xs:boolean"/>
-<xs:element name="name" type="xs:string" minOccurs="0"/>
-<xs:element name="ranking" type="xs:int" minOccurs="0"/>
-<xs:element name="roomTypeId" type="xs:long" minOccurs="0"/>
-<xs:element name="size" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -168,6 +194,13 @@
 <xs:element name="username" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
+
+<xs:simpleType name="allocationExceptionReportTypeEnum">
+<xs:restriction base="xs:string">
+<xs:enumeration value="TYPE_1"/>
+<xs:enumeration value="TYPE_2"/>
+</xs:restriction>
+</xs:simpleType>
 
 <xs:simpleType name="partnerType">
 <xs:restriction base="xs:string">

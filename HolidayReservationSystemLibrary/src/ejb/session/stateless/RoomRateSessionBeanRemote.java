@@ -22,4 +22,5 @@ public interface RoomRateSessionBeanRemote {
 
     public List<RoomRate> getAllRoomRates();
     public void updateRoomRate(Long roomRateId, String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate);
+    public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms);
 }

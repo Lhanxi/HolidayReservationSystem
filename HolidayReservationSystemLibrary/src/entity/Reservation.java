@@ -92,7 +92,7 @@ public class Reservation implements Serializable {
         this.roomType = roomType;
     }
    
-    
+
         /**
      * @return the roomReservations
      */

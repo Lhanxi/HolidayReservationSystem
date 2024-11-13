@@ -7,6 +7,7 @@ package ejb.session.stateless;
 import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -52,4 +53,40 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
         roomRate.setEndDate(endDate);
     }
     
+    @Override
+    public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType=:roomType");
+        query.setParameter("roomType", roomType); 
+        List<RoomRate> roomRates = query.getResultList();
+        
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        
+        while (!calendar.getTime().after(endDate)) {
+            Date currentDate = calendar.getTime();
+            
+            BigDecimal dailyRate = findRateAmountForDate(roomRates, currentDate);
+
+            totalAmount = totalAmount.add(dailyRate.multiply(BigDecimal.valueOf(noOfRooms)));
+
+            calendar.add(Calendar.DATE, 1);
+        }
+        return totalAmount;
+    }
+    
+    private BigDecimal findRateAmountForDate(List<RoomRate> roomRates, Date date) {
+        for (RoomRate roomRate : roomRates) {
+            if (!date.before(roomRate.getStartDate()) && !date.after(roomRate.getEndDate())) {
+                return roomRate.getRoomRateAmount();
+            }
+        }
+        for (RoomRate roomRate : roomRates) {
+            if (roomRate.getRateTypeEnum() == RateTypeEnum.PUBLISHED) {
+                return roomRate.getRoomRateAmount();
+            }
+        }
+        return BigDecimal.ZERO; 
+    }
 }
+
