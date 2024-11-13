@@ -105,9 +105,7 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
             return;
         } else if (targetIndex == roomTypes.size() && roomTypeCurrentIndex == roomTypes.size() - 1) { //this is the case where they select move to the end but it is already at the end
             return;
-        } else if (targetIndex == roomTypes.size()) {
-            targetIndex -= 1;
-        }
+        } 
         
         //int currentRanking = roomType.getRanking();
 

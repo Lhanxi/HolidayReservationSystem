@@ -514,6 +514,7 @@ public class MainApp {
                 newAmenities = scanner.next(); 
             } else if (response == 6) {
                 targetIndex = getRoomTypeTargetIndex();
+                System.out.println("targetIndex " + targetIndex);
             }  else if (response == 7) {
                 break;
             }
