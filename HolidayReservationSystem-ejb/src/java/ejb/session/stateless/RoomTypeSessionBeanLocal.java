@@ -7,6 +7,7 @@ package ejb.session.stateless;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Local;
+import util.exception.RoomTypeCreationException;
 
 /**
  *
@@ -14,7 +15,7 @@ import javax.ejb.Local;
  */
 @Local
 public interface RoomTypeSessionBeanLocal {
-    public Long createNewRoomType(RoomType newRoomType, Integer ranking);
+    public Long createNewRoomType(RoomType newRoomType, Integer ranking) throws RoomTypeCreationException ;
     public List<RoomType> getRoomTypeList();
     public void updateRoomTypeDetails(Long roomTypeId, String roomTypeName, String newDescription, String newSize, String newBedCapacity, String newAmenities, Integer ranking);
     public String deleteRoomType(Long roomTypeId);

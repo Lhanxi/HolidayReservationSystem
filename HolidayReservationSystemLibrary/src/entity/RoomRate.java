@@ -14,6 +14,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -37,7 +38,7 @@ public class RoomRate implements Serializable {
     @Size(max=64)
     private String name; 
     @ManyToOne
-    @Column(nullable=false)
+    @JoinColumn(nullable=false)
     @NotNull
     private RoomType roomType;
     @Enumerated(EnumType.STRING)

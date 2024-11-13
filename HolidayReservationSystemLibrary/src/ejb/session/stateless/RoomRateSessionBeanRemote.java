@@ -13,6 +13,7 @@ import javax.ejb.Remote;
 import javax.persistence.NoResultException;
 import util.enumeration.RateTypeEnum;
 import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomRateCreationException;
 
 /**
  *
@@ -20,8 +21,7 @@ import util.enumeration.RoomRateNotFoundException;
  */
 @Remote
 public interface RoomRateSessionBeanRemote {
-    public Long createNewRoomRate(RoomRate roomRate);
-
+    public Long createNewRoomRate(RoomRate roomRate) throws RoomRateCreationException;
     public List<RoomRate> getAllRoomRates();
     public void updateRoomRate(Long roomRateId, String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate);
     public Long getRoomRateForRoomType(RoomType roomType, RateTypeEnum rateTypeEnum);

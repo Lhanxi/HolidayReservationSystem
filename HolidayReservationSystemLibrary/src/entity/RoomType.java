@@ -24,7 +24,7 @@ public class RoomType implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomTypeId;
-    @Column(nullable = false, length = 64)
+    @Column(nullable = false, length = 64, unique = true)
     @NotNull
     @Size(max=64)
     private String name;
@@ -44,7 +44,6 @@ public class RoomType implements Serializable {
     @NotNull
     private boolean isDisabled; 
     @Column(nullable = false, unique = true)
-    @NotNull
     private Integer ranking;
 
     public RoomType() {

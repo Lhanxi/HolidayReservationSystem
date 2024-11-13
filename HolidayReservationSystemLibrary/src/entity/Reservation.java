@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.ArrayList;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -43,14 +44,12 @@ public class Reservation implements Serializable {
     @NotNull
     private Integer numRooms;
     @OneToOne
-    @Column(nullable = false)
-    @NotNull
+    @JoinColumn(nullable = false)
     private RoomType roomType;
     @OneToMany 
     private List<RoomReservation> roomReservations;
     @ManyToMany
-    @Column(nullable = false)
-    @NotNull
+    @JoinColumn(nullable = false)
     private List<RoomRate> roomRates;
 
     public Reservation() {

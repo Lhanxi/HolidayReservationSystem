@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -47,6 +49,10 @@ import util.exception.DuplicateUsernameException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidPartnerCreationException;
+import util.exception.ReservationCreationException;
+import util.exception.RoomCreationException;
+import util.exception.RoomRateCreationException;
+import util.exception.RoomTypeCreationException;
 import util.exception.VisitorNotFoundException;
 /**
  *
@@ -321,20 +327,28 @@ public class MainApp {
             employeeType = EmployeeType.GUEST_RELATION_OFFICER;
         }
         boolean isCreated = false;
+            
         
-        do {
-            Employee employee = new Employee(username, password, employeeType); 
-            try {
-                employeeSessionBeanRemote.createNewEmployee(employee);
-                System.out.println("Employee created successfully!");
-                isCreated = true;
-            } catch (Exception ex) {
-                System.out.println("Error: " + ex.getMessage() + " Please enter a different username.");
-                System.out.println("Please enter employee username:");
-                System.out.print("> "); 
-                username = scanner.next();
+        Employee employee = new Employee(username, password, employeeType); 
+        Set<ConstraintViolation<Employee>>constraintViolations = validator.validate(employee);
+        
+        if (constraintViolations.isEmpty()) {
+        
+            while (true) {
+                try {
+                    employeeSessionBeanRemote.createNewEmployee(employee);
+                    System.out.println("Employee created successfully!");
+                    break;
+                 } catch (Exception ex) {
+                    System.out.println("Error: " + ex.getMessage() + " Please enter a different username.");
+                    System.out.println("Please enter employee username:");
+                    System.out.print("> "); 
+                    username = scanner.next();
+                }
             }
-        } while (!isCreated);
+        } else {
+            showInputDataValidationErrorsForEmployee(constraintViolations);
+        }
     }
     
     private void viewAllEmployees() {
@@ -356,34 +370,41 @@ public class MainApp {
     }
     
     private void createNewPartner() {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            Integer response = 0;
-            PartnerType partnerType = PartnerType.EMPLOYEE;
+        Scanner scanner = new Scanner(System.in);
+        Integer response = 0;
+        PartnerType partnerType = PartnerType.EMPLOYEE;
 
-            System.out.println("===Create New Partner==="); 
-            System.out.println("Please enter employee username");
-            System.out.print(">"); 
-            String username = scanner.next();
+        System.out.println("===Create New Partner==="); 
+        System.out.println("Please enter employee username");
+        System.out.print(">"); 
+        String username = scanner.next();
 
-            System.out.println("Please enter employee password");
-            System.out.print(">"); 
-            String password = scanner.next();
+        System.out.println("Please enter employee password");
+        System.out.print(">"); 
+        String password = scanner.next();
 
-            while (response < 1 || response > 4) {
-                System.out.println("Please select the partner type");
-                System.out.println("1: Partner Employee");
-                System.out.println("2: Partner Reservation Manager");
-                response = getIntegerInput();
+        while (response < 1 || response > 4) {
+            System.out.println("Please select the partner type");
+            System.out.println("1: Partner Employee");
+            System.out.println("2: Partner Reservation Manager");
+            response = getIntegerInput();
+        }
+
+        if (response == 2) {
+            partnerType = PartnerType.RESERVATION_MANAGER;
+        }
+
+        Partner partner = new Partner(username, password, partnerType);
+        Set<ConstraintViolation<Partner>> constraintViolations = validator.validate(partner);
+
+        if (constraintViolations.isEmpty()) {
+            try {
+                partnerSessionBeanRemote.createNewPartner(partner);
+            } catch (InvalidPartnerCreationException ex) {
+                System.out.println(ex.getMessage());
             }
-
-            if (response == 2) {
-                partnerType = PartnerType.RESERVATION_MANAGER;
-            }
-            Partner partner = new Partner(username, password, partnerType);
-            partnerSessionBeanRemote.createNewPartner(partner);
-        } catch (InvalidPartnerCreationException ex) {
-            System.out.println(ex.getMessage());
+        } else {
+            
         }
     }
     
@@ -432,10 +453,18 @@ public class MainApp {
         System.out.println("ranking: " + ranking);
         
         RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, false);
+        Set<ConstraintViolation<RoomType>> constraintViolations = validator.validate(newRoomType);
         
-        Long roomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, ranking); 
-        
-        System.out.println("Room Type Successfully created, Room Type Id: " + roomTypeId);
+        if (constraintViolations.isEmpty()) {
+            try {
+                Long roomTypeId = roomTypeSessionBeanRemote.createNewRoomType(newRoomType, ranking); 
+                System.out.println("Room Type Successfully created, Room Type Id: " + roomTypeId);
+            } catch (RoomTypeCreationException ex) {
+                System.out.println(ex.getMessage());
+            }
+        } else {
+            showInputDataValidationErrorsForRoomType(constraintViolations);
+        }
     }
     
     private void viewRoomTypeDetails() {
@@ -564,7 +593,7 @@ public class MainApp {
         }
     }
     
-    private void createNewRoom() {
+    private void createNewRoom() throws RoomCreationException {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("Select the room type for the room"); 
@@ -595,11 +624,19 @@ public class MainApp {
         }
         
         Room room = new Room(roomType, roomNumber, true, false);
+        Set<ConstraintViolation<Room>> constraintViolations = validator.validate(room);
         
-        Long roomID = roomSessionBeanRemote.createNewRoom(room);
-        
-        System.out.println("Room successfully created! Room ID: " + roomID);
-        System.out.println("");
+        if (constraintViolations.isEmpty()) {
+            try {
+                Long roomID = roomSessionBeanRemote.createNewRoom(room);
+                System.out.println("Room successfully created! Room ID: " + roomID);
+                System.out.println("");
+            } catch (RoomCreationException ex) {
+                System.out.println("Room creation failed " + ex.getMessage());
+            }
+        } else {
+            showInputDataValidationErrorsForRoom(constraintViolations);
+        }
     }
     
     private void deleteRoom() {
@@ -626,7 +663,6 @@ public class MainApp {
     }
     
     private void updateRoom() {
-        
         Scanner scanner = new Scanner(System.in);
         String roomNumber = "0";
         
@@ -707,9 +743,7 @@ public class MainApp {
             } else if (response == 5) {
                 break;
             }
-                
         }
-        
         roomSessionBeanRemote.updateRoom(roomId, roomType, roomNumber, status, isDisabled);
     }
     
@@ -724,7 +758,7 @@ public class MainApp {
     }
     
     
-    private void createNewRoomRate () {
+    private void createNewRoomRate () throws RoomRateCreationException {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("Please enter the room rate name"); 
@@ -774,12 +808,19 @@ public class MainApp {
                 break; 
             }
         }
-        //still need to do some of the setting later
-        
         RoomRate newRoomRate = new RoomRate(name, roomType, rateType, ratePerNight, startDate, endDate);
+        Set<ConstraintViolation<RoomRate>> constraintViolations = validator.validate(newRoomRate);
         
-        roomRateSessionBeanRemote.createNewRoomRate(newRoomRate);
-        System.out.println("New Room Rate successfully created!");
+        if (constraintViolations.isEmpty()) {
+            try {
+                Long roomRateId = roomRateSessionBeanRemote.createNewRoomRate(newRoomRate);
+                System.out.println("New Room Rate successfully created, roomRateId = " + roomRateId);
+            } catch (RoomRateCreationException ex) {
+                System.out.println("RoomRate Creation failed, " + ex.getMessage());
+            }
+        } else {
+            showInputDataValidationErrorsForRoomRate(constraintViolations);
+        }
     }
     
     private void updateRoomRate() {
@@ -993,7 +1034,7 @@ public class MainApp {
         return roomRates.get(response).getRoomRateId();
     }
     
-    private void walkInSearchRoom() throws VisitorNotFoundException, InvalidCustomerCreationException{
+    private void walkInSearchRoom() throws VisitorNotFoundException, InvalidCustomerCreationException, ReservationCreationException {
         Scanner scanner = new Scanner(System.in);
         
         Date startDate, endDate;
@@ -1019,6 +1060,11 @@ public class MainApp {
         
         for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
             roomTypes.add(entry.getKey());
+        }
+        
+        if (roomTypes.size() == 0) {
+            System.out.println("There are no available room types to be reserved"); 
+            return;
         }
         
         System.out.println("Available room types. Please select which room type to make a reservation");
@@ -1055,7 +1101,7 @@ public class MainApp {
     }
 
 
-    private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms) throws VisitorNotFoundException, InvalidCustomerCreationException {
+    private void walkInReserveRoom(String roomTypeName, Date startDate, Date endDate, Integer numAvailRooms) throws VisitorNotFoundException, InvalidCustomerCreationException, ReservationCreationException {
         Scanner scanner = new Scanner(System.in);
         int response = 0;
         Long visitorId = null;
@@ -1077,8 +1123,6 @@ public class MainApp {
                 System.out.println("Invalid number, please select a valid number"); 
                 numRooms = getIntegerInput();
             }
-
-            
 
             BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
             BigDecimal totalPrice = roomRatePublished.multiply(new BigDecimal(numRooms));
@@ -1102,9 +1146,19 @@ public class MainApp {
         }
         
         Reservation newReservation = new Reservation(startDate, endDate, numRooms);
-        Long roomRateId = roomRateSessionBeanRemote.getRoomRateForRoomType(roomType, RateTypeEnum.PUBLISHED); //getting for published because this is walk-in
-        Long newReservationId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType, visitorId, roomRateId);
-        System.out.println("Reservation successfully created. ReservationId : " + newReservationId);
+        Set<ConstraintViolation<Reservation>> constraintViolations = validator.validate(newReservation);
+        
+        if (constraintViolations.isEmpty()) {
+            try {
+                Long roomRateId = roomRateSessionBeanRemote.getRoomRateForRoomType(roomType, RateTypeEnum.PUBLISHED); //getting for published because this is walk-in
+                Long newReservationId = reserveRoomSessionBeanRemote.createReservation(newReservation, roomType, visitorId, roomRateId);
+                 System.out.println("Reservation successfully created. ReservationId : " + newReservationId);
+            } catch (ReservationCreationException ex) {
+                System.out.println("Reservation creation failed: " + ex.getMessage());
+            }
+        } else {
+            showInputDataValidationErrorsForReservation(constraintViolations);
+        }
     }
     
     private Long doVisitorLogin() throws VisitorNotFoundException, InvalidCustomerCreationException {
@@ -1245,7 +1299,6 @@ public class MainApp {
         }
         roomSessionBeanRemote.checkOut(roomNumbers);
     }
-
     
     private void allocateRoomstoCurrentDayReservations() {
         Scanner scanner = new Scanner(System.in);
@@ -1365,5 +1418,77 @@ public class MainApp {
             response = getIntegerInput();
         }
         return response; 
+    }
+    
+    private void showInputDataValidationErrorsForEmployee(Set<ConstraintViolation<Employee>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+    private void showInputDataValidationErrorsForPartner(Set<ConstraintViolation<Employee>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+    private void showInputDataValidationErrorsForRoomType(Set<ConstraintViolation<RoomType>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+    private void showInputDataValidationErrorsForRoomRate(Set<ConstraintViolation<RoomRate>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+    private void showInputDataValidationErrorsForRoom(Set<ConstraintViolation<Room>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+     private void showInputDataValidationErrorsForReservation(Set<ConstraintViolation<Reservation>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
     }
 }

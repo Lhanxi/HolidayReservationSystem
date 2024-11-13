@@ -8,11 +8,11 @@ import entity.RoomType;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import util.exception.RoomTypeCreationException;
 
 /**
  *
@@ -26,9 +26,14 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     
     public RoomTypeSessionBean() {
     }
-     @Override
-    public Long createNewRoomType(RoomType newRoomType, Integer ranking) {
+    
+    @Override
+    public Long createNewRoomType(RoomType newRoomType, Integer ranking) throws RoomTypeCreationException {
     try {
+        
+        if (!isValidRoomTypeName(newRoomType.getName())) {
+            throw new RoomTypeCreationException("Room Type with name " + newRoomType.getName() + " already exists");
+        }
         List<RoomType> roomTypes = getRoomTypeList();
         
         if (roomTypes.size() > 0) {
@@ -43,10 +48,15 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
         
         System.out.println("RoomType created with ID: " + newRoomType.getRoomTypeId());
         } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println("Error persisting RoomType: " + ex.getMessage());
+            throw new RoomTypeCreationException("Room Type with name " + newRoomType.getName() + " already exists");
         }
         return newRoomType.getRoomTypeId();
+    }
+    
+    public boolean isValidRoomTypeName(String name) {
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.name:=name"); 
+        query.setParameter("name", name);
+        return query.getResultList().size() > 0;
     }
     
     private void updateRoomTypeRankings(List<RoomType> roomTypes, Integer ranking) {

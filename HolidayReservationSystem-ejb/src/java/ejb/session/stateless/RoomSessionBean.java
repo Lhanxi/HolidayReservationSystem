@@ -7,13 +7,14 @@ package ejb.session.stateless;
 import entity.Room;
 import entity.RoomReservation;
 import entity.RoomType;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import util.enumeration.RoomDeletionException;
+import util.exception.RoomCreationException;
 
 /**
  *
@@ -30,10 +31,19 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     
 
     @Override
-    public Long createNewRoom(Room room) {
-        em.persist(room); 
-        em.flush();
-        return room.getRoomId();
+    public Long createNewRoom(Room room) throws RoomCreationException {
+        if (!isValidRoomNumber(room.getRoomNumber())) {
+            throw new RoomCreationException("Room with room number " + room.getRoomNumber() + " already exists");
+        } 
+        
+        try {
+            em.persist(room); 
+            em.flush();
+            return room.getRoomId();
+        } catch (PersistenceException ex) {
+            throw new RoomCreationException("Unexpected Error when creating room: " + ex.getMessage()); 
+        }
+        
     }
     
     @Override
