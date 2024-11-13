@@ -7,6 +7,7 @@ package entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -27,6 +28,7 @@ public class RoomRate implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomRateId;
+    @Column(nullable=false, unique = true)
     private String name; 
     @ManyToOne
     private RoomType roomType;
@@ -35,6 +37,7 @@ public class RoomRate implements Serializable {
     private BigDecimal roomRateAmount; 
     private Date startDate; //check if we want to use this 
     private Date endDate;
+    private Boolean isDisabled;
 
     public RoomRate() {}
     
@@ -45,6 +48,7 @@ public class RoomRate implements Serializable {
         this.roomRateAmount = roomRateAmount;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.isDisabled = false;
     }
     
 
@@ -103,8 +107,14 @@ public class RoomRate implements Serializable {
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
-    
-    
+
+    public Boolean getIsDisabled() {
+        return isDisabled;
+    }
+
+    public void setIsDisabled(Boolean isDisabled) {
+        this.isDisabled = isDisabled;
+    }
 
     @Override
     public int hashCode() {

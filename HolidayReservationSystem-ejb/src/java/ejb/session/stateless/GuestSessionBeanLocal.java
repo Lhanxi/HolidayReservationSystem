@@ -29,4 +29,6 @@ public interface GuestSessionBeanLocal {
     public List<Reservation> retrieveAllReservationByCustomerId(Long customerId) throws ReservationNotFoundException;
     public Visitor retrieveCustomerByPassport(String passportNumber) throws VisitorNotFoundException;
     public Visitor createNewVisitor(Visitor newVisitor) throws InvalidCustomerCreationException;
+
+    public Visitor receiveCustomerById(Long customerId);
 }

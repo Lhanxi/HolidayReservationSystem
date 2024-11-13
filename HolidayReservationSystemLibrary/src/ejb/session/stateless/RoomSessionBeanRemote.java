@@ -8,6 +8,7 @@ import entity.Room;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Remote;
+import util.enumeration.RoomDeletionException;
 
 /**
  *
@@ -23,7 +24,7 @@ public interface RoomSessionBeanRemote {
 
     public Room getRoom(String roomNumber);
     public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status, Boolean isDisabled);
-    public String deleteRoom(String roomNumber);
+    public void deleteRoom(String roomNumber) throws RoomDeletionException;
     public void updateRoomStatus(List<Room> rooms, Boolean roomStatus);
     public void checkOut(List<String> roomNumbers);
 }

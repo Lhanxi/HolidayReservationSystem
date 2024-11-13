@@ -10,7 +10,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
+import javax.persistence.NoResultException;
 import util.enumeration.RateTypeEnum;
+import util.enumeration.RoomRateNotFoundException;
 
 /**
  *
@@ -23,6 +25,12 @@ public interface RoomRateSessionBeanLocal {
     public List<RoomRate> getAllRoomRates();
 
     public void updateRoomRate(Long roomRateId, String name, RoomType roomType, RateTypeEnum rateTypeEnum, BigDecimal roomRateAmount, Date startDate, Date endDate);
+
+    public Long getRoomRateForRoomType(RoomType roomType, RateTypeEnum rateTypeEnum);
+    public String deleteRoomRate(Long roomRateId);
+    public List<RoomRate> getEnabledRoomRates();
+
+    public RoomRate getRoomRateByName(String roomRateName) throws RoomRateNotFoundException;
     
     public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms);
 }

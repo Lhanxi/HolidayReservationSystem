@@ -29,7 +29,7 @@ public class Partner implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long partnerId;
     
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
     
     @Column(nullable = false)
