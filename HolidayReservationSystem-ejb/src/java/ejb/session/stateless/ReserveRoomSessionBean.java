@@ -50,7 +50,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         visitor.getReservations().add(newReservation);
         
         RoomRate roomRate = em.find(RoomRate.class, roomRateId);
-        newReservation.setRoomRate(roomRate);
+        newReservation.addRoomRate(roomRate);
         em.flush();
         
         return newReservation.getReservationId();

@@ -15,6 +15,7 @@ import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import util.enumeration.PartnerType;
 
 /**
@@ -30,13 +31,16 @@ public class Partner implements Serializable {
     private Long partnerId;
     
     @Column(nullable = false, unique = true)
+    @NotNull
     private String username;
     
     @Column(nullable = false)
+    @NotNull
     private String password;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull
     private PartnerType partnerType;
     
     @OneToMany

@@ -6,13 +6,10 @@ package entity;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.ArrayList;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -21,10 +18,13 @@ import javax.persistence.OneToMany;
 @Entity
 public class Customer extends Visitor implements Serializable {
     
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(max = 64)
     private String username;
     
     @Column(nullable = false)
+    @NotNull
     private String password;
     
     public Customer() {

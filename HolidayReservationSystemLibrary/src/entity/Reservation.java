@@ -15,7 +15,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.ArrayList;
-import javax.persistence.ManyToOne;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -32,18 +32,26 @@ public class Reservation implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reservationId;
     @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
+    @NotNull
     private Date startDate;
     @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
+    @NotNull
     private Date endDate; 
     @Column(nullable = false)
     @NotNull
     private Integer numRooms;
     @OneToOne
+    @Column(nullable = false)
+    @NotNull
     private RoomType roomType;
     @OneToMany 
     private List<RoomReservation> roomReservations;
-    @ManyToOne
-    private RoomRate roomRate;
+    @ManyToMany
+    @Column(nullable = false)
+    @NotNull
+    private List<RoomRate> roomRates;
 
     public Reservation() {
     }
@@ -53,6 +61,7 @@ public class Reservation implements Serializable {
         this.endDate = endDate; 
         this.numRooms = numRooms;
         this.roomReservations = new ArrayList<RoomReservation>();
+        this.roomRates = new ArrayList<RoomRate>();
     }
 
     public Long getReservationId() {
@@ -95,15 +104,17 @@ public class Reservation implements Serializable {
         this.roomType = roomType;
     }
 
-    public RoomRate getRoomRate() {
-        return roomRate;
+    public List<RoomRate> getRoomRates() {
+        return roomRates;
     }
 
-    public void setRoomRate(RoomRate roomRate) {
-        this.roomRate = roomRate;
+    public void addRoomRate(RoomRate roomRate) {
+        this.roomRates.add(roomRate);
     }
-    
-   
+
+    public void removeRoomRate(RoomRate roomRate) {
+        this.roomRates.remove(roomRate);
+    }
 
         /**
      * @return the roomReservations
