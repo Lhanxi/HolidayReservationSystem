@@ -15,6 +15,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -29,10 +31,13 @@ public class Visitor implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long guestId;
     
-    @Column(nullable = false)
+    @Column(nullable = false, length = 64)
+    @NotNull
+    @Size(max=64)
     private String name;
     
     @Column(nullable = false, unique = true)
+    @NotNull
     private String passportNumber;
     
     @OneToMany

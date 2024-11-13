@@ -15,6 +15,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import util.enumeration.RateTypeEnum;
 
 /**
@@ -28,15 +32,31 @@ public class RoomRate implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomRateId;
-    @Column(nullable=false, unique = true)
+    @Column(nullable=false, unique = true, length = 64)
+    @NotNull
+    @Size(max=64)
     private String name; 
     @ManyToOne
+    @Column(nullable=false)
+    @NotNull
     private RoomType roomType;
     @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
+    @NotNull
     private RateTypeEnum rateTypeEnum;
+    @Column(nullable=false)
+    @NotNull
     private BigDecimal roomRateAmount; 
+    @Temporal(TemporalType.DATE)
+    @Column(nullable=false)
+    @NotNull
     private Date startDate; //check if we want to use this 
+    @Temporal(TemporalType.DATE)
+    @Column(nullable=false)
+    @NotNull
     private Date endDate;
+    @Column(nullable=false)
+    @NotNull
     private Boolean isDisabled;
 
     public RoomRate() {}

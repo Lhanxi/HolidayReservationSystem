@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 /**
  *
@@ -24,12 +25,17 @@ public class Room implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
     @Column(nullable = false, unique = true)
+    @NotNull
     private String roomNumber; 
     @Column(nullable = false)
+    @NotNull
     private Boolean roomStatus; //true is available, false is not available
     @ManyToOne
+    @Column(nullable=false)
+    @NotNull
     private RoomType roomType;
     @Column(nullable=false)
+    @NotNull
     private boolean isDisabled;
 
     public Room() {
