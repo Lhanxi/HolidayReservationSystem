@@ -39,7 +39,6 @@ public class RoomRate implements Serializable {
     private String name; 
     @ManyToOne
     @JoinColumn(nullable=false)
-    @NotNull
     private RoomType roomType;
     @Enumerated(EnumType.STRING)
     @Column(nullable=false)

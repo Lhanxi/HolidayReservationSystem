@@ -33,7 +33,6 @@ public class Room implements Serializable {
     private Boolean roomStatus; //true is available, false is not available
     @ManyToOne
     @JoinColumn(nullable=false)
-    @NotNull
     private RoomType roomType;
     @Column(nullable=false)
     @NotNull

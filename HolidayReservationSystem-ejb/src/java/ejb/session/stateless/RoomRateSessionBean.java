@@ -8,6 +8,7 @@ import entity.RoomRate;
 import entity.RoomType;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -91,6 +92,65 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
         roomRate.setRoomRateAmount(roomRateAmount);
         roomRate.setStartDate(startDate);
         roomRate.setEndDate(endDate);
+    }
+    
+    @Override
+    public List<RoomRate> retrieveRoomRateByDate(Date startDate, Date endDate, RoomType roomType) {
+        List<RoomRate> enabledRoomRates = this.getEnabledRoomRates();
+        List<RoomRate> roomRateForDate = new ArrayList<RoomRate>();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(endDate);
+        cal.add(Calendar.DATE, -1);
+        Date adjustedEndDate = cal.getTime();
+
+        for (RoomRate roomRate : enabledRoomRates) {
+            if (roomRate.getRoomType().equals(roomType) &&
+                !roomRate.getStartDate().after(adjustedEndDate) &&
+                !roomRate.getEndDate().before(startDate)) {
+                roomRateForDate.add(roomRate);
+            }
+        }
+        return roomRateForDate;
+    }
+    
+    @Override
+    public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType=:roomType");
+        query.setParameter("roomType", roomType); 
+        List<RoomRate> roomRates = query.getResultList();
+        
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        endCalendar.add(Calendar.DATE, -1);
+
+        while (!calendar.getTime().after(endCalendar.getTime())) {
+            Date currentDate = calendar.getTime();
+
+            BigDecimal dailyRate = findRateAmountForDate(roomRates, currentDate);
+
+            totalAmount = totalAmount.add(dailyRate.multiply(BigDecimal.valueOf(noOfRooms)));
+
+            calendar.add(Calendar.DATE, 1);
+        }
+        return totalAmount;
+    }
+    
+    private BigDecimal findRateAmountForDate(List<RoomRate> roomRates, Date date) {
+        for (RoomRate roomRate : roomRates) {
+            if (!date.before(roomRate.getStartDate()) && !date.after(roomRate.getEndDate())) {
+                return roomRate.getRoomRateAmount();
+            }
+        }
+        for (RoomRate roomRate : roomRates) {
+            if (roomRate.getRateTypeEnum() == RateTypeEnum.PUBLISHED) {
+                return roomRate.getRoomRateAmount();
+            }
+        }
+        return BigDecimal.ZERO; 
     }
     
     @Override
