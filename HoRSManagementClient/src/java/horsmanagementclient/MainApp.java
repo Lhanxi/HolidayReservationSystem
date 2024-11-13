@@ -38,6 +38,7 @@ import util.enumeration.AllocationExceptionReportTypeEnum;
 import util.enumeration.EmployeeType;
 import util.enumeration.PartnerType;
 import util.enumeration.RateTypeEnum;
+import util.enumeration.RoomDeletionException;
 import util.enumeration.RoomRateNotFoundException;
 import util.exception.DuplicateUsernameException;
 import util.exception.InvalidCustomerCreationException;
@@ -608,9 +609,12 @@ public class MainApp {
                 System.out.println("Room with that room number does not exist, please try again"); 
             }
         }
-        
-        String output = roomSessionBeanRemote.deleteRoom(roomNumber);
-        System.out.println(output);
+        try {
+            roomSessionBeanRemote.deleteRoom(roomNumber);
+            System.out.println("Room successfully deleted");
+        } catch (RoomDeletionException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
     
     private void updateRoom() {
@@ -1016,9 +1020,9 @@ public class MainApp {
         
         Integer response = -1;
         String roomTypeName;
-        while (response < 0 || response > roomTypes.size()) {
+        while (response < 0 || response >= roomTypes.size()) {
             response = getIntegerInput();
-            if (response < 0 || response > roomTypes.size()) {
+            if (response < 0 || response >= roomTypes.size()) {
                 System.out.println("Invalid response, please try again");
                 continue;
             }

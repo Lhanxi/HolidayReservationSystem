@@ -7,11 +7,13 @@ package ejb.session.stateless;
 import entity.Room;
 import entity.RoomReservation;
 import entity.RoomType;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import util.enumeration.RoomDeletionException;
 
 /**
  *
@@ -98,19 +100,18 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
     
     
     @Override
-    public String deleteRoom(String roomNumber) {
+    public void deleteRoom(String roomNumber) throws RoomDeletionException {
         Query query = em.createQuery("SELECT r FROM Room r WHERE r.roomNumber = :roomNumber"); 
         query.setParameter("roomNumber", roomNumber); 
         Room room = (Room) query.getSingleResult();
         
-        if (room.getRoomStatus()) {
-            //if no one is using the room, then we can safely delete the room
-            room.setRoomType(null);
+        Query queryRoomReservations = em.createQuery("SELECT r FROM RoomReservation r WHERE r.room =:room");
+        queryRoomReservations.setParameter("room", room); 
+        
+        if (queryRoomReservations.getResultList().size() == 0) {
             em.remove(room);
-            return "Room successfully deleted";
         } else {
-            room.setIsDisabled(Boolean.TRUE);
+            throw new RoomDeletionException("Room cannot be deleted, set to disabled");
         }
-        return "Room cannot be deleted as it is currently being used. Room has been set to disabled";
     }
 }

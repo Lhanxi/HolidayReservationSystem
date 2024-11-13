@@ -8,6 +8,7 @@ import entity.Room;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Local;
+import util.enumeration.RoomDeletionException;
 
 /**
  *
@@ -24,7 +25,7 @@ public interface RoomSessionBeanLocal {
 
     public Room getRoom(String roomNumber);
 
-    public String deleteRoom(String roomNumber);
+    public void deleteRoom(String roomNumber) throws RoomDeletionException;
 
     public void updateRoom(Long roomId, RoomType roomType, String roomNumber, Boolean status, Boolean isDisabled);
     public void updateRoomStatus(List<Room> rooms, Boolean roomStatus);
