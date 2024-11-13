@@ -93,7 +93,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         System.out.println("rooms length:" + rooms.size());
         
         updateRoomStatus(rooms, true);
-        checkOutRoomReservations(roomNumbers);
+        //checkOutRoomReservations(roomNumbers);
     }
     
     private void checkOutRoomReservations(List<String> roomNumbers) {

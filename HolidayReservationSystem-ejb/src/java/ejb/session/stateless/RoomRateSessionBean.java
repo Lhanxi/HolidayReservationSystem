@@ -38,10 +38,10 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     @Override
     public Long createNewRoomRate(RoomRate roomRate) throws RoomRateCreationException {
         try {
-            Query query = em.createQuery("SELECT COUNT(r) FROM RoomRate r WHERE r.name = :name");
+            Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.name = :name");
             query.setParameter("name", roomRate.getName());
 
-            if (query.getResultList().size() > 0) {
+            if (!query.getResultList().isEmpty()) {
                 throw new RoomRateCreationException("Room rate with the name '" + roomRate.getName() + "' already exists.");
             }
 
@@ -116,8 +116,9 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     @Override
     public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms) {
         BigDecimal totalAmount = BigDecimal.ZERO;
-        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType=:roomType");
-        query.setParameter("roomType", roomType); 
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType = :roomType AND r.rateTypeEnum <> :excludedRateType");
+        query.setParameter("roomType", roomType);
+        query.setParameter("excludedRateType", RateTypeEnum.PUBLISHED);
         List<RoomRate> roomRates = query.getResultList();
         
         Calendar calendar = Calendar.getInstance();
@@ -146,7 +147,7 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
             }
         }
         for (RoomRate roomRate : roomRates) {
-            if (roomRate.getRateTypeEnum() == RateTypeEnum.PUBLISHED) {
+            if (roomRate.getRateTypeEnum() == RateTypeEnum.NORMAL) {
                 return roomRate.getRoomRateAmount();
             }
         }
@@ -166,10 +167,10 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     public String deleteRoomRate(Long roomRateId) {
         RoomRate roomRate = em.find(RoomRate.class, roomRateId); 
         
-        Query query = em.createQuery("SELECT r FROM Reservation r WHERE r.roomRate =:roomRate");
+        Query query = em.createQuery("SELECT r FROM Reservation r WHERE :roomRate MEMBER OF r.roomRates");
         query.setParameter("roomRate", roomRate); 
         
-        if (query.getResultList().size() == 0) { //there are no reservations
+        if (query.getResultList().isEmpty()) { //there are no reservations
             em.remove(roomRate);
             return "Successfully deleted room rate";
         }

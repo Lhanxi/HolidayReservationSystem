@@ -4,7 +4,7 @@
  */
 package holidayreservationsystemwebclient;
 
-//import ws.client.HolidayReservationSystemWebService_Service;
+import ws.client.HolidayReservationSystemWebService_Service;
 
 /**
  *
@@ -14,10 +14,8 @@ public class HolidayReservationSystemWebClient {
 
     public static void main(String[] args)
     { 
-        /*
         HolidayReservationSystemWebService_Service service = new HolidayReservationSystemWebService_Service(); 
         MainApp mainApp = new MainApp(service);
         mainApp.runApp();
-        */
     }    
 }

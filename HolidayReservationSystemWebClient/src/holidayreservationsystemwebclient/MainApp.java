@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Scanner;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-/*
 import ws.client.HolidayReservationSystemWebService_Service;
 import ws.client.InvalidLoginException_Exception;
 import ws.client.Partner;
@@ -22,13 +21,11 @@ import ws.client.PartnerType;
 import ws.client.Reservation;
 import ws.client.ReservationNotFoundException_Exception;
 import ws.client.RoomType;
-*/
 /**
  *
  * @author leunghanxi
  */
 public class MainApp {
-    /*
     private Partner partner;
     
     private HolidayReservationSystemWebService_Service service;
@@ -415,5 +412,4 @@ public class MainApp {
             return false;
         }
     }
-*/
 }
