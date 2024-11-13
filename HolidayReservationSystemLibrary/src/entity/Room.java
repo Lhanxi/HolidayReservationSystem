@@ -23,7 +23,7 @@ public class Room implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String roomNumber; 
     @Column(nullable = false)
     private Boolean roomStatus; //true is available, false is not available

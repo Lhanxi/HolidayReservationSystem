@@ -38,7 +38,7 @@ import util.enumeration.AllocationExceptionReportTypeEnum;
 import util.enumeration.EmployeeType;
 import util.enumeration.PartnerType;
 import util.enumeration.RateTypeEnum;
-import util.exception.CustomerNotFoundException;
+import util.enumeration.RoomRateNotFoundException;
 import util.exception.DuplicateUsernameException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
@@ -212,8 +212,9 @@ public class MainApp {
                         System.out.println("1: Create New Room Rate"); 
                         System.out.println("2: Update RoomRate");
                         System.out.println("3: Delete Room Rate");
-                        System.out.println("4: View All Room Rates");
-                        System.out.println("5: Logout");
+                        System.out.println("4: View Room Rate Details");
+                        System.out.println("5: View All Room Rates");
+                        System.out.println("6: Logout");
                         Integer re = getIntegerInput();
 
                         if (re == 1) {
@@ -222,9 +223,12 @@ public class MainApp {
                             updateRoomRate();
                         } else if (re == 3) {
                             deleteRoomRate(); 
-                        } else if (re == 4 ) {
+                        } else if (re == 4) {
+                            viewRoomRate();
+                        } 
+                        else if (re == 5 ) {
                             viewAllRoomRates();
-                        } else if (re == 5) {
+                        } else if (re == 6) {
                             loggedIn = false;
                             break;
                         }
@@ -396,13 +400,11 @@ public class MainApp {
         
         System.out.println("Please enter the room type name.");
         System.out.print(">"); 
-        scanner.nextLine();
         String roomNameType = scanner.nextLine();
         
         
         System.out.println("Please include the description for the room type"); 
         System.out.print(">"); 
-        scanner.nextLine();
         String description = scanner.nextLine();
         
         System.out.println("Please indicate the size of the room"); 
@@ -412,7 +414,6 @@ public class MainApp {
         System.out.println("Please indicate the bed capacity of the room"); 
         System.out.print(">"); 
         String bedCapacity = scanner.next(); 
-        scanner.nextLine();
         
         System.out.println("Please indicate the room amentities, separating them with a comma"); 
         System.out.print(">"); 
@@ -850,10 +851,35 @@ public class MainApp {
         System.out.println(output);
     }
     
+    private void viewRoomRate() throws RoomRateNotFoundException {
+       Scanner scanner = new Scanner(System.in);
+       RoomRate roomRate = null;
+
+       System.out.println("Please enter the name of the Room Rate:");
+       String roomRateName = scanner.nextLine();
+
+       while (true) {
+           try {
+               roomRate = roomRateSessionBeanRemote.getRoomRateByName(roomRateName);
+               break;
+           } catch (RoomRateNotFoundException ex) {
+               System.out.println("Error: " + ex.getMessage() + " Please enter a different room rate name.");
+               System.out.print("> ");
+               roomRateName = scanner.nextLine();
+           }
+       }
+
+       String output = String.format("roomId: %s, name: %s, roomType: %s, rateType: %s, ratePerNight: %s, startDate: %s, endDate: %s", 
+               roomRate.getRoomRateId(), roomRate.getName(), roomRate.getRoomType(), 
+               roomRate.getRateTypeEnum(), roomRate.getRoomRateAmount(), roomRate.getStartDate(), roomRate.getEndDate());
+       System.out.println(output);
+   }
+
+    
     private void viewAllRoomRates(){
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getAllRoomRates();
         for (RoomRate r : roomRates) {
-            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; startDate=%s, endDate=%s", 
+            String output = String.format("roomId: %s, name: %s, roomType: %s; rateType: %s; ratePerNight: %s; startDate: %s, endDate: %s", 
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(output);
         }

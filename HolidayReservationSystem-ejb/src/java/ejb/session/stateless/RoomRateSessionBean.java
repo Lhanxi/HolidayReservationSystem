@@ -12,9 +12,11 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import util.enumeration.RateTypeEnum;
+import util.enumeration.RoomRateNotFoundException;
 
 /**
  *
@@ -53,6 +55,17 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
             }
         }
         return enabled;
+    }
+    
+    @Override
+    public RoomRate getRoomRateByName(String roomRateName) throws RoomRateNotFoundException {
+        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.name = :roomRateName"); 
+        query.setParameter("roomRateName", roomRateName); 
+        try {
+            return (RoomRate) query.getSingleResult();
+        } catch (NoResultException ex) {
+            throw new RoomRateNotFoundException("Room Rate with this name does not exist.");
+        }
     }
     
     @Override
