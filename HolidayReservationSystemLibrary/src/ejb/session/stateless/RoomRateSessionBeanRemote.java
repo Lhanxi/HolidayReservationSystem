@@ -27,5 +27,7 @@ public interface RoomRateSessionBeanRemote {
     public Long getRoomRateForRoomType(RoomType roomType, RateTypeEnum rateTypeEnum);
     public String deleteRoomRate(Long roomRateId);
     public List<RoomRate> getEnabledRoomRates();
+    public List<RoomRate> retrieveRoomRateByDate(Date startDate, Date endDate, RoomType roomType);
+    public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms);
     public RoomRate getRoomRateByName(String roomRateName) throws RoomRateNotFoundException;
 }

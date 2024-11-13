@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import util.enumeration.PartnerType;
@@ -39,8 +40,7 @@ public class Partner implements Serializable {
     private String password;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @NotNull
+    @JoinColumn(nullable = false)
     private PartnerType partnerType;
     
     @OneToMany

@@ -14,7 +14,9 @@ import ejb.session.stateless.RoomSessionBeanRemote;
 import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.GuestSessionBeanRemote;
 import entity.Reservation;
+import entity.RoomRate;
 import entity.RoomType;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -23,9 +25,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.ReservationNotFoundException;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 /**
  *
  * @author leunghanxi
@@ -37,14 +44,19 @@ public class MainApp {
     private HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote;
     private ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote;
     private GuestSessionBeanRemote guestSessionBeanRemote;
+    private final ValidatorFactory validatorFactory;
+    private final Validator validator;
     
     private Customer customer;
     private Long customerId;
     
     public MainApp() {
+        validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
     }
     
     public MainApp(RoomTypeSessionBeanRemote roomTypeSessionBeanRemote, RoomSessionBeanRemote roomSessionBeanRemote, RoomRateSessionBeanRemote roomRateSessionBeanRemote, HotelInventorySessionBeanRemote hotelInventorySessionBeanRemote, ReserveRoomSessionBeanRemote reserveRoomSessionBeanRemote, GuestSessionBeanRemote guestSessionBeanRemote) {
+        this();
         this.roomTypeSessionBeanRemote = roomTypeSessionBeanRemote;
         this.roomSessionBeanRemote = roomSessionBeanRemote;
         this.roomRateSessionBeanRemote = roomRateSessionBeanRemote;
@@ -109,8 +121,7 @@ public class MainApp {
     
     public void registerCustomer() {
         Scanner scanner = new Scanner(System.in);
-        try {
-            while (true) {
+        while (true) {
                 String username = "";
                 String password = "";
                 String passportNumber = "";
@@ -126,15 +137,23 @@ public class MainApp {
                 passportNumber = scanner.nextLine().trim();
                 if (username.length() > 0 && password.length() > 0 && passportNumber.length() > 0) {
                     customer = new Customer(username, password, name, passportNumber);
-                    customerId = guestSessionBeanRemote.createNewCustomer(customer);
-                    System.out.println(username + " successfully registered!\n");
-                    this.showCustomerMenu();
+                    Set<ConstraintViolation<Customer>>constraintViolations = validator.validate(customer);
+                    if(constraintViolations.isEmpty()) {
+                        try {
+                            customerId = guestSessionBeanRemote.createNewCustomer(customer);
+                            System.out.println(username + " successfully registered!\n");
+                            this.showCustomerMenu();
+                        } catch (InvalidCustomerCreationException ex) {
+                            System.out.println(ex.getMessage());
+                        }
+                        
+                    } else {
+                        showInputDataValidationErrorsForCustomer(constraintViolations);
+                    }
                 }
+            
             }
-        } catch (InvalidCustomerCreationException ex) {
-            System.out.println(ex.getMessage());
         }
-    }
     
     public void showCustomerMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -145,7 +164,7 @@ public class MainApp {
             System.out.println("2: Reserve Hotel Room");
             System.out.println("3: View All Reservations");
             System.out.println("4: View Reservation Details");
-            System.out.println("5: Exit\n");
+            System.out.println("5: Logout\n");
             
             response = 0;
             while (response < 1 || response > 5) {
@@ -162,11 +181,12 @@ public class MainApp {
                     break;
                 }
             }
-            if (response == 4) {
-                break;
+            if (response == 5) {
+                customer = null;
+                customerId = null;
+                this.runApp();
             }
         }
-        scanner.close();
     }
     
     public void searchHotelRoom() {
@@ -192,11 +212,16 @@ public class MainApp {
         HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
         int counter = 1;
         for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
-            String roomType = entry.getKey(); 
+            String roomTypeName = entry.getKey(); 
             Integer availability = entry.getValue(); 
-            System.out.println(counter + ". " + roomType + " - Available: " + availability);
+            RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+            BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, 1);
+            System.out.println(counter + ". " + roomTypeName + " - Available: " + availability);
+            System.out.println("Cost for 1 room: $" + totalAmount + " \n");
             counter++;
         }
+        
+        
         if (customer != null) {
             this.reserveHotelRoom(availableRoomTypes, startDate, endDate);
         } else { 
@@ -247,6 +272,7 @@ public class MainApp {
                 continue;
             }
         }
+        
         int numOfRooms;
         int availableNumOfRooms = availableRoomTypes.get(choice);
         Reservation reservation;
@@ -257,15 +283,24 @@ public class MainApp {
             
             if (numOfRooms < 1 || numOfRooms > availableNumOfRooms) {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
+                RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
+                BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, numOfRooms);
+                List<RoomRate> roomRates = roomRateSessionBeanRemote.retrieveRoomRateByDate(startDate, endDate, roomType);
+
+                reservation = new Reservation(startDate, endDate, numOfRooms, roomRates);
+                Set<ConstraintViolation<Reservation>>constraintViolations = validator.validate(reservation);
+                if(constraintViolations.isEmpty()) {
+                    Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
+                    System.out.println("Reservation " + reservationId + " succesfully created.");
+                    System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
+                } else {
+                    showInputDataValidationErrorsForReservation(constraintViolations);
+                }
+                this.showCustomerMenu();
             } else {
-                reservation = new Reservation(startDate, endDate, numOfRooms);
                 break;
             }
         }
-        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
-        Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
-        System.out.println("Reservation " + reservationId + " succesfully created.\n");
-        this.showCustomerMenu();
     }
     
     public void viewReservationDetails() {
@@ -380,5 +415,29 @@ public class MainApp {
         } catch (DateTimeParseException e) {
             return false;
         }
+    }
+    
+    private void showInputDataValidationErrorsForCustomer(Set<ConstraintViolation<Customer>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
+    }
+    
+    private void showInputDataValidationErrorsForReservation(Set<ConstraintViolation<Reservation>>constraintViolations)
+    {
+        System.out.println("\nInput data validation error!:");
+            
+        for(ConstraintViolation constraintViolation:constraintViolations)
+        {
+            System.out.println("\t" + constraintViolation.getPropertyPath() + " - " + constraintViolation.getInvalidValue() + "; " + constraintViolation.getMessage());
+        }
+
+        System.out.println("\nPlease try again......\n");
     }
 }

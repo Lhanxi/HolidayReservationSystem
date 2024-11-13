@@ -4,6 +4,7 @@
  */
 package holidayreservationsystemwebclient;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Scanner;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+/*
 import ws.client.HolidayReservationSystemWebService_Service;
 import ws.client.InvalidLoginException_Exception;
 import ws.client.Partner;
@@ -20,12 +22,13 @@ import ws.client.PartnerType;
 import ws.client.Reservation;
 import ws.client.ReservationNotFoundException_Exception;
 import ws.client.RoomType;
-
+*/
 /**
  *
  * @author leunghanxi
  */
 public class MainApp {
+    /*
     private Partner partner;
     
     private HolidayReservationSystemWebService_Service service;
@@ -98,7 +101,7 @@ public class MainApp {
         while (true) {
             System.out.println("=== Welcome to the Partner Employee Menu ===\n");
             System.out.println("1: Search Hotel Room");
-            System.out.println("2: Exit\n");
+            System.out.println("2: Logout\n");
             
             response = 0;
             while (response < 1 || response > 2) {
@@ -111,6 +114,7 @@ public class MainApp {
                 }
             }
             if (response == 2) {
+                partner = null;
                 break;
             }
         }
@@ -144,14 +148,19 @@ public class MainApp {
                 String roomData = availableRoomTypes.get(i);
 
                 String[] parts = roomData.split(" ");
+                
 
                 if (parts.length == 2) {
-                    String roomType = parts[0]; 
+                    String roomTypeName = parts[0]; 
                     String availableRooms = parts[1];  
 
-                    System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+                    System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
+                    RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
+                    BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
+                    System.out.println("Cost for 1 room: $" + totalAmount + " \n");
                 }
             }
+            
 
             if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
                 this.showPartnerEmployeeMenu();
@@ -173,7 +182,7 @@ public class MainApp {
             System.out.println("2: Reserve Hotel Room");
             System.out.println("3: View All Reservations");
             System.out.println("4: View Reservation Details");
-            System.out.println("5: Exit\n");
+            System.out.println("5: Logout\n");
             
             response = 0;
             while (response < 1 || response > 5) {
@@ -190,7 +199,8 @@ public class MainApp {
                     break;
                 }
             }
-            if (response == 4) {
+            if (response == 5) {
+                partner = null;
                 break;
             }
         }
@@ -265,7 +275,9 @@ public class MainApp {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
             } else {
                 Long reservationId = service.getHolidayReservationSystemWebServicePort().reserveRoom(partner.getPartnerId(), startDate, endDate, numOfRooms, roomType);
+                BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, numOfRooms);
                 System.out.println("Reservation " + reservationId + " successfully reserved!\n");
+                System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
                 break;
             }
         }
@@ -403,4 +415,5 @@ public class MainApp {
             return false;
         }
     }
+*/
 }

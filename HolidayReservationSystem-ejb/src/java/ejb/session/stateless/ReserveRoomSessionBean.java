@@ -58,9 +58,9 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     
     @Override
     public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType) { 
+        newReservation.setRoomType(roomType);
         em.persist(newReservation);
         em.flush();
-        newReservation.setRoomType(roomType);
         Visitor visitor = em.find(Visitor.class, visitorId);
         visitor.getReservations().add(newReservation);
         return newReservation.getReservationId();
@@ -68,9 +68,9 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     
     @Override
     public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType) { 
+        newReservation.setRoomType(roomType);
         em.persist(newReservation);
         em.flush();
-        newReservation.setRoomType(roomType);
         Partner partner = em.find(Partner.class, partnerId);
         partner.getReservations().add(newReservation);
         return newReservation.getReservationId();
