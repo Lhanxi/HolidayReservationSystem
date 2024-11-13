@@ -15,6 +15,7 @@ import ejb.session.stateless.RoomTypeSessionBeanRemote;
 import ejb.session.stateless.GuestSessionBeanRemote;
 import entity.Reservation;
 import entity.RoomType;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -192,11 +193,16 @@ public class MainApp {
         HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
         int counter = 1;
         for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
-            String roomType = entry.getKey(); 
+            String roomTypeName = entry.getKey(); 
             Integer availability = entry.getValue(); 
-            System.out.println(counter + ". " + roomType + " - Available: " + availability);
+            RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+            BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, 1);
+            System.out.println(counter + ". " + roomTypeName + " - Available: " + availability);
+            System.out.println("Cost for 1 room: $" + totalAmount + " \n");
             counter++;
         }
+        
+        
         if (customer != null) {
             this.reserveHotelRoom(availableRoomTypes, startDate, endDate);
         } else { 
@@ -247,6 +253,7 @@ public class MainApp {
                 continue;
             }
         }
+        
         int numOfRooms;
         int availableNumOfRooms = availableRoomTypes.get(choice);
         Reservation reservation;
@@ -263,8 +270,10 @@ public class MainApp {
             }
         }
         RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
+        BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, numOfRooms);
         Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
-        System.out.println("Reservation " + reservationId + " succesfully created.\n");
+        System.out.println("Reservation " + reservationId + " succesfully created.");
+        System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
         this.showCustomerMenu();
     }
     

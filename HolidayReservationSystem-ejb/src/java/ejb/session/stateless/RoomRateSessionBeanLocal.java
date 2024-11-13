@@ -32,4 +32,5 @@ public interface RoomRateSessionBeanLocal {
 
     public RoomRate getRoomRateByName(String roomRateName) throws RoomRateNotFoundException;
     
+    public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms);
 }

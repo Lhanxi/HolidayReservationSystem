@@ -104,7 +104,7 @@ public class Reservation implements Serializable {
     }
     
    
-    
+
         /**
      * @return the roomReservations
      */
