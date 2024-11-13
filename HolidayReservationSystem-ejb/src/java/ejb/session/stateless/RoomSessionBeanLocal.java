@@ -9,6 +9,7 @@ import entity.RoomType;
 import java.util.List;
 import javax.ejb.Local;
 import util.enumeration.RoomDeletionException;
+import util.exception.RoomCreationException;
 
 /**
  *
@@ -17,7 +18,7 @@ import util.enumeration.RoomDeletionException;
 @Local
 public interface RoomSessionBeanLocal {
 
-    public Long createNewRoom(Room room);
+    public Long createNewRoom(Room room) throws RoomCreationException;
 
     public List<Room> viewAllRooms();
 

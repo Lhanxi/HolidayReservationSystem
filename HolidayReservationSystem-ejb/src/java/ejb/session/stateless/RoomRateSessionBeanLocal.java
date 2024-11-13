@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
-import javax.persistence.NoResultException;
 import util.enumeration.RateTypeEnum;
 import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomRateCreationException;
 
 /**
  *
@@ -20,7 +20,7 @@ import util.enumeration.RoomRateNotFoundException;
  */
 @Local
 public interface RoomRateSessionBeanLocal {
-    public Long createNewRoomRate(RoomRate roomRate);
+    public Long createNewRoomRate(RoomRate roomRate) throws RoomRateCreationException;
 
     public List<RoomRate> getAllRoomRates();
 

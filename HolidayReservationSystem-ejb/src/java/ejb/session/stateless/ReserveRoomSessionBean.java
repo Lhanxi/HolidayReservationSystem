@@ -22,8 +22,10 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import util.enumeration.RateTypeEnum;
+import util.exception.ReservationCreationException;
 
 /**
  *
@@ -40,20 +42,24 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId, Long roomRateId) {
-        //creates a new Reservation
-        em.persist(newReservation); 
-        newReservation.setRoomType(roomType); 
-        RoomType r = newReservation.getRoomType();
-        
-        Visitor visitor = em.find(Visitor.class, visitorId);
-        visitor.getReservations().add(newReservation);
-        
-        RoomRate roomRate = em.find(RoomRate.class, roomRateId);
-        newReservation.addRoomRate(roomRate);
-        em.flush();
-        
-        return newReservation.getReservationId();
+    public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId, Long roomRateId) throws ReservationCreationException {
+        try {
+            //creates a new Reservation
+            em.persist(newReservation); 
+            newReservation.setRoomType(roomType); 
+            RoomType r = newReservation.getRoomType();
+
+            Visitor visitor = em.find(Visitor.class, visitorId);
+            visitor.getReservations().add(newReservation);
+
+            RoomRate roomRate = em.find(RoomRate.class, roomRateId);
+            newReservation.addRoomRate(roomRate);
+            em.flush();
+
+            return newReservation.getReservationId();
+        } catch (PersistenceException ex) {
+            throw new ReservationCreationException("Missing an attribute");
+        }
     }
     
     @Override

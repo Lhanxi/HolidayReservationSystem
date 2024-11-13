@@ -15,9 +15,11 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import util.enumeration.RateTypeEnum;
 import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomRateCreationException;
 
 /**
  *
@@ -34,10 +36,22 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     }
     
     @Override
-    public Long createNewRoomRate(RoomRate roomRate) {
-        em.persist(roomRate); 
-        em.flush();
-        return roomRate.getRoomRateId();
+    public Long createNewRoomRate(RoomRate roomRate) throws RoomRateCreationException {
+        try {
+            Query query = em.createQuery("SELECT COUNT(r) FROM RoomRate r WHERE r.name = :name");
+            query.setParameter("name", roomRate.getName());
+
+            if (query.getResultList().size() > 0) {
+                throw new RoomRateCreationException("Room rate with the name '" + roomRate.getName() + "' already exists.");
+            }
+
+            em.persist(roomRate);
+            em.flush();
+            return roomRate.getRoomRateId();
+
+        } catch (PersistenceException ex) {
+            throw new RoomRateCreationException("An unexpected error occurred while creating room rate: " + ex.getMessage());
+        }
     }
     
     @Override 
