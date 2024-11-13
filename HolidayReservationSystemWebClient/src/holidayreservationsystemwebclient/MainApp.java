@@ -4,6 +4,7 @@
  */
 package holidayreservationsystemwebclient;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -20,7 +21,6 @@ import ws.client.PartnerType;
 import ws.client.Reservation;
 import ws.client.ReservationNotFoundException_Exception;
 import ws.client.RoomType;
-
 /**
  *
  * @author leunghanxi
@@ -144,14 +144,19 @@ public class MainApp {
                 String roomData = availableRoomTypes.get(i);
 
                 String[] parts = roomData.split(" ");
+                
 
                 if (parts.length == 2) {
-                    String roomType = parts[0]; 
+                    String roomTypeName = parts[0]; 
                     String availableRooms = parts[1];  
 
-                    System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+                    System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
+                    RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
+                    BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
+                    System.out.println("Cost for 1 room: $" + totalAmount + " \n");
                 }
             }
+            
 
             if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
                 this.showPartnerEmployeeMenu();
@@ -265,7 +270,9 @@ public class MainApp {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
             } else {
                 Long reservationId = service.getHolidayReservationSystemWebServicePort().reserveRoom(partner.getPartnerId(), startDate, endDate, numOfRooms, roomType);
+                BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, numOfRooms);
                 System.out.println("Reservation " + reservationId + " successfully reserved!\n");
+                System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
                 break;
             }
         }

@@ -111,7 +111,7 @@ public class Reservation implements Serializable {
     public void addRoomRate(RoomRate roomRate) {
         this.roomRates.add(roomRate);
     }
-    
+
     public void removeRoomRate(RoomRate roomRate) {
         this.roomRates.remove(roomRate);
     }

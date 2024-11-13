@@ -8,6 +8,7 @@ import ejb.session.stateless.HotelInventorySessionBeanLocal;
 import ejb.session.stateless.PartnerSessionBeanLocal;
 import ejb.session.stateless.ReserveRoomSessionBeanLocal;
 import ejb.session.stateless.RoomTypeSessionBeanLocal;
+import ejb.session.stateless.RoomRateSessionBeanLocal;
 import javax.ejb.EJB;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
@@ -20,6 +21,7 @@ import java.util.List;
 import entity.Reservation;
 import entity.RoomReservation;
 import entity.RoomType;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,6 +53,9 @@ public class HolidayReservationSystemWebService {
     @EJB(name = "RoomTypeSessionBeanlocal")
     private RoomTypeSessionBeanLocal roomTypeSessionBeanLocal;
     
+    @EJB(name = "RoomRateSessionBeanlocal")
+    private RoomRateSessionBeanLocal roomRateSessionBeanLocal;
+    
     @WebMethod(operationName = "doPartnerLogin")
     public Partner doPartnerLogin(@WebParam(name = "username") String username, @WebParam(name = "password") String password) throws InvalidLoginException {
         try {
@@ -80,6 +85,19 @@ public class HolidayReservationSystemWebService {
         return resultArray;
     }
     
+    @WebMethod(operationName = "retrieveRoomRateCost")
+    public BigDecimal retrieveRoomRateCost(@WebParam(name = "startDate") XMLGregorianCalendar startDate, 
+                                 @WebParam(name = "endDate") XMLGregorianCalendar endDate,
+                                 @WebParam(name = "roomType") RoomType roomType,
+                                 @WebParam(name = "numOfRooms") int noOfRooms) {
+        Date startDateConverted = startDate.toGregorianCalendar().getTime();
+        Date endDateConverted = endDate.toGregorianCalendar().getTime();
+
+        BigDecimal totalAmount = roomRateSessionBeanLocal.calculateRoomRateAmount(roomType, startDateConverted, endDateConverted, noOfRooms);
+        
+        return totalAmount;
+    }
+    
     @WebMethod(operationName = "retrieveRoomType")
     public RoomType retrieveRoomType(@WebParam(name = "roomTypeName") String roomTypeName) {
         return roomTypeSessionBeanLocal.getRoomTypeByName(roomTypeName);
@@ -101,11 +119,23 @@ public class HolidayReservationSystemWebService {
     public Reservation retrieveReservation(@WebParam(name = "reservationId") Long reservationId) throws ReservationNotFoundException {
         try {
             Reservation reservation = partnerSessionBeanLocal.retrieveReservationById(reservationId);
-            em.detach(reservation.getRoomReservations());
-            em.detach(reservation.getRoomType());
+
+            if (reservation.getRoomReservations() != null) {
+                List<RoomReservation> roomReservations = new ArrayList<>(reservation.getRoomReservations());
+                for (RoomReservation roomReservation : roomReservations) {
+                    em.detach(roomReservation);
+                }
+                reservation.setRoomReservations(roomReservations);
+            }
+
+            if (reservation.getRoomType() != null) {
+                em.detach(reservation.getRoomType());
+            }
+
             em.detach(reservation);
 
             return reservation;
+
         } catch (ReservationNotFoundException ex) {
             throw new ReservationNotFoundException("Reservation ID " + reservationId + " does not exist");
         }
@@ -119,8 +149,11 @@ public class HolidayReservationSystemWebService {
             for (Reservation reservation : reservations) {
                 if (reservation.getRoomReservations() != null) {
                     List<RoomReservation> roomReservations = new ArrayList<>(reservation.getRoomReservations());
-                    roomReservations.size(); 
-                    em.detach(roomReservations);
+
+                    for (RoomReservation roomReservation : roomReservations) {
+                        em.detach(roomReservation);
+                    }
+
                     reservation.setRoomReservations(roomReservations);
                 }
                 if (reservation.getRoomType() != null) {
