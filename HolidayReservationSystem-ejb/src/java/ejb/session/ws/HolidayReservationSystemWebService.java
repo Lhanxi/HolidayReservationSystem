@@ -80,7 +80,7 @@ public class HolidayReservationSystemWebService {
 
         int index = 0;
         for (Map.Entry<String, Integer> entry : roomAvailability.entrySet()) {
-            resultArray[index] = entry.getKey() + " " + entry.getValue().toString();  
+            resultArray[index] = entry.getKey() + "/" + entry.getValue().toString();  
             index++;
         }
         return resultArray;

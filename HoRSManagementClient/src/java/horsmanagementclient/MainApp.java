@@ -29,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1048,7 +1049,7 @@ public class MainApp {
             endDate = getDateInput();
             System.out.println("");
             
-            if (endDate.before(startDate)) {
+            if (!endDate.after(startDate)) {
                 System.out.println("End Date cannot be before start date. Please try again.");
             } else {
                 break; 
@@ -1125,10 +1126,25 @@ public class MainApp {
             }
 
             BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
-            BigDecimal totalPrice = roomRatePublished.multiply(new BigDecimal(numRooms));
+            
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(endDate);
+            endCalendar.add(Calendar.DATE, -1);
+
+            BigDecimal totalAmount = BigDecimal.ZERO;
+
+            while (!calendar.getTime().after(endCalendar.getTime())) {
+                totalAmount = totalAmount.add(roomRatePublished);
+
+                calendar.add(Calendar.DATE, 1);
+            }
+            totalAmount.multiply(new BigDecimal(numRooms));
             
             System.out.println("");
-            System.out.println("Total Price: " + totalPrice); 
+            System.out.println("Total Price: " + totalAmount); 
             
             while (true){
                 System.out.println("Confirm to reserve? Y/N");  
@@ -1419,6 +1435,7 @@ public class MainApp {
         }
         return response; 
     }
+    
     
     private void showInputDataValidationErrorsForEmployee(Set<ConstraintViolation<Employee>>constraintViolations)
     {

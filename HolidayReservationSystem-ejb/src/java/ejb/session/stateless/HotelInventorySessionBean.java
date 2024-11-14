@@ -52,10 +52,13 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         }
         
         HashMap<String, Integer> availableRoomTypes = new HashMap<String, Integer>();
+        List<String> disabled = getDisabledRoomTypes();
         
         for (Map.Entry<String, Integer> entry : roomCount.entrySet()) {
             if (entry.getValue() > 0) {
+                if (!disabled.contains(entry.getKey())){
                 availableRoomTypes.put(entry.getKey(), entry.getValue());
+                }
             }
         }
         return availableRoomTypes;
@@ -73,6 +76,18 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
             }
         }
         return availRooms;
+    }
+   
+    private List<String> getDisabledRoomTypes() {
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.isDisabled=:isDisabled"); 
+        query.setParameter("isDisabled", true);
+        List<RoomType> r = query.getResultList();
+        List<String> output = new ArrayList<String>();
+        
+        for (RoomType roomT : r) {
+            output.add(roomT.getName());
+        }
+        return output;
     }
     
     private List<Reservation> getReservationsForPeriod(Date startDate, Date endDate) {

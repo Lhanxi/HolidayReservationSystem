@@ -73,10 +73,9 @@ public class MainApp {
             System.out.println("1: Guest Login");
             System.out.println("2: Register as Guest");
             System.out.println("3: Search Hotel Room");
-            System.out.println("4: Exit\n");
             
             response = 0;
-            while (response < 1 || response > 4) {
+            while (response < 1 || response > 3) {
                 System.out.print(">");
                 response = getIntegerInput();
                 if (response == 1) {
@@ -85,15 +84,9 @@ public class MainApp {
                     this.registerCustomer();
                 } else if (response == 3) {
                     this.searchHotelRoom();
-                } else {
-                    break;
-                }
-            }
-            if (response == 4) {
-                break;
+                } 
             }
         }
-        scanner.close();
     }
     
     public void loginCustomer() {
@@ -208,8 +201,18 @@ public class MainApp {
             }
         }
             
-        System.out.println("=== These are the available room types ===\n");
         HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
+        if (availableRoomTypes.isEmpty()) {
+            System.out.println("No available room types for the specified dates.");
+            if (customerId == null) {
+                this.runApp();
+            } else {
+                this.showCustomerMenu();
+            }
+        } 
+        
+        System.out.println("=== These are the available room types ===\n");
+        
         int counter = 1;
         for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
             String roomTypeName = entry.getKey(); 
@@ -283,6 +286,7 @@ public class MainApp {
             
             if (numOfRooms < 1 || numOfRooms > availableNumOfRooms) {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
+            } else {
                 RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
                 BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, numOfRooms);
                 List<RoomRate> roomRates = roomRateSessionBeanRemote.retrieveRoomRateByDate(startDate, endDate, roomType);
@@ -293,14 +297,13 @@ public class MainApp {
                     Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
                     System.out.println("Reservation " + reservationId + " succesfully created.");
                     System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
+                    break;
                 } else {
                     showInputDataValidationErrorsForReservation(constraintViolations);
                 }
-                this.showCustomerMenu();
-            } else {
-                break;
             }
         }
+        this.showCustomerMenu();
     }
     
     public void viewReservationDetails() {

@@ -21,11 +21,13 @@ import ws.client.PartnerType;
 import ws.client.Reservation;
 import ws.client.ReservationNotFoundException_Exception;
 import ws.client.RoomType;
+
 /**
  *
  * @author leunghanxi
  */
 public class MainApp {
+  
     private Partner partner;
     
     private HolidayReservationSystemWebService_Service service;
@@ -39,28 +41,9 @@ public class MainApp {
 
     
     public void runApp() {
-        Scanner scanner = new Scanner(System.in);
-        int response = 0;
-        while (true) {
-            System.out.println("=== Welcome to the Holiday Reservation System - Partner Web Client ===\n");
-            System.out.println("1: Partner Login");
-            System.out.println("2: Exit\n");
-            
-            response = 0;
-            while (response < 1 || response > 2) {
-                System.out.print(">");
-                response = getIntegerInput();
-                if (response == 1) {
-                    this.loginPartner();
-                } else {
-                    break;
-                }
-            }
-            if (response == 2) {
-                break;
-            }
-        }
-        scanner.close();
+        System.out.println("=== Welcome to the Holiday Reservation System - Partner Web Client ===\n");
+        System.out.println("Partner Login\n");
+        loginPartner();
     }
     
     public void loginPartner() {
@@ -115,6 +98,7 @@ public class MainApp {
                 break;
             }
         }
+        this.runApp();
         scanner.close();
     }
     
@@ -139,23 +123,29 @@ public class MainApp {
 
             }
 
-            System.out.println("=== These are the available room types ===\n");
             List<String> availableRoomTypes = service.getHolidayReservationSystemWebServicePort().searchRoom(startDate, endDate);
+            if (availableRoomTypes.isEmpty()) {
+                System.out.println("=== There are no available rooms for this date. ===\n");
+                if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
+                    this.showPartnerEmployeeMenu();
+                } else {
+                    this.showManagerMenu();
+                }
+            }
+            System.out.println("=== These are the available room types ===\n");
+            
             for (int i = 0; i < availableRoomTypes.size(); i++) {
                 String roomData = availableRoomTypes.get(i);
 
-                String[] parts = roomData.split(" ");
+                String[] parts = roomData.split("/");
                 
+                String roomTypeName = parts[0]; 
+                String availableRooms = parts[1];  
 
-                if (parts.length == 2) {
-                    String roomTypeName = parts[0]; 
-                    String availableRooms = parts[1];  
-
-                    System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
-                    RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
-                    BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
-                    System.out.println("Cost for 1 room: $" + totalAmount + " \n");
-                }
+                System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
+                RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
+                BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
+                System.out.println("Cost for 1 room: $" + totalAmount + " \n");
             }
             
 
@@ -233,16 +223,14 @@ public class MainApp {
         for (int i = 0; i < availableRoomTypes.size(); i++) {
             String roomData = availableRoomTypes.get(i);
 
-            String[] parts = roomData.split(" ");
+            String[] parts = roomData.split("/");
 
-            if (parts.length == 2) {
-                String roomType = parts[0]; 
-                String availableRooms = parts[1]; 
-                roomTypes.add(parts[0]);
-                availablity.add(parts[1]);
-                System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
-                counter++;
-            }
+            String roomType = parts[0]; 
+            String availableRooms = parts[1]; 
+            roomTypes.add(parts[0]);
+            availablity.add(parts[1]);
+            System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+            counter++;
         }
         
         int availableNumOfRooms = 0;
@@ -412,4 +400,5 @@ public class MainApp {
             return false;
         }
     }
+
 }
