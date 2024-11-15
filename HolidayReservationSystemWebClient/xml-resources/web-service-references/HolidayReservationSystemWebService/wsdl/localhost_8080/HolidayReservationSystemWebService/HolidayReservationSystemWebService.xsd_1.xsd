@@ -132,18 +132,6 @@
 </xs:sequence>
 </xs:complexType>
 
-<xs:complexType name="retrieveRoomType">
-<xs:sequence>
-<xs:element name="roomTypeName" type="xs:string" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
-<xs:complexType name="retrieveRoomTypeResponse">
-<xs:sequence>
-<xs:element name="return" type="tns:roomType" minOccurs="0"/>
-</xs:sequence>
-</xs:complexType>
-
 <xs:complexType name="retrieveReservation">
 <xs:sequence>
 <xs:element name="reservationId" type="xs:long" minOccurs="0"/>
@@ -153,6 +141,18 @@
 <xs:complexType name="retrieveReservationResponse">
 <xs:sequence>
 <xs:element name="return" type="tns:reservation" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="retrieveRoomType">
+<xs:sequence>
+<xs:element name="roomTypeName" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="retrieveRoomTypeResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:roomType" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 

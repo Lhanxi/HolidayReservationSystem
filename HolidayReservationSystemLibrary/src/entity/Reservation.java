@@ -63,15 +63,6 @@ public class Reservation implements Serializable {
         this.roomRates = new ArrayList<RoomRate>();
     }
 
-    public Reservation(Date startDate, Date endDate, Integer numRooms, List<RoomRate> roomRates) {
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.numRooms = numRooms;
-        this.roomType = roomType;
-        this.roomReservations = new ArrayList<RoomReservation>();
-        this.roomRates = roomRates;
-    }
-
     public Long getReservationId() {
         return reservationId;
     }

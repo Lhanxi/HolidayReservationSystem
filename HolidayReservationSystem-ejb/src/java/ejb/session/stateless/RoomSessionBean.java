@@ -121,6 +121,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         if (queryRoomReservations.getResultList().size() == 0) {
             em.remove(room);
         } else {
+            room.setIsDisabled(Boolean.TRUE);
             throw new RoomDeletionException("Room cannot be deleted, set to disabled");
         }
     }

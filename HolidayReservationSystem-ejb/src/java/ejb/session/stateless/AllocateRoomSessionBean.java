@@ -57,7 +57,7 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
     @Override
     public void allocateRooms(Date currentDate) {
         //get all the rooms that are not disabled
-        List<Room> rooms = hotelInventorySessionBeanLocal.getAllEnabledRooms();
+        List<Room> rooms = hotelInventorySessionBeanLocal.getRoomsForAllocation(currentDate);
         
         //get the list of reservations that start for this date's NIGHT. need to allocated these 
         List<Reservation> currentDayReservations = getCurrentDayReservations(currentDate);
@@ -140,7 +140,16 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
     private List<Reservation> getCurrentDayReservations(Date currentDate) {
         Query query = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate =:startDate");
         query.setParameter("startDate", currentDate);
-        return query.getResultList();
+        List<Reservation> r = query.getResultList(); 
+        List<Reservation> currentDayReservations = new ArrayList<Reservation>();
+        
+        //accounts for the ones that have already been allocated room Reservations early on in the day
+        for (Reservation reserve : r) {
+            if (reserve.getRoomReservations().isEmpty()) {
+                currentDayReservations.add(reserve);
+            }
+        }
+        return currentDayReservations; 
     }
     
     private List<Reservation> getOverlappingReservations(Date currentDate) {

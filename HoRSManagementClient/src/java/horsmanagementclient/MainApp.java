@@ -50,6 +50,7 @@ import util.exception.DuplicateUsernameException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidPartnerCreationException;
+import util.exception.PartnerNotFoundException;
 import util.exception.ReservationCreationException;
 import util.exception.RoomCreationException;
 import util.exception.RoomRateCreationException;
@@ -255,18 +256,19 @@ public class MainApp {
                         System.out.println("============");
                         System.out.println("Select what to do");
                         System.out.println("1: Walk-in Search Room"); 
-                        System.out.println("2: Check-in Guest");
-                        System.out.println("3: Check-out Guest");
-                        System.out.println("4: Done");
+                        System.out.println("2: Walk-in Reserve Room");
+                        System.out.println("3: Check-in Guest");
+                        System.out.println("4: Check-out Guest");
+                        System.out.println("5: Done");
                         Integer re = getIntegerInput();
 
-                        if (re == 1) {
+                        if (re == 1 || re == 2) {
                             walkInSearchRoom();
-                        } else if (re == 2) {
-                            checkInGuest();
                         } else if (re == 3) {
-                            checkOutGuest();
+                            checkInGuest();
                         } else if (re == 4) {
+                            checkOutGuest();
+                        } else if (re == 5) {
                             loggedIn = false;
                             break;
                         }
@@ -376,11 +378,11 @@ public class MainApp {
         PartnerType partnerType = PartnerType.EMPLOYEE;
 
         System.out.println("===Create New Partner==="); 
-        System.out.println("Please enter employee username");
+        System.out.println("Please enter partner username");
         System.out.print(">"); 
         String username = scanner.next();
 
-        System.out.println("Please enter employee password");
+        System.out.println("Please enter partner password");
         System.out.print(">"); 
         String password = scanner.next();
 
@@ -394,8 +396,11 @@ public class MainApp {
         if (response == 2) {
             partnerType = PartnerType.RESERVATION_MANAGER;
         }
+        
+        System.out.println("Please enter company name"); 
+        String companyName = scanner.next();
 
-        Partner partner = new Partner(username, password, partnerType);
+        Partner partner = new Partner(username, password, partnerType,companyName);
         Set<ConstraintViolation<Partner>> constraintViolations = validator.validate(partner);
 
         if (constraintViolations.isEmpty()) {
@@ -448,10 +453,11 @@ public class MainApp {
         
         System.out.println("Please indicate the room amentities, separating them with a comma"); 
         System.out.print(">"); 
+        scanner.nextLine();
         String amenities = scanner.nextLine();
         
         Integer ranking = getRoomTypeTargetIndex();
-        System.out.println("ranking: " + ranking);
+        //System.out.println("ranking: " + ranking);
         
         RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, false);
         Set<ConstraintViolation<RoomType>> constraintViolations = validator.validate(newRoomType);
@@ -753,7 +759,7 @@ public class MainApp {
         List<Room> rooms = roomSessionBeanRemote.viewAllRooms(); 
         for (Room r : rooms) {
             String output = String.format("roomId: %s, roomNumber: %s, roomType: %s, roomStatus: %s", 
-                    r.getRoomId(), r.getRoomNumber(),r.getRoomType(), r.getRoomStatus());
+                    r.getRoomId(), r.getRoomNumber(),r.getRoomType().getName(), r.getRoomStatus());
             System.out.println(output);
         }
     }
@@ -789,7 +795,7 @@ public class MainApp {
             } else if (response == 3) {
                 rateType = RateTypeEnum.PEAK;
             } else if (response == 4) {
-                rateType = RateTypeEnum.PUBLISHED;
+                rateType = RateTypeEnum.PROMOTION;
             }
         }
         
@@ -831,7 +837,7 @@ public class MainApp {
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getEnabledRoomRates();
         for (int i = 0; i < roomRates.size(); i++) {
             RoomRate r = roomRates.get(i);
-            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; startDate=%s; endDate=%s", 
+            String output = String.format("roomId: %s, name: %s, roomType: %s; rateType: %s; ratePerNight: %s; startDate: %s; endDate: %s", 
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(i+ ": " + output);
         }
@@ -955,9 +961,8 @@ public class MainApp {
             } else if (response == 3) {
                 rateType = RateTypeEnum.PEAK;
             } else if (response == 4) {
-                rateType = RateTypeEnum.PUBLISHED;
+                rateType = RateTypeEnum.PROMOTION;
             }
-        
         return rateType;
     }
     
@@ -1141,7 +1146,7 @@ public class MainApp {
 
                 calendar.add(Calendar.DATE, 1);
             }
-            totalAmount.multiply(new BigDecimal(numRooms));
+            totalAmount = totalAmount.multiply(new BigDecimal(numRooms));
             
             System.out.println("");
             System.out.println("Total Price: " + totalAmount); 
@@ -1225,28 +1230,45 @@ public class MainApp {
         return visitorId;
     }
     
-    private void checkInGuest() throws VisitorNotFoundException {
+    private void checkInGuest() throws VisitorNotFoundException, PartnerNotFoundException {
         Scanner scanner = new Scanner(System.in);
         Visitor visitor = null;
+        Partner partner = null;
 
         // Loop until a valid visitor is found
-        while (visitor == null) {
+        while (visitor == null && partner == null) {
             try {
                 System.out.println("");
-                System.out.println("Please enter your passport number");
-                System.out.print(">");
-                String passport = scanner.next();
+                System.out.println("Did you book from a partner?");
+                System.out.println("1: yes"); 
+                System.out.println("2: no"); 
+                Integer response = getIntegerInput();
+                
+                if (response == 1) {
+                    System.out.println("Please enter your company name");
+                    String companyName = scanner.next();
+                    partner = partnerSessionBeanRemote.getPartnerByName(companyName);
+                } else if (response == 2) {
+                    System.out.println("Please enter your passport number");
+                    System.out.print(">");
+                    String passport = scanner.next();
 
-                // Attempt to retrieve visitor by passport
-                visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passport);
-
-            } catch (VisitorNotFoundException ex) {
+                    // Attempt to retrieve visitor by passport
+                    visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passport);
+                }          
+            } catch (VisitorNotFoundException | PartnerNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
         }
         
 
-        List<Reservation> reservations = visitor.getReservations();
+        List<Reservation> reservations = null;
+                
+        if (partner != null) {
+            reservations = partner.getReservations();
+        } else if (visitor != null) {
+            reservations = visitor.getReservations();
+        }
 
         //this is for the case that the visitor has multiple reservations for different dates
         System.out.print("");

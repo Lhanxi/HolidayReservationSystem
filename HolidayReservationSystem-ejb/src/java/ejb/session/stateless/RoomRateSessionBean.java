@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -96,30 +97,70 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
     
     @Override
     public List<RoomRate> retrieveRoomRateByDate(Date startDate, Date endDate, RoomType roomType) {
-        List<RoomRate> enabledRoomRates = this.getEnabledRoomRates();
+        List<RoomRate> roomRates = this.getEnabledRoomRates();
+        List<RoomRate> nonPublishedRoomRates = roomRates.stream()
+            .filter(roomRate -> roomRate.getRateTypeEnum() != RateTypeEnum.PUBLISHED &&
+                                roomRate.getRoomType().equals(roomType))
+            .collect(Collectors.toList());
+        
         List<RoomRate> roomRateForDate = new ArrayList<RoomRate>();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(endDate);
-        cal.add(Calendar.DATE, -1);
-        Date adjustedEndDate = cal.getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
 
-        for (RoomRate roomRate : enabledRoomRates) {
-            if (roomRate.getRoomType().equals(roomType) &&
-                !roomRate.getStartDate().after(adjustedEndDate) &&
-                !roomRate.getEndDate().before(startDate)) {
-                roomRateForDate.add(roomRate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        endCalendar.add(Calendar.DATE, -1);
+
+        while (!calendar.getTime().after(endCalendar.getTime())) {
+            Date currentDate = calendar.getTime();
+            RoomRate rateForDay = null;
+
+            for (RoomRate roomRate : nonPublishedRoomRates) {
+                if (roomRate.getRoomType().equals(roomType) &&
+                    !currentDate.before(roomRate.getStartDate()) &&
+                    !currentDate.after(roomRate.getEndDate())) {
+                    rateForDay = roomRate;
+                    break;
+                }
             }
+
+            if (rateForDay == null) {
+                for (RoomRate roomRate : nonPublishedRoomRates) {
+                    if (roomRate.getRateTypeEnum() == RateTypeEnum.NORMAL &&
+                        roomRate.getRoomType().equals(roomType)) {
+                        rateForDay = roomRate;
+                        break;
+                    }
+                }
+            }
+
+            if (rateForDay != null) {
+                boolean alreadyExists = false;
+                for (RoomRate existingRate : roomRateForDate) {
+                    if (existingRate.getRateTypeEnum() == rateForDay.getRateTypeEnum()) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (!alreadyExists) {
+                    roomRateForDate.add(rateForDay);
+                }
+            }
+            calendar.add(Calendar.DATE, 1);
         }
+
         return roomRateForDate;
     }
     
     @Override
     public BigDecimal calculateRoomRateAmount(RoomType roomType, Date startDate, Date endDate, int noOfRooms) {
         BigDecimal totalAmount = BigDecimal.ZERO;
-        Query query = em.createQuery("SELECT r FROM RoomRate r WHERE r.roomType = :roomType AND r.rateTypeEnum <> :excludedRateType");
-        query.setParameter("roomType", roomType);
-        query.setParameter("excludedRateType", RateTypeEnum.PUBLISHED);
-        List<RoomRate> roomRates = query.getResultList();
+        List<RoomRate> roomRates = this.getEnabledRoomRates();
+        
+        List<RoomRate> nonPublishedRoomRates = roomRates.stream()
+            .filter(roomRate -> roomRate.getRateTypeEnum() != RateTypeEnum.PUBLISHED &&
+                                roomRate.getRoomType().equals(roomType))
+            .collect(Collectors.toList());
         
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(startDate);
@@ -131,7 +172,7 @@ public class RoomRateSessionBean implements RoomRateSessionBeanRemote, RoomRateS
         while (!calendar.getTime().after(endCalendar.getTime())) {
             Date currentDate = calendar.getTime();
 
-            BigDecimal dailyRate = findRateAmountForDate(roomRates, currentDate);
+            BigDecimal dailyRate = findRateAmountForDate(nonPublishedRoomRates, currentDate);
 
             totalAmount = totalAmount.add(dailyRate.multiply(BigDecimal.valueOf(noOfRooms)));
 

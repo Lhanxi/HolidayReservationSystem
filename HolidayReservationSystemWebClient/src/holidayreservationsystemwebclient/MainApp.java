@@ -72,6 +72,7 @@ public class MainApp {
             }
         } catch (Exception ex){
             System.out.println(ex.getMessage());
+            loginPartner();
         }
     }
     
@@ -145,7 +146,7 @@ public class MainApp {
                 System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
                 RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
                 BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
-                System.out.println("Cost for 1 room: $" + totalAmount + " \n");
+                System.out.println("Cost for 1 room for all nights: $" + totalAmount + " \n");
             }
             
 
@@ -191,6 +192,7 @@ public class MainApp {
                 break;
             }
         }
+        this.runApp();
         scanner.close();
     }
     
@@ -271,8 +273,33 @@ public class MainApp {
     
     public void viewReservationDetails() {
         try {
+            List<Reservation> reservations = service.getHolidayReservationSystemWebServicePort().retrieveAllPartnerReservations(partner.getPartnerId());
+            int counter = 1;
+            System.out.println("=== All Reservations ===\n");
+            for (Reservation reservation : reservations) {
+                System.out.println(counter + ". Reservation Id: " + reservation.getReservationId());
+                counter += 1;
+            }
             Scanner scanner = new Scanner(System.in);
             int response = 0;
+            while (true) {
+                System.out.println("=== Do you want to view a specific reservation? ===\n");
+                System.out.println("1. Yes");
+                System.out.println("2: No");
+
+                response = 0;
+                while (response < 1 || response > 2) {
+                    response = getIntegerInput();
+                    if (response == 1) {
+                       break;
+                    } else if (response == 2) {
+                        this.showManagerMenu();
+                    }
+                }
+                if (response == 1) {
+                    break;
+                }
+            }
             String reservationId;
             while (true) {
                 response = 0;
@@ -282,7 +309,7 @@ public class MainApp {
                 reservationId = scanner.next().trim();
                 
                 Reservation reservation = service.getHolidayReservationSystemWebServicePort().retrieveReservation(Long.parseLong(reservationId));
-                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType() + "\n");
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
                 
                 System.out.println("Would you like to view more reservations?\n");
                 System.out.println("1. Yes");
@@ -308,26 +335,10 @@ public class MainApp {
             int counter = 1;
             System.out.println("=== All Reservations ===\n");
             for (Reservation reservation : reservations) {
-                System.out.println(counter + ". Reservation Id: " + reservation.getReservationId());
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
                 counter += 1;
             }
-            Scanner scanner = new Scanner(System.in);
-            int response = 0;
-            while (true) {
-                System.out.println("=== Do you want to view a specific reservation? ===\n");
-                System.out.println("1. Yes");
-                System.out.println("2: No");
-
-                response = 0;
-                while (response < 1 || response > 2) {
-                    response = getIntegerInput();
-                    if (response == 1) {
-                        this.viewReservationDetails();
-                    } else if (response == 2) {
-                        this.showManagerMenu();
-                    }
-                }
-            }
+            
         } catch (ReservationNotFoundException_Exception ex) { 
             System.out.println(ex.getMessage());
         }

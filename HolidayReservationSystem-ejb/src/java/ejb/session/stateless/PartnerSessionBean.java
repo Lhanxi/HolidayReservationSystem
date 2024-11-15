@@ -4,7 +4,6 @@
  */
 package ejb.session.stateless;
 
-import javax.ejb.Stateless;
 import java.util.List;
 import javax.ejb.Stateless;
 import entity.Partner;
@@ -31,6 +30,7 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
     
     public PartnerSessionBean() {
     }
+    
     
     @Override
     public Long createNewPartner(Partner partner) throws InvalidPartnerCreationException {
@@ -95,5 +95,22 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
         } catch (NoResultException | NonUniqueResultException ex) {
             throw new ReservationNotFoundException("Reservations do not exist");
         }
+    }
+    
+    public Partner getPartnerByName(String companyName) throws PartnerNotFoundException {
+        try {
+            Query query = entityManager.createQuery("SELECT p FROM Partner p WHERE p.companyName =:companyName"); 
+            query.setParameter("companyName", companyName); 
+            
+            Partner p = (Partner) query.getSingleResult(); 
+            p.getReservations().size();
+            return p;
+        } catch (PersistenceException ex) {
+            throw new PartnerNotFoundException(ex.getMessage());
+        }
+    }
+
+    public void persist(Object object) {
+        entityManager.persist(object);
     }
 } 

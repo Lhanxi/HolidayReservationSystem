@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -37,6 +38,8 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     @PersistenceContext(unitName = "HolidayReservationSystem-ejbPU")
     private EntityManager em;
     
+    @EJB
+    private RoomRateSessionBeanLocal roomRateSessionBeanLocal;
     
     public ReserveRoomSessionBean() {
     }
@@ -63,8 +66,12 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType) { 
+    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate) { 
         newReservation.setRoomType(roomType);
+        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDate, endDate, roomType);
+        for (RoomRate roomRate : roomRates) {
+            newReservation.addRoomRate(roomRate);
+        }
         em.persist(newReservation);
         em.flush();
         Visitor visitor = em.find(Visitor.class, visitorId);
@@ -73,8 +80,12 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType) { 
+    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate) { 
         newReservation.setRoomType(roomType);
+        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDate, endDate, roomType);
+        for (RoomRate roomRate : roomRates) {
+            newReservation.addRoomRate(roomRate);
+        }
         em.persist(newReservation);
         em.flush();
         Partner partner = em.find(Partner.class, partnerId);

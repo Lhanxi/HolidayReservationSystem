@@ -46,16 +46,19 @@ public class Partner implements Serializable {
     @OneToMany
     private List<Reservation> reservations;
     
+    private String companyName;
+
     
     public Partner() {
        reservations = new ArrayList<Reservation>();
     }
 
-    public Partner(String username, String password, PartnerType partnerType) {
+    public Partner(String username, String password, PartnerType partnerType, String companyName) {
         this();
         this.username = username;
         this.password = password;
         this.partnerType = partnerType;
+        this.companyName = companyName;
     }
 
     public Long getPartnerId() {
@@ -124,6 +127,10 @@ public class Partner implements Serializable {
      */
     public List<Reservation> getReservations() {
         return reservations;
+    }
+
+    public String getCompanyName() {
+        return companyName;
     }
 
     /**

@@ -103,6 +103,37 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         return periodReservations;
     }
     
+    @Override
+    public List<Room> getRoomsForAllocation(Date startDate) {
+        Query query = em.createQuery("SELECT r FROM Room r");
+        List<Room> rooms = query.getResultList();
+        List<Room> availRooms = new ArrayList<>();
+        
+        Query queryR = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate = :startDate AND SIZE(r.roomReservations) > 0");
+        queryR.setParameter("startDate", startDate);
+
+        //this means that some reservations have already been allocated
+        if (!queryR.getResultList().isEmpty()) {
+            List<Reservation> allocatedReservations = queryR.getResultList();
+            for (Reservation r : allocatedReservations) {
+                List<RoomReservation> roomReservations = r.getRoomReservations();
+                
+                for (RoomReservation roomReservation : roomReservations) {
+                    Room allocatedRoom = roomReservation.getRoom(); 
+                    rooms.remove(allocatedRoom);
+                }
+            }
+        }
+        
+        
+        for (Room r : rooms) {
+            if (!r.isDisabled()) {
+                availRooms.add(r);
+            }
+        }
+        return availRooms;
+
+    }
 /*
 
     @Override

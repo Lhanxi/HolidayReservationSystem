@@ -113,9 +113,8 @@ public class HolidayReservationSystemWebService {
         Date startDateConverted = startDate.toGregorianCalendar().getTime();
         Date endDateConverted = endDate.toGregorianCalendar().getTime();
         
-        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDateConverted, endDateConverted, roomType);
-        Reservation newReservation = new Reservation(startDateConverted, endDateConverted, numOfRooms, roomRates);
-        return reserveRoomSessionBeanLocal.createReservationForPartner(partnerId, newReservation, roomType);
+        Reservation newReservation = new Reservation(startDateConverted, endDateConverted, numOfRooms);
+        return reserveRoomSessionBeanLocal.createReservationForPartner(partnerId, newReservation, roomType, startDateConverted, endDateConverted);
     }
     
     @WebMethod(operationName = "retrieveReservation")
