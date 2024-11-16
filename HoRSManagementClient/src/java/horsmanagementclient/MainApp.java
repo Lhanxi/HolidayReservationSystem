@@ -1093,7 +1093,11 @@ public class MainApp {
             }
         }
         roomTypeName = roomTypes.get(response);
+        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+        BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
+        System.out.println("Price for one night : " + roomRatePublished);
         
+
         response = 0;
         while (response < 1 || response > 2) {
             System.out.println("");
@@ -1136,6 +1140,7 @@ public class MainApp {
             }
 
             BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
+            System.out.println("Price for one night: " + roomRatePublished);
             
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(startDate);

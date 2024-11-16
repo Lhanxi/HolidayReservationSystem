@@ -126,7 +126,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         List<RoomRate> roomRates = query.getResultList();
         
         if (roomRates.isEmpty()) {
-            throw new NoResultException("No matching RoomRate found for the given RoomType and RateTypeEnum.");
+            throw new NoResultException("No matching RoomRate found for published rates of this room tyepe.");
         }
         
         return roomRates.get(0).getRoomRateAmount();
