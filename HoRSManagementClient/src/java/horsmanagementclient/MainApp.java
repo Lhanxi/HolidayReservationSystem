@@ -95,6 +95,8 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("*** Welcome to Holiday Reservation System Management Portal ***");
+        System.out.println("To manually trigger allocation, please use username: system, password: password"); 
+        System.out.println("");
         Employee employee;
         boolean exitSystem = false;
         
@@ -157,7 +159,7 @@ public class MainApp {
                         System.out.println("1: RoomType functions");
                         System.out.println("2: Room functions");
                         System.out.println("3: View Allocation Exception Report");
-                        System.out.println("3: Logout");
+                        System.out.println("4: Logout");
                         Integer r = getIntegerInput();
                         if (r == 1) {
                             while (true) {
@@ -1343,6 +1345,7 @@ public class MainApp {
     
     private void allocateRoomstoCurrentDayReservations() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter date to allocate rooms");
         Date date = getDateInput();
         
         allocateRoomSessionBeanRemote.allocateRooms(date);
