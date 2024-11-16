@@ -27,4 +27,6 @@ public interface ReserveRoomSessionBeanLocal {
     public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations);
     public BigDecimal getPublishedRoomRate(RoomType roomType) throws NoResultException;
     public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId, Long roomRateId) throws ReservationCreationException;
+
+    public List<Reservation> getReservationsOfDate(Date todayDate);
 }

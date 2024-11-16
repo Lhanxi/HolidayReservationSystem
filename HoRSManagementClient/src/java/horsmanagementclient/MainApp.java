@@ -156,6 +156,7 @@ public class MainApp {
                         System.out.println("Please select what you would like to do.");
                         System.out.println("1: RoomType functions");
                         System.out.println("2: Room functions");
+                        System.out.println("3: View Allocation Exception Report");
                         System.out.println("3: Logout");
                         Integer r = getIntegerInput();
                         if (r == 1) {
@@ -214,7 +215,9 @@ public class MainApp {
                                     break;
                                 }
                             }
-                        } else if (r == 3) {
+                        } else if (r ==3) {
+                            viewAllocationExceptionReport(); 
+                        }   else if (r == 4) {
                             loggedIn = false;
                             break;
                         }
@@ -1348,6 +1351,42 @@ public class MainApp {
         System.out.println(date);
     }
     
+    private void viewAllocationExceptionReport() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter today's date to view rooms allocated");
+        Date todayDate = getDateInput();
+        
+        List<Reservation> todayReservations = reserveRoomSessionBeanRemote.getReservationsOfDate(todayDate);
+        List<RoomReservation> todayRoomReservations = reserveRoomSessionBeanRemote.getTodayRoomAllocation(todayReservations);
+        
+        
+        //prints out the room numbers of the roomReservations
+        for (RoomReservation r : todayRoomReservations) {
+            String roomType = getRoomTypeOfRoomReservation(todayReservations, r);
+            if (r.getAllocationExceptionReport() == null) { //room successfully allocated
+                System.out.println("Room successfully allocated: RoomNumber: " + r.getRoom().getRoomNumber());
+            } else {
+                AllocationExceptionReport allocationExceptionReport = r.getAllocationExceptionReport();
+                if (allocationExceptionReport.getAllocationExceptionReportTypeEnum() == AllocationExceptionReportTypeEnum.TYPE_1) {
+                    System.out.println("RoomType " + roomType + " unavailable, bumped to " + r.getRoom().getRoomType() + ", RoomNumber: " + r.getRoom().getRoomNumber());
+                } else if (allocationExceptionReport.getAllocationExceptionReportTypeEnum() == AllocationExceptionReportTypeEnum.TYPE_2) {
+                    System.out.println("No available room for room type " + roomType);
+                }
+            }
+        }
+
+    }
+    
+    private String getRoomTypeOfRoomReservation(List<Reservation> reservations, RoomReservation roomReservation) {
+        String output = "";
+        for (Reservation r : reservations) {
+            if (r.getRoomReservations().contains(roomReservation)) {
+                output = r.getRoomType().getName();
+            }
+        }
+        return output;
+    }
+    
     
     //utility functions
     private int getIntegerInput() {
@@ -1403,7 +1442,6 @@ public class MainApp {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             if (isValidDate(dateInput)) {
-                System.out.println("The date format is valid: " + dateInput);
                 LocalDate localDate = LocalDate.parse(dateInput, formatter);
                 return java.sql.Date.valueOf(localDate); 
             } else {

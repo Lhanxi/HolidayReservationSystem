@@ -203,5 +203,6 @@ public class AllocateRoomSessionBean implements AllocateRoomSessionBeanRemote, A
         //roomReservation.setRoomType(roomType);
         return roomReservation;
     }
+    
 
 }

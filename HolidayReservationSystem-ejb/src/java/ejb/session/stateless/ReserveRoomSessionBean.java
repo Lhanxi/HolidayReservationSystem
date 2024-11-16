@@ -170,6 +170,23 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         
         return roomReservations;
     }
+    
+    @Override
+    public List<Reservation> getReservationsOfDate(Date todayDate) {
+        Query query = em.createQuery("SELECT r FROM Reservation r");
+        List<Reservation> reservations = query.getResultList();
+
+        //get today's allocations of RoomReservations
+        List<Reservation> todayReservations = new ArrayList<Reservation>();
+        for (Reservation r: reservations) {
+            if (r.getStartDate().equals(todayDate)) {
+                todayReservations.add(r); 
+                r.getRoomReservations().size(); //eager fetching to get the room type of room reservations later on 
+
+            }
+        }
+        return todayReservations;
+    }
 
 
     /* 
