@@ -80,7 +80,7 @@ public class HolidayReservationSystemWebService {
 
         int index = 0;
         for (Map.Entry<String, Integer> entry : roomAvailability.entrySet()) {
-            resultArray[index] = entry.getKey() + " " + entry.getValue().toString();  
+            resultArray[index] = entry.getKey() + "/" + entry.getValue().toString();  
             index++;
         }
         return resultArray;
@@ -113,9 +113,8 @@ public class HolidayReservationSystemWebService {
         Date startDateConverted = startDate.toGregorianCalendar().getTime();
         Date endDateConverted = endDate.toGregorianCalendar().getTime();
         
-        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDateConverted, endDateConverted, roomType);
-        Reservation newReservation = new Reservation(startDateConverted, endDateConverted, numOfRooms, roomRates);
-        return reserveRoomSessionBeanLocal.createReservationForPartner(partnerId, newReservation, roomType);
+        Reservation newReservation = new Reservation(startDateConverted, endDateConverted, numOfRooms);
+        return reserveRoomSessionBeanLocal.createReservationForPartner(partnerId, newReservation, roomType, startDateConverted, endDateConverted);
     }
     
     @WebMethod(operationName = "retrieveReservation")

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Scanner;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-/*
 import ws.client.HolidayReservationSystemWebService_Service;
 import ws.client.InvalidLoginException_Exception;
 import ws.client.Partner;
@@ -22,13 +21,12 @@ import ws.client.PartnerType;
 import ws.client.Reservation;
 import ws.client.ReservationNotFoundException_Exception;
 import ws.client.RoomType;
-*/
 /**
  *
  * @author leunghanxi
  */
 public class MainApp {
-    /*
+    
     private Partner partner;
     
     private HolidayReservationSystemWebService_Service service;
@@ -42,28 +40,9 @@ public class MainApp {
 
     
     public void runApp() {
-        Scanner scanner = new Scanner(System.in);
-        int response = 0;
-        while (true) {
-            System.out.println("=== Welcome to the Holiday Reservation System - Partner Web Client ===\n");
-            System.out.println("1: Partner Login");
-            System.out.println("2: Exit\n");
-            
-            response = 0;
-            while (response < 1 || response > 2) {
-                System.out.print(">");
-                response = getIntegerInput();
-                if (response == 1) {
-                    this.loginPartner();
-                } else {
-                    break;
-                }
-            }
-            if (response == 2) {
-                break;
-            }
-        }
-        scanner.close();
+        System.out.println("=== Welcome to the Holiday Reservation System - Partner Web Client ===\n");
+        System.out.println("Partner Login\n");
+        loginPartner();
     }
     
     public void loginPartner() {
@@ -134,31 +113,35 @@ public class MainApp {
                 System.out.print(">");
                 endDate = this.getDateInput();
 
-                if (endDate.before(startDate)) {
+                if (!endDate.after(startDate)) {
                     System.out.println("End Date cannot be before start date. Please try again.\n");
                 } else {
                     break;
                 }
 
             }
-
-            System.out.println("=== These are the available room types ===\n");
             List<String> availableRoomTypes = service.getHolidayReservationSystemWebServicePort().searchRoom(startDate, endDate);
+            if (availableRoomTypes.isEmpty()) {
+                System.out.println("=== There are no available rooms for this date. ===\n");
+                if (partner.getPartnerType().equals(PartnerType.EMPLOYEE)) {
+                    this.showPartnerEmployeeMenu();
+                } else {
+                    this.showManagerMenu();
+                }
+            }
+            System.out.println("=== These are the available room types ===\n");
+            
             for (int i = 0; i < availableRoomTypes.size(); i++) {
                 String roomData = availableRoomTypes.get(i);
 
-                String[] parts = roomData.split(" ");
-                
+                String[] parts = roomData.split("/");
+                String roomTypeName = parts[0]; 
+                String availableRooms = parts[1];  
 
-                if (parts.length == 2) {
-                    String roomTypeName = parts[0]; 
-                    String availableRooms = parts[1];  
-
-                    System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
-                    RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
-                    BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
-                    System.out.println("Cost for 1 room: $" + totalAmount + " \n");
-                }
+                System.out.println((i + 1) + ". " + roomTypeName + " - Available: " + availableRooms);
+                RoomType roomType = service.getHolidayReservationSystemWebServicePort().retrieveRoomType(roomTypeName);
+                BigDecimal totalAmount = service.getHolidayReservationSystemWebServicePort().retrieveRoomRateCost(startDate, endDate, roomType, 1);
+                System.out.println("Cost for 1 room for all nights: $" + totalAmount + " \n");
             }
             
 
@@ -204,6 +187,7 @@ public class MainApp {
                 break;
             }
         }
+        this.runApp();
         scanner.close();
     }
     
@@ -236,16 +220,14 @@ public class MainApp {
         for (int i = 0; i < availableRoomTypes.size(); i++) {
             String roomData = availableRoomTypes.get(i);
 
-            String[] parts = roomData.split(" ");
+            String[] parts = roomData.split("/");
 
-            if (parts.length == 2) {
-                String roomType = parts[0]; 
-                String availableRooms = parts[1]; 
-                roomTypes.add(parts[0]);
-                availablity.add(parts[1]);
-                System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
-                counter++;
-            }
+            String roomType = parts[0]; 
+            String availableRooms = parts[1]; 
+            roomTypes.add(parts[0]);
+            availablity.add(parts[1]);
+            System.out.println((i + 1) + ". " + roomType + " - Available: " + availableRooms);
+            counter++;
         }
         
         int availableNumOfRooms = 0;
@@ -286,39 +268,6 @@ public class MainApp {
     
     public void viewReservationDetails() {
         try {
-            Scanner scanner = new Scanner(System.in);
-            int response = 0;
-            String reservationId;
-            while (true) {
-                response = 0;
-                System.out.println("=== Reservation Details ===\n");
-                System.out.println("Please Enter Reservation Id");
-                System.out.print(">");
-                reservationId = scanner.next().trim();
-                
-                Reservation reservation = service.getHolidayReservationSystemWebServicePort().retrieveReservation(Long.parseLong(reservationId));
-                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType() + "\n");
-                
-                System.out.println("Would you like to view more reservations?\n");
-                System.out.println("1. Yes");
-                System.out.println("2. No");
-                while (response < 1 || response > 2) {
-                    response = getIntegerInput();
-                    if (response == 1) {
-                        this.viewReservationDetails();
-                    } else if (response == 2) {
-                        this.showManagerMenu();
-                    }
-                }
-                
-            }
-        } catch (ReservationNotFoundException_Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
-    
-    public void viewAllReservations() {
-        try {
             List<Reservation> reservations = service.getHolidayReservationSystemWebServicePort().retrieveAllPartnerReservations(partner.getPartnerId());
             int counter = 1;
             System.out.println("=== All Reservations ===\n");
@@ -337,12 +286,53 @@ public class MainApp {
                 while (response < 1 || response > 2) {
                     response = getIntegerInput();
                     if (response == 1) {
+                       break;
+                    } else if (response == 2) {
+                        this.showManagerMenu();
+                    }
+                }
+                if (response == 1) {
+                    break;
+                }
+            }
+            String reservationId;
+            while (true) {
+                response = 0;
+                System.out.println("=== Reservation Details ===\n");
+                System.out.println("Please Enter Reservation Id");
+                System.out.print(">");
+                reservationId = scanner.next().trim();
+                
+                Reservation reservation = service.getHolidayReservationSystemWebServicePort().retrieveReservation(Long.parseLong(reservationId));
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
+                
+                System.out.println("Would you like to view more reservations?\n");
+                System.out.println("1. Yes");
+                System.out.println("2. No");
+                while (response < 1 || response > 2) {
+                    response = getIntegerInput();
+                    if (response == 1) {
                         this.viewReservationDetails();
                     } else if (response == 2) {
                         this.showManagerMenu();
                     }
                 }
             }
+        } catch (ReservationNotFoundException_Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+    
+    public void viewAllReservations() {
+        try {
+            List<Reservation> reservations = service.getHolidayReservationSystemWebServicePort().retrieveAllPartnerReservations(partner.getPartnerId());
+            int counter = 1;
+            System.out.println("=== All Reservations ===\n");
+            for (Reservation reservation : reservations) {
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
+                counter += 1;
+            }
+            
         } catch (ReservationNotFoundException_Exception ex) { 
             System.out.println(ex.getMessage());
         }
@@ -415,5 +405,4 @@ public class MainApp {
             return false;
         }
     }
-*/
 }

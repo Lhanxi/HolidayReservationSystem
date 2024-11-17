@@ -54,9 +54,9 @@ public class RoomTypeSessionBean implements RoomTypeSessionBeanRemote, RoomTypeS
     }
     
     public boolean isValidRoomTypeName(String name) {
-        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.name:=name"); 
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.name = :name"); 
         query.setParameter("name", name);
-        return query.getResultList().size() > 0;
+        return query.getResultList().isEmpty();
     }
     
     private void updateRoomTypeRankings(List<RoomType> roomTypes, Integer ranking) {

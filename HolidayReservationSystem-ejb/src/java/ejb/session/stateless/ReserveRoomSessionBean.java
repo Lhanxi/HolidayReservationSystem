@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -37,6 +38,8 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     @PersistenceContext(unitName = "HolidayReservationSystem-ejbPU")
     private EntityManager em;
     
+    @EJB
+    private RoomRateSessionBeanLocal roomRateSessionBeanLocal;
     
     public ReserveRoomSessionBean() {
     }
@@ -63,8 +66,12 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType) { 
+    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate) { 
         newReservation.setRoomType(roomType);
+        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDate, endDate, roomType);
+        for (RoomRate roomRate : roomRates) {
+            newReservation.addRoomRate(roomRate);
+        }
         em.persist(newReservation);
         em.flush();
         Visitor visitor = em.find(Visitor.class, visitorId);
@@ -73,8 +80,12 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
     }
     
     @Override
-    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType) { 
+    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate) { 
         newReservation.setRoomType(roomType);
+        List<RoomRate> roomRates = roomRateSessionBeanLocal.retrieveRoomRateByDate(startDate, endDate, roomType);
+        for (RoomRate roomRate : roomRates) {
+            newReservation.addRoomRate(roomRate);
+        }
         em.persist(newReservation);
         em.flush();
         Partner partner = em.find(Partner.class, partnerId);
@@ -115,7 +126,7 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         List<RoomRate> roomRates = query.getResultList();
         
         if (roomRates.isEmpty()) {
-            throw new NoResultException("No matching RoomRate found for the given RoomType and RateTypeEnum.");
+            throw new NoResultException("No matching RoomRate found for published rates of this room tyepe.");
         }
         
         return roomRates.get(0).getRoomRateAmount();
@@ -158,6 +169,23 @@ public class ReserveRoomSessionBean implements ReserveRoomSessionBeanRemote, Res
         }
         
         return roomReservations;
+    }
+    
+    @Override
+    public List<Reservation> getReservationsOfDate(Date todayDate) {
+        Query query = em.createQuery("SELECT r FROM Reservation r");
+        List<Reservation> reservations = query.getResultList();
+
+        //get today's allocations of RoomReservations
+        List<Reservation> todayReservations = new ArrayList<Reservation>();
+        for (Reservation r: reservations) {
+            if (r.getStartDate().equals(todayDate)) {
+                todayReservations.add(r); 
+                r.getRoomReservations().size(); //eager fetching to get the room type of room reservations later on 
+
+            }
+        }
+        return todayReservations;
     }
 
 

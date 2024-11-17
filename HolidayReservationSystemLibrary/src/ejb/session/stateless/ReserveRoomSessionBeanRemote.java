@@ -10,6 +10,7 @@ import entity.RoomReservation;
 import entity.RoomType;
 import entity.Visitor;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.Remote;
 import javax.persistence.NoResultException;
@@ -21,9 +22,10 @@ import util.exception.ReservationCreationException;
  */
 @Remote
 public interface ReserveRoomSessionBeanRemote {
-    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType);
-    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType);
+    public Long createReservationForCustomer(Long visitorId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate);
+    public Long createReservationForPartner(Long partnerId, Reservation newReservation, RoomType roomType, Date startDate, Date endDate);
     public Long createReservation(Reservation newReservation, RoomType roomType, Long visitorId, Long roomRateId) throws ReservationCreationException;
     public List<RoomReservation> getTodayRoomAllocation(List<Reservation> reservations);
     public BigDecimal getPublishedRoomRate(RoomType roomType) throws NoResultException;
+    public List<Reservation> getReservationsOfDate(Date todayDate);
 }

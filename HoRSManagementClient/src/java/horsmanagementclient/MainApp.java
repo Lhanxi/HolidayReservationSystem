@@ -29,6 +29,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +44,13 @@ import util.enumeration.AllocationExceptionReportTypeEnum;
 import util.enumeration.EmployeeType;
 import util.enumeration.PartnerType;
 import util.enumeration.RateTypeEnum;
-import util.enumeration.RoomDeletionException;
-import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomDeletionException;
+import util.exception.RoomRateNotFoundException;
 import util.exception.DuplicateUsernameException;
 import util.exception.InvalidCustomerCreationException;
 import util.exception.InvalidLoginException;
 import util.exception.InvalidPartnerCreationException;
+import util.exception.PartnerNotFoundException;
 import util.exception.ReservationCreationException;
 import util.exception.RoomCreationException;
 import util.exception.RoomRateCreationException;
@@ -93,6 +95,8 @@ public class MainApp {
         Scanner scanner = new Scanner(System.in);
         
         System.out.println("*** Welcome to Holiday Reservation System Management Portal ***");
+        System.out.println("To manually trigger allocation, please use username: system, password: password"); 
+        System.out.println("");
         Employee employee;
         boolean exitSystem = false;
         
@@ -154,7 +158,8 @@ public class MainApp {
                         System.out.println("Please select what you would like to do.");
                         System.out.println("1: RoomType functions");
                         System.out.println("2: Room functions");
-                        System.out.println("3: Logout");
+                        System.out.println("3: View Allocation Exception Report");
+                        System.out.println("4: Logout");
                         Integer r = getIntegerInput();
                         if (r == 1) {
                             while (true) {
@@ -212,7 +217,9 @@ public class MainApp {
                                     break;
                                 }
                             }
-                        } else if (r == 3) {
+                        } else if (r ==3) {
+                            viewAllocationExceptionReport(); 
+                        }   else if (r == 4) {
                             loggedIn = false;
                             break;
                         }
@@ -254,18 +261,19 @@ public class MainApp {
                         System.out.println("============");
                         System.out.println("Select what to do");
                         System.out.println("1: Walk-in Search Room"); 
-                        System.out.println("2: Check-in Guest");
-                        System.out.println("3: Check-out Guest");
-                        System.out.println("4: Done");
+                        System.out.println("2: Walk-in Reserve Room");
+                        System.out.println("3: Check-in Guest");
+                        System.out.println("4: Check-out Guest");
+                        System.out.println("5: Done");
                         Integer re = getIntegerInput();
 
-                        if (re == 1) {
+                        if (re == 1 || re == 2) {
                             walkInSearchRoom();
-                        } else if (re == 2) {
-                            checkInGuest();
                         } else if (re == 3) {
-                            checkOutGuest();
+                            checkInGuest();
                         } else if (re == 4) {
+                            checkOutGuest();
+                        } else if (re == 5) {
                             loggedIn = false;
                             break;
                         }
@@ -375,11 +383,11 @@ public class MainApp {
         PartnerType partnerType = PartnerType.EMPLOYEE;
 
         System.out.println("===Create New Partner==="); 
-        System.out.println("Please enter employee username");
+        System.out.println("Please enter partner username");
         System.out.print(">"); 
         String username = scanner.next();
 
-        System.out.println("Please enter employee password");
+        System.out.println("Please enter partner password");
         System.out.print(">"); 
         String password = scanner.next();
 
@@ -393,8 +401,11 @@ public class MainApp {
         if (response == 2) {
             partnerType = PartnerType.RESERVATION_MANAGER;
         }
+        
+        System.out.println("Please enter company name"); 
+        String companyName = scanner.next();
 
-        Partner partner = new Partner(username, password, partnerType);
+        Partner partner = new Partner(username, password, partnerType,companyName);
         Set<ConstraintViolation<Partner>> constraintViolations = validator.validate(partner);
 
         if (constraintViolations.isEmpty()) {
@@ -447,10 +458,11 @@ public class MainApp {
         
         System.out.println("Please indicate the room amentities, separating them with a comma"); 
         System.out.print(">"); 
+        scanner.nextLine();
         String amenities = scanner.nextLine();
         
         Integer ranking = getRoomTypeTargetIndex();
-        System.out.println("ranking: " + ranking);
+        //System.out.println("ranking: " + ranking);
         
         RoomType newRoomType = new RoomType(roomNameType, description, size, bedCapacity, amenities, false);
         Set<ConstraintViolation<RoomType>> constraintViolations = validator.validate(newRoomType);
@@ -752,7 +764,7 @@ public class MainApp {
         List<Room> rooms = roomSessionBeanRemote.viewAllRooms(); 
         for (Room r : rooms) {
             String output = String.format("roomId: %s, roomNumber: %s, roomType: %s, roomStatus: %s", 
-                    r.getRoomId(), r.getRoomNumber(),r.getRoomType(), r.getRoomStatus());
+                    r.getRoomId(), r.getRoomNumber(),r.getRoomType().getName(), r.getRoomStatus());
             System.out.println(output);
         }
     }
@@ -788,7 +800,7 @@ public class MainApp {
             } else if (response == 3) {
                 rateType = RateTypeEnum.PEAK;
             } else if (response == 4) {
-                rateType = RateTypeEnum.PUBLISHED;
+                rateType = RateTypeEnum.PROMOTION;
             }
         }
         
@@ -830,7 +842,7 @@ public class MainApp {
         List<RoomRate> roomRates = roomRateSessionBeanRemote.getEnabledRoomRates();
         for (int i = 0; i < roomRates.size(); i++) {
             RoomRate r = roomRates.get(i);
-            String output = String.format("roomId=%s, name=%s, roomType=%s; rateType=%s; ratePerNight=%s; startDate=%s; endDate=%s", 
+            String output = String.format("roomId: %s, name: %s, roomType: %s; rateType: %s; ratePerNight: %s; startDate: %s; endDate: %s", 
                     r.getRoomRateId(), r.getName(), r.getRoomType(), r.getRateTypeEnum(), r.getRoomRateAmount(), r.getStartDate(), r.getEndDate());
             System.out.println(i+ ": " + output);
         }
@@ -954,9 +966,8 @@ public class MainApp {
             } else if (response == 3) {
                 rateType = RateTypeEnum.PEAK;
             } else if (response == 4) {
-                rateType = RateTypeEnum.PUBLISHED;
+                rateType = RateTypeEnum.PROMOTION;
             }
-        
         return rateType;
     }
     
@@ -1048,7 +1059,7 @@ public class MainApp {
             endDate = getDateInput();
             System.out.println("");
             
-            if (endDate.before(startDate)) {
+            if (!endDate.after(startDate)) {
                 System.out.println("End Date cannot be before start date. Please try again.");
             } else {
                 break; 
@@ -1082,7 +1093,11 @@ public class MainApp {
             }
         }
         roomTypeName = roomTypes.get(response);
+        RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
+        BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
+        System.out.println("Price for one night : " + roomRatePublished);
         
+
         response = 0;
         while (response < 1 || response > 2) {
             System.out.println("");
@@ -1125,10 +1140,26 @@ public class MainApp {
             }
 
             BigDecimal roomRatePublished = reserveRoomSessionBeanRemote.getPublishedRoomRate(roomType);
-            BigDecimal totalPrice = roomRatePublished.multiply(new BigDecimal(numRooms));
+            System.out.println("Price for one night: " + roomRatePublished);
+            
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDate);
+
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(endDate);
+            endCalendar.add(Calendar.DATE, -1);
+
+            BigDecimal totalAmount = BigDecimal.ZERO;
+
+            while (!calendar.getTime().after(endCalendar.getTime())) {
+                totalAmount = totalAmount.add(roomRatePublished);
+
+                calendar.add(Calendar.DATE, 1);
+            }
+            totalAmount = totalAmount.multiply(new BigDecimal(numRooms));
             
             System.out.println("");
-            System.out.println("Total Price: " + totalPrice); 
+            System.out.println("Total Price: " + totalAmount); 
             
             while (true){
                 System.out.println("Confirm to reserve? Y/N");  
@@ -1209,28 +1240,45 @@ public class MainApp {
         return visitorId;
     }
     
-    private void checkInGuest() throws VisitorNotFoundException {
+    private void checkInGuest() throws VisitorNotFoundException, PartnerNotFoundException {
         Scanner scanner = new Scanner(System.in);
         Visitor visitor = null;
+        Partner partner = null;
 
         // Loop until a valid visitor is found
-        while (visitor == null) {
+        while (visitor == null && partner == null) {
             try {
                 System.out.println("");
-                System.out.println("Please enter your passport number");
-                System.out.print(">");
-                String passport = scanner.next();
+                System.out.println("Did you book from a partner?");
+                System.out.println("1: yes"); 
+                System.out.println("2: no"); 
+                Integer response = getIntegerInput();
+                
+                if (response == 1) {
+                    System.out.println("Please enter your company name");
+                    String companyName = scanner.next();
+                    partner = partnerSessionBeanRemote.getPartnerByName(companyName);
+                } else if (response == 2) {
+                    System.out.println("Please enter your passport number");
+                    System.out.print(">");
+                    String passport = scanner.next();
 
-                // Attempt to retrieve visitor by passport
-                visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passport);
-
-            } catch (VisitorNotFoundException ex) {
+                    // Attempt to retrieve visitor by passport
+                    visitor = guestSessionBeanRemote.retrieveCustomerByPassport(passport);
+                }          
+            } catch (VisitorNotFoundException | PartnerNotFoundException ex) {
                 System.out.println(ex.getMessage());
             }
         }
         
 
-        List<Reservation> reservations = visitor.getReservations();
+        List<Reservation> reservations = null;
+                
+        if (partner != null) {
+            reservations = partner.getReservations();
+        } else if (visitor != null) {
+            reservations = visitor.getReservations();
+        }
 
         //this is for the case that the visitor has multiple reservations for different dates
         System.out.print("");
@@ -1302,12 +1350,49 @@ public class MainApp {
     
     private void allocateRoomstoCurrentDayReservations() {
         Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter date to allocate rooms");
         Date date = getDateInput();
         
         allocateRoomSessionBeanRemote.allocateRooms(date);
         System.out.println("Rooms have been allocated");
 
         System.out.println(date);
+    }
+    
+    private void viewAllocationExceptionReport() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter today's date to view rooms allocated");
+        Date todayDate = getDateInput();
+        
+        List<Reservation> todayReservations = reserveRoomSessionBeanRemote.getReservationsOfDate(todayDate);
+        List<RoomReservation> todayRoomReservations = reserveRoomSessionBeanRemote.getTodayRoomAllocation(todayReservations);
+        
+        
+        //prints out the room numbers of the roomReservations
+        for (RoomReservation r : todayRoomReservations) {
+            String roomType = getRoomTypeOfRoomReservation(todayReservations, r);
+            if (r.getAllocationExceptionReport() == null) { //room successfully allocated
+                System.out.println("Room successfully allocated: RoomNumber: " + r.getRoom().getRoomNumber());
+            } else {
+                AllocationExceptionReport allocationExceptionReport = r.getAllocationExceptionReport();
+                if (allocationExceptionReport.getAllocationExceptionReportTypeEnum() == AllocationExceptionReportTypeEnum.TYPE_1) {
+                    System.out.println("RoomType " + roomType + " unavailable, bumped to " + r.getRoom().getRoomType().getName() + ", RoomNumber: " + r.getRoom().getRoomNumber());
+                } else if (allocationExceptionReport.getAllocationExceptionReportTypeEnum() == AllocationExceptionReportTypeEnum.TYPE_2) {
+                    System.out.println("No available room for room type " + roomType);
+                }
+            }
+        }
+
+    }
+    
+    private String getRoomTypeOfRoomReservation(List<Reservation> reservations, RoomReservation roomReservation) {
+        String output = "";
+        for (Reservation r : reservations) {
+            if (r.getRoomReservations().contains(roomReservation)) {
+                output = r.getRoomType().getName();
+            }
+        }
+        return output;
     }
     
     
@@ -1365,7 +1450,6 @@ public class MainApp {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             if (isValidDate(dateInput)) {
-                System.out.println("The date format is valid: " + dateInput);
                 LocalDate localDate = LocalDate.parse(dateInput, formatter);
                 return java.sql.Date.valueOf(localDate); 
             } else {
@@ -1419,6 +1503,7 @@ public class MainApp {
         }
         return response; 
     }
+    
     
     private void showInputDataValidationErrorsForEmployee(Set<ConstraintViolation<Employee>>constraintViolations)
     {

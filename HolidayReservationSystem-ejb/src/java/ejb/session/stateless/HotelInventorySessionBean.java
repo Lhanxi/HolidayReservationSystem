@@ -47,15 +47,18 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         for (Reservation r : reservations) {
             String roomTypeName = r.getRoomType().getName();
             int roomsReserved = r.getNumRooms();
-            int currentCount = roomCount.get(roomTypeName);
+            int currentCount = roomCount.getOrDefault(roomTypeName, 0);
             roomCount.put(roomTypeName, currentCount - roomsReserved);
         }
         
         HashMap<String, Integer> availableRoomTypes = new HashMap<String, Integer>();
+        List<String> disabled = getDisabledRoomTypes();
         
         for (Map.Entry<String, Integer> entry : roomCount.entrySet()) {
             if (entry.getValue() > 0) {
+                if (!disabled.contains(entry.getKey())){
                 availableRoomTypes.put(entry.getKey(), entry.getValue());
+                }
             }
         }
         return availableRoomTypes;
@@ -74,6 +77,18 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         }
         return availRooms;
     }
+   
+    private List<String> getDisabledRoomTypes() {
+        Query query = em.createQuery("SELECT r FROM RoomType r WHERE r.isDisabled=:isDisabled"); 
+        query.setParameter("isDisabled", true);
+        List<RoomType> r = query.getResultList();
+        List<String> output = new ArrayList<String>();
+        
+        for (RoomType roomT : r) {
+            output.add(roomT.getName());
+        }
+        return output;
+    }
     
     private List<Reservation> getReservationsForPeriod(Date startDate, Date endDate) {
         Query query = em.createQuery("SELECT r FROM Reservation r");
@@ -88,6 +103,37 @@ public class HotelInventorySessionBean implements HotelInventorySessionBeanRemot
         return periodReservations;
     }
     
+    @Override
+    public List<Room> getRoomsForAllocation(Date startDate) {
+        Query query = em.createQuery("SELECT r FROM Room r");
+        List<Room> rooms = query.getResultList();
+        List<Room> availRooms = new ArrayList<>();
+        
+        Query queryR = em.createQuery("SELECT r FROM Reservation r WHERE r.startDate = :startDate AND SIZE(r.roomReservations) > 0");
+        queryR.setParameter("startDate", startDate);
+
+        //this means that some reservations have already been allocated
+        if (!queryR.getResultList().isEmpty()) {
+            List<Reservation> allocatedReservations = queryR.getResultList();
+            for (Reservation r : allocatedReservations) {
+                List<RoomReservation> roomReservations = r.getRoomReservations();
+                
+                for (RoomReservation roomReservation : roomReservations) {
+                    Room allocatedRoom = roomReservation.getRoom(); 
+                    rooms.remove(allocatedRoom);
+                }
+            }
+        }
+        
+        
+        for (Room r : rooms) {
+            if (!r.isDisabled()) {
+                availRooms.add(r);
+            }
+        }
+        return availRooms;
+
+    }
 /*
 
     @Override

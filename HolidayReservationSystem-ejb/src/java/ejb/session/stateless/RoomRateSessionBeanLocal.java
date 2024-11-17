@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
 import util.enumeration.RateTypeEnum;
-import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomRateNotFoundException;
 import util.exception.RoomRateCreationException;
 
 /**

@@ -12,7 +12,7 @@ import java.util.List;
 import javax.ejb.Remote;
 import javax.persistence.NoResultException;
 import util.enumeration.RateTypeEnum;
-import util.enumeration.RoomRateNotFoundException;
+import util.exception.RoomRateNotFoundException;
 import util.exception.RoomRateCreationException;
 
 /**

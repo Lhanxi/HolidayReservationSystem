@@ -13,7 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
-import util.enumeration.RoomDeletionException;
+import util.exception.RoomDeletionException;
 import util.exception.RoomCreationException;
 
 /**
@@ -93,7 +93,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         System.out.println("rooms length:" + rooms.size());
         
         updateRoomStatus(rooms, true);
-        checkOutRoomReservations(roomNumbers);
+        //checkOutRoomReservations(roomNumbers);
     }
     
     private void checkOutRoomReservations(List<String> roomNumbers) {
@@ -121,6 +121,7 @@ public class RoomSessionBean implements RoomSessionBeanRemote, RoomSessionBeanLo
         if (queryRoomReservations.getResultList().size() == 0) {
             em.remove(room);
         } else {
+            room.setIsDisabled(Boolean.TRUE);
             throw new RoomDeletionException("Room cannot be deleted, set to disabled");
         }
     }

@@ -73,10 +73,9 @@ public class MainApp {
             System.out.println("1: Guest Login");
             System.out.println("2: Register as Guest");
             System.out.println("3: Search Hotel Room");
-            System.out.println("4: Exit\n");
             
             response = 0;
-            while (response < 1 || response > 4) {
+            while (response < 1 || response > 3) {
                 System.out.print(">");
                 response = getIntegerInput();
                 if (response == 1) {
@@ -85,15 +84,9 @@ public class MainApp {
                     this.registerCustomer();
                 } else if (response == 3) {
                     this.searchHotelRoom();
-                } else {
-                    break;
                 }
             }
-            if (response == 4) {
-                break;
-            }
         }
-        scanner.close();
     }
     
     public void loginCustomer() {
@@ -201,15 +194,25 @@ public class MainApp {
             System.out.print(">");
             endDate = this.getDateInput();
             
-            if (endDate.before(startDate)) {
+            if (!endDate.after(startDate)) {
                 System.out.println("End Date cannot be before start date. Please try again.\n");
             } else {
                 break;
             }
         }
-            
-        System.out.println("=== These are the available room types ===\n");
+        
         HashMap<String, Integer> availableRoomTypes = hotelInventorySessionBeanRemote.getAvailableRoomTypes(startDate, endDate);
+        if (availableRoomTypes.isEmpty()) {
+            System.out.println("No available room types for the specified dates.");
+            if (customerId == null) {
+                this.runApp();
+            } else {
+                this.showCustomerMenu();
+            }
+        } 
+        
+        System.out.println("=== These are the available room types ===\n");
+        
         int counter = 1;
         for (Map.Entry<String, Integer> entry : availableRoomTypes.entrySet()) {
             String roomTypeName = entry.getKey(); 
@@ -217,7 +220,7 @@ public class MainApp {
             RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(roomTypeName);
             BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, 1);
             System.out.println(counter + ". " + roomTypeName + " - Available: " + availability);
-            System.out.println("Cost for 1 room: $" + totalAmount + " \n");
+            System.out.println("Cost for 1 room for all nights: $" + totalAmount + " \n");
             counter++;
         }
         
@@ -283,30 +286,56 @@ public class MainApp {
             
             if (numOfRooms < 1 || numOfRooms > availableNumOfRooms) {
                 System.out.println("Invalid number of rooms. There are " + availableNumOfRooms + " available rooms!\n");
+            } else {
                 RoomType roomType = roomTypeSessionBeanRemote.getRoomTypeByName(choice);
                 BigDecimal totalAmount = roomRateSessionBeanRemote.calculateRoomRateAmount(roomType, startDate, endDate, numOfRooms);
                 List<RoomRate> roomRates = roomRateSessionBeanRemote.retrieveRoomRateByDate(startDate, endDate, roomType);
 
-                reservation = new Reservation(startDate, endDate, numOfRooms, roomRates);
+                reservation = new Reservation(startDate, endDate, numOfRooms);
                 Set<ConstraintViolation<Reservation>>constraintViolations = validator.validate(reservation);
                 if(constraintViolations.isEmpty()) {
-                    Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType);
+                    Long reservationId = reserveRoomSessionBeanRemote.createReservationForCustomer(customerId, reservation, roomType, startDate, endDate);
                     System.out.println("Reservation " + reservationId + " succesfully created.");
                     System.out.println("Total Amount to be paid: $" + totalAmount + " \n");
+                    break;
                 } else {
                     showInputDataValidationErrorsForReservation(constraintViolations);
                 }
-                this.showCustomerMenu();
-            } else {
-                break;
             }
         }
+        this.showCustomerMenu();
     }
     
     public void viewReservationDetails() {
         try {
+            List<Reservation> reservations = guestSessionBeanRemote.retrieveAllReservationByCustomerId(customerId);
+            int counter = 1;
+            System.out.println("=== All Reservations ===\n");
+            for (Reservation reservation : reservations) {
+                System.out.println(counter + ". Reservation Id: " + reservation.getReservationId());
+                counter += 1;
+            }
             Scanner scanner = new Scanner(System.in);
             int response = 0;
+            while (true) {
+                System.out.println("=== Do you want to view a specific reservation? ===\n");
+                System.out.println("1. Yes");
+                System.out.println("2: No");
+
+                response = 0;
+                while (response < 1 || response > 2) {
+                    response = getIntegerInput();
+                    if (response == 1) {
+                        break;
+                    } else if (response == 2) {
+                        this.showCustomerMenu();
+                    }
+                }
+                if (response == 1) {
+                    break;
+                }
+            }
+            response = 0;
             String reservationId;
             while (true) {
                 response = 0;
@@ -315,7 +344,7 @@ public class MainApp {
                 System.out.print(">");
                 reservationId = scanner.next().trim();
                 Reservation reservation = guestSessionBeanRemote.retrieveReservationById(Long.parseLong(reservationId));
-                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType() + "\n");
+                System.out.println("Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
                 
                 System.out.println("Would you like to view more reservations?\n");
                 System.out.println("1. Yes");
@@ -341,25 +370,8 @@ public class MainApp {
             int counter = 1;
             System.out.println("=== All Reservations ===\n");
             for (Reservation reservation : reservations) {
-                System.out.println(counter + ". Reservation Id: " + reservation.getReservationId());
+                System.out.println(counter + ". Reservation Id: " + reservation.getReservationId() + ", Start Date: " + reservation.getStartDate() + ", End Date: " + reservation.getEndDate() + ", Number of Rooms: " + reservation.getNumRooms() + ", Room Type: " + reservation.getRoomType().getName() + "\n");
                 counter += 1;
-            }
-            Scanner scanner = new Scanner(System.in);
-            int response = 0;
-            while (true) {
-                System.out.println("=== Do you want to view a specific reservation? ===\n");
-                System.out.println("1. Yes");
-                System.out.println("2: No");
-
-                response = 0;
-                while (response < 1 || response > 2) {
-                    response = getIntegerInput();
-                    if (response == 1) {
-                        this.viewReservationDetails();
-                    } else if (response == 2) {
-                        this.showCustomerMenu();
-                    }
-                }
             }
         } catch (ReservationNotFoundException ex) {
             System.out.println(ex.getMessage());

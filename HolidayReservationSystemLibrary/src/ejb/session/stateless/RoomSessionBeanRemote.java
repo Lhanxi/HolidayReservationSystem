@@ -8,7 +8,7 @@ import entity.Room;
 import entity.RoomType;
 import java.util.List;
 import javax.ejb.Remote;
-import util.enumeration.RoomDeletionException;
+import util.exception.RoomDeletionException;
 import util.exception.RoomCreationException;
 
 /**

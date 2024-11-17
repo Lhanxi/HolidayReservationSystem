@@ -19,13 +19,13 @@ import util.exception.EmployeeNotFoundException;
  * @author jeremy
  */
 @Singleton
-@Startup
+//@Startup
 public class DataInit implements DataInitLocal {
 
     @EJB
     private EmployeeSessionBeanLocal employeeSessionBeanLocal;
     
-    @PostConstruct
+    //@PostConstruct
     public void defaultSystemAccount() {
         try {
             employeeSessionBeanLocal.retrieveEmployeeByUsername("admin1");

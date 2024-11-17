@@ -4,7 +4,6 @@
  */
 package ejb.session.stateless;
 
-import javax.ejb.Stateless;
 import java.util.List;
 import javax.ejb.Stateless;
 import entity.Partner;
@@ -31,6 +30,7 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
     
     public PartnerSessionBean() {
     }
+    
     
     @Override
     public Long createNewPartner(Partner partner) throws InvalidPartnerCreationException {
@@ -88,14 +88,29 @@ public class PartnerSessionBean implements PartnerSessionBeanRemote, PartnerSess
     @Override
     public List<Reservation> retrieveAllReservationByPartnerId(Long partnerId) throws ReservationNotFoundException {
         try {
-            Query query = entityManager.createQuery("SELECT r FROM Reservation r WHERE r.partner.partnerId = :inPartnerId");
-            query.setParameter("inPartnerId", partnerId);
-
-            List<Reservation> reservations = (List<Reservation>) query.getResultList();
+            Partner partner = entityManager.find(Partner.class, partnerId);
+            List<Reservation> reservations = partner.getReservations();
             reservations.size();
             return reservations;
         } catch (NoResultException | NonUniqueResultException ex) {
             throw new ReservationNotFoundException("Reservations do not exist");
         }
+    }
+    
+    public Partner getPartnerByName(String companyName) throws PartnerNotFoundException {
+        try {
+            Query query = entityManager.createQuery("SELECT p FROM Partner p WHERE p.companyName =:companyName"); 
+            query.setParameter("companyName", companyName); 
+            
+            Partner p = (Partner) query.getSingleResult(); 
+            p.getReservations().size();
+            return p;
+        } catch (PersistenceException ex) {
+            throw new PartnerNotFoundException(ex.getMessage());
+        }
+    }
+
+    public void persist(Object object) {
+        entityManager.persist(object);
     }
 } 
